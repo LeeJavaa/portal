@@ -130,3 +130,23 @@ MEDIA_ROOT = 'media/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# VIDEO PROCESSING REGION SETTINGS
+
+REGION_POS = {
+    'minimap' : [22, 717, 516, 1052],
+    'killfeed' : [22, 462, 516, 693],
+    'scorecard' : [699, 1, 1224, 228]
+}
+
+DESIRED_POS = {
+    'minimap': [0, 321],
+    'killfeed': [0, 12],
+    'scorecard': [510, 12]
+}
+
+DESIRED_WIDTH = {
+    'minimap': 1340,
+    'killfeed': 506,
+    'scorecard': 774
+}
