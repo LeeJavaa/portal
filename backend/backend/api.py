@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from django.shortcuts import get_object_or_404
 
@@ -34,12 +35,7 @@ class AnalysisIn(Schema):
     team_one: str
     team_two:str
 
-# @api.get("/analyses")
-
-@api.get("/analysis/{analysis_id}", response=AnalysisOut)
-def get_analysis(request, analysis_id: int):
-    analysis = get_object_or_404(Analysis, id=analysis_id)
-    
+def serialize_analysis(analysis):
     return {
         "id": analysis.id,
         "created": analysis.created,
@@ -54,6 +50,16 @@ def get_analysis(request, analysis_id: int):
         "team_one": analysis.team_one.name,
         "team_two": analysis.team_two.name,
     }
+
+@api.get("/analyses", response=List[AnalysisOut])
+def get_analyses(request):
+    qs = Analysis.objects.all()
+    return [serialize_analysis(analysis) for analysis in qs]
+
+@api.get("/analysis/{analysis_id}", response=AnalysisOut)
+def get_analysis(request, analysis_id: int):
+    analysis = get_object_or_404(Analysis, id=analysis_id)
+    return serialize_analysis(analysis)
 
 @api.post("/create_analysis")
 def create_analysis(request, payload: AnalysisIn):

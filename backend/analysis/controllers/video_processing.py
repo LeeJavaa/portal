@@ -8,12 +8,10 @@ from utils.storage import get_file_paths
 
 def process_video(analysis):
     input_file_path, output_file_path = get_file_paths(analysis)
-    print(input_file_path)
-    print(output_file_path)
     cap = cv2.VideoCapture(input_file_path)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(output_file_path, fourcc, fps, (1340, 1080))
+    out = cv2.VideoWriter(output_file_path, fourcc, fps, settings.PROCESSED_DIMENSIONS)
 
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     start_time = time.time()
@@ -44,7 +42,10 @@ def process_video(analysis):
 def process_frame(frame):
 
     regions = ['minimap', 'killfeed', 'scorecard']
-    new_frame = np.zeros((1080, 1340, 3), dtype=np.uint8)
+    new_frame = np.zeros(
+        (settings.PROCESSED_DIMENSIONS[1], settings.PROCESSED_DIMENSIONS[0], 3), 
+        dtype=np.uint8
+    )
 
     for region in regions:
         region_x1 = settings.REGION_POS[region][0]

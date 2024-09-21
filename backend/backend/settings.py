@@ -137,22 +137,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # VIDEO PROCESSING REGION SETTINGS
 
 REGION_POS = {
-    'minimap' : [22, 717, 516, 1052],
-    'killfeed' : [22, 462, 516, 693],
-    'scorecard' : [699, 1, 1224, 228]
+    'minimap' : [32, 506, 707, 1052],
+    'killfeed' : [32, 506, 480, 691],
+    'scorecard' : [718, 1208, 11, 209]
 }
 
 DESIRED_POS = {
-    'minimap': [0, 321],
-    'killfeed': [0, 12],
-    'scorecard': [510, 12]
+    'minimap': [0, 0],
+    'killfeed': [1100, 484],
+    'scorecard': [1100, 0]
 }
 
 DESIRED_WIDTH = {
-    'minimap': 1340,
-    'killfeed': 506,
-    'scorecard': 774
+    'minimap': 1100,
+    'killfeed': 710,
+    'scorecard': 710
 }
+
+PROCESSED_DIMENSIONS = (1811, 810)
 
 # CORS
 CORS_ALLOW_ALL_ORIGINS = True
