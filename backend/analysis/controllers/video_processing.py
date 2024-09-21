@@ -4,13 +4,12 @@ import time
 
 from django.conf import settings
 
+from utils.storage import get_file_paths
+
 def process_video(analysis):
-
-    input_dir = settings.BASE_DIR + settings.MEDIA_ROOT + "input_gameplay/"
-    output_dir = settings.BASE_DIR + settings.MEDIA_ROOT + "output_gameplay/"
-    input_file_path = input_dir + analysis.input_file + ".mp4"
-    output_file_path = output_dir + analysis.output_file + ".mp4"
-
+    input_file_path, output_file_path = get_file_paths(analysis)
+    print(input_file_path)
+    print(output_file_path)
     cap = cv2.VideoCapture(input_file_path)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -39,6 +38,8 @@ def process_video(analysis):
     
     cap.release()
     out.release()
+
+    return True
 
 def process_frame(frame):
 

@@ -38,9 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'analysis',
+    'ninja',
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -150,3 +153,6 @@ DESIRED_WIDTH = {
     'killfeed': 506,
     'scorecard': 774
 }
+
+# CORS
+CORS_ALLOW_ALL_ORIGINS = True
