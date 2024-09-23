@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Portal Engine",
+  title: "Portal | Analysis Engine",
   description: "A competitive call of duty analysis engine",
 };
 
