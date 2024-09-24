@@ -58,7 +58,7 @@ export default function Page({ params }) {
           onPause={() => setIsPlaying(false)}
         >
           <source
-            src="/media/output_gameplay/optic_nysl_karachi_2024_07_21.mp4"
+            src="/media/optic_nysl_karachi_2024_07_21.mp4"
             type="video/mp4"
           />
         </video>
