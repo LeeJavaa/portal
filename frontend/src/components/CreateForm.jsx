@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   Dialog,
@@ -25,27 +26,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "./ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Button } from "./ui/button";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { useToast } from "@/hooks/use-toast";
 
+import { format } from "date-fns";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { analysisSchema } from "@/validators/newAnalysis.ts";
 
 import { cn } from "@/lib/utils";
 
-import { CalendarDays, ArrowRight } from "lucide-react";
+import { CalendarDays, ArrowRight, Loader } from "lucide-react";
 
 export default function CreateForm() {
   const [modalOpen, setModalOpen] = useState(false);
   const [formStep, setFormStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(analysisSchema),
@@ -61,8 +66,48 @@ export default function CreateForm() {
     },
   });
 
-  function onSubmit(data) {
-    console.log(data);
+  async function onSubmit(data) {
+    setIsSubmitting(true);
+    setError(null);
+
+    const formattedData = {
+      ...data,
+      played_date: new Date(data.played_date).toISOString(),
+      start_time: parseFloat(data.start_time),
+    };
+
+    try {
+      const response = await fetch(
+        "http://localhost:8000/api/create_analysis",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formattedData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create analysis");
+      }
+
+      const result = await response.json();
+      console.log("Analysis created successfully:", result);
+
+      router.push(`/analysis/${result.id}`);
+    } catch (error) {
+      console.error("Error creating analysis:", error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -103,11 +148,39 @@ export default function CreateForm() {
                 control={form.control}
                 name="played_date"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Date</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Pick a date" {...field} />
-                    </FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -142,9 +215,23 @@ export default function CreateForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Map</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Select a map" {...field} />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select the map this was played on" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="6 star">6 Star</SelectItem>
+                        <SelectItem value="karachi">Karachi</SelectItem>
+                        <SelectItem value="rio">Rio</SelectItem>
+                        <SelectItem value="sub base">Sub Base</SelectItem>
+                        <SelectItem value="vista">Vista</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -156,9 +243,21 @@ export default function CreateForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Game Mode</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Select a game mode" {...field} />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select the game mode of this game" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="hardpoint">Hardpoint</SelectItem>
+                        <SelectItem value="snd">SND</SelectItem>
+                        <SelectItem value="control">Control</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -171,8 +270,11 @@ export default function CreateForm() {
                   <FormItem>
                     <FormLabel>Start Time</FormLabel>
                     <FormControl>
-                      <Input placeholder="20 seconds" {...field} />
+                      <Input placeholder="3.142" {...field} />
                     </FormControl>
+                    <FormDescription>
+                      How far into the VOD did the actual game start?
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -190,9 +292,48 @@ export default function CreateForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Team One</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Select a team" {...field} />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select the game mode of this game" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="atlanta faze">
+                          Atlanta FaZe
+                        </SelectItem>
+                        <SelectItem value="optic texas">OpTic Texas</SelectItem>
+                        <SelectItem value="nysl">New York Subliners</SelectItem>
+                        <SelectItem value="toronto ultra">
+                          Toronto Ultra
+                        </SelectItem>
+                        <SelectItem value="lat">LA Thieves</SelectItem>
+                        <SelectItem value="vancouver surge">
+                          Vancouver Surge
+                        </SelectItem>
+                        <SelectItem value="miami heretics">
+                          Miami Heretics
+                        </SelectItem>
+                        <SelectItem value="minnesota rokkr">
+                          Minnesota Rokkr
+                        </SelectItem>
+                        <SelectItem value="lag">
+                          Los Angeles Guerrillas
+                        </SelectItem>
+                        <SelectItem value="royal ravens">
+                          Carolina Royal Ravens
+                        </SelectItem>
+                        <SelectItem value="boston breach">
+                          Boston Breach
+                        </SelectItem>
+                        <SelectItem value="vegas falcons">
+                          Vegas Falcons
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -204,9 +345,48 @@ export default function CreateForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Team Two</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Select a team" {...field} />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select the game mode of this game" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="atlanta faze">
+                          Atlanta FaZe
+                        </SelectItem>
+                        <SelectItem value="optic texas">OpTic Texas</SelectItem>
+                        <SelectItem value="nysl">New York Subliners</SelectItem>
+                        <SelectItem value="toronto ultra">
+                          Toronto Ultra
+                        </SelectItem>
+                        <SelectItem value="lat">LA Thieves</SelectItem>
+                        <SelectItem value="vancouver surge">
+                          Vancouver Surge
+                        </SelectItem>
+                        <SelectItem value="miami heretics">
+                          Miami Heretics
+                        </SelectItem>
+                        <SelectItem value="minnesota rokkr">
+                          Minnesota Rokkr
+                        </SelectItem>
+                        <SelectItem value="lag">
+                          Los Angeles Guerrillas
+                        </SelectItem>
+                        <SelectItem value="royal ravens">
+                          Carolina Royal Ravens
+                        </SelectItem>
+                        <SelectItem value="boston breach">
+                          Boston Breach
+                        </SelectItem>
+                        <SelectItem value="vegas falcons">
+                          Vegas Falcons
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -215,11 +395,19 @@ export default function CreateForm() {
             <div className="flex gap-2">
               <Button
                 type="submit"
+                disabled={isSubmitting}
                 className={cn({
                   hidden: formStep != 2,
                 })}
               >
-                Submit
+                {isSubmitting ? (
+                  <>
+                    <Loader className="mr-2 h-4 w-4 animate-spin" />{" "}
+                    Processing...
+                  </>
+                ) : (
+                  "Submit"
+                )}
               </Button>
               <Button
                 type="button"

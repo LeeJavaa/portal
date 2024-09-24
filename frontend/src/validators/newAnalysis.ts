@@ -1,9 +1,10 @@
 import { z } from "zod";
 
 export const analysisSchema = z.object({
-  played_date: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message:
-      "Oops! This date seems a bit wonky. Could you double-check it for me? 📅",
+  played_date: z.date({
+    required_error: "When did this happen? We need a date! 📅",
+    invalid_type_error:
+      "Oops! This doesn't look like a valid date. Could you double-check it for me? 🤔",
   }),
   input_file: z
     .string()
@@ -29,10 +30,16 @@ export const analysisSchema = z.object({
       255,
       "That's quite a game mode name! Let's keep it under 255 characters, shall we? 🕹️"
     ),
-  start_time: z.string().refine((val) => !isNaN(parseFloat(val)), {
-    message:
-      "Start time should be a number. Did you accidentally type letters instead of numbers? ⏱️",
-  }),
+  start_time: z.string().refine(
+    (val) => {
+      const parsed = parseFloat(val);
+      return !isNaN(parsed) && String(parsed) === val;
+    },
+    {
+      message:
+        "Oops! Start time should be a valid number. No sneaky letters or extra characters, please! ⏱️",
+    }
+  ),
   team_one: z
     .string()
     .min(1, "Team one is missing! Who are we cheering for? 👥"),
