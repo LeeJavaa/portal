@@ -68,7 +68,6 @@ export default function CreateForm() {
 
   async function onSubmit(data) {
     setIsSubmitting(true);
-    setError(null);
 
     const formattedData = {
       ...data,
@@ -95,8 +94,6 @@ export default function CreateForm() {
 
       const result = await response.json();
       console.log("Analysis created successfully:", result);
-
-      router.push(`/analysis/${result.id}`);
     } catch (error) {
       console.error("Error creating analysis:", error);
       toast({
@@ -107,6 +104,7 @@ export default function CreateForm() {
       });
     } finally {
       setIsSubmitting(false);
+      setModalOpen(false);
     }
   }
 
