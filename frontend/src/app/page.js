@@ -1,7 +1,7 @@
 import AnalysisBlock from "@/components/AnalysisBlock";
 
 export default async function Home() {
-  let data = await fetch("http://localhost:8000/api/analyses", {
+  let data = await fetch("http://localhost/api/analyses", {
     cache: "no-store",
   });
   let analyses = await data.json();

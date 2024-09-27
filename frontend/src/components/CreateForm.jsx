@@ -77,7 +77,7 @@ export default function CreateForm() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/create_analysis",
+        "http://localhost/api/create_analysis",
         {
           method: "POST",
           headers: {
