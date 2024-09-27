@@ -2,5 +2,7 @@ Scripts
 Lib
 Include
 pyvenv.cfg
+static
 
 *.mp4
+.idea
