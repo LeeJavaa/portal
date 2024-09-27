@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-68q(!a278p11cskx_8-79#f#()n(ls_2s4v13@t3chnj3s#7+*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.3.5', 'localhost', '127.0.0.1', '0.0.0.0']
 
 
 # Application definition
@@ -124,10 +124,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = "/var/www/portal/static"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # https://docs.djangoproject.com/en/5.1/ref/settings/#std-setting-MEDIA_ROOT
 
-MEDIA_ROOT = 'media/'
+MEDIA_URL = 'media/'
+MEDIA_ROOT = "/var/www/portal/media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -158,3 +161,32 @@ PROCESSED_DIMENSIONS = (1811, 810)
 
 # CORS
 CORS_ALLOW_ALL_ORIGINS = True
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'gunicorn': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/gunicorn/dev.log',
+            'maxBytes': 1024 * 1024 * 100,  # 100 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'loggers': {
+        'gunicorn.error': {
+            'handlers': ['gunicorn'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

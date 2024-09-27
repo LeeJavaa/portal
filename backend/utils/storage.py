@@ -16,6 +16,9 @@ def get_file_paths(analysis):
     # Construct output file path
     output_filename = f"{analysis.output_file}.mp4"
     output_rel_path = os.path.join(output_subdir, output_filename)
-    output_file_path = default_storage.path(output_rel_path)
+    output_file_path = os.path.join(settings.MEDIA_ROOT, output_rel_path)
+    
+    os.makedirs(os.path.dirname(input_file_path), exist_ok=True)
+    os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
     return input_file_path, output_file_path

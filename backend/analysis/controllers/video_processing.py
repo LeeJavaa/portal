@@ -1,4 +1,5 @@
 import cv2
+import logging
 import numpy as np
 import time
 
@@ -6,38 +7,44 @@ from django.conf import settings
 
 from utils.storage import get_file_paths
 
+logger = logging.getLogger('gunicorn.error')
+
 def process_video(analysis):
-    input_file_path, output_file_path = get_file_paths(analysis)
-    cap = cv2.VideoCapture(input_file_path)
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(output_file_path, fourcc, fps, settings.PROCESSED_DIMENSIONS)
+    try:
+        logger.info('Processing video...')
+        input_file_path, output_file_path = get_file_paths(analysis)
+        cap = cv2.VideoCapture(input_file_path)
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter(output_file_path, fourcc, fps, settings.PROCESSED_DIMENSIONS)
 
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    start_time = time.time()
-    last_log_time = start_time
-    frames_processed = 0
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        start_time = time.time()
+        last_log_time = start_time
+        frames_processed = 0
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-        processed_frame = process_frame(frame)
-        out.write(processed_frame)
-        frames_processed += 1
-        current_time = time.time()
+            processed_frame = process_frame(frame)
+            out.write(processed_frame)
+            frames_processed += 1
+            current_time = time.time()
 
-        if current_time - last_log_time >= 20:
-            seconds_processed = frames_processed / fps
-            percentage_complete = (frames_processed / total_frames) * 100
-            print(f"Processed {seconds_processed:.2f} seconds of video ({percentage_complete:.2f}% complete)")
-            last_log_time = current_time
-    
-    cap.release()
-    out.release()
+            if current_time - last_log_time >= 20:
+                seconds_processed = frames_processed / fps
+                percentage_complete = (frames_processed / total_frames) * 100
+                logger.info(f"Processed {seconds_processed:.2f} seconds of video ({percentage_complete:.2f}% complete)")
+                last_log_time = current_time
 
-    return True
+        cap.release()
+        out.release()
+
+        return True
+    except Exception as e:
+        logger.info(f"Error processing video: {e}")
 
 def process_frame(frame):
 
