@@ -3,8 +3,10 @@ import { useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import formatDate from "../../../../utils/dateHandling";
 
+import { TriangleAlert } from "lucide-react";
 import {
   Play,
   Pause,
@@ -42,7 +44,19 @@ export default function Page({ params }) {
     videoRef.current.currentTime += seconds;
   };
 
-  if (!analysis) return <div>No analysis data available</div>;
+    if (!analysis) {
+      return (
+        <main className="flex-1 flex flex-col items-center justify-center px-4 md:px-6 py-12">
+          <div className="w-full max-w-4xl">
+            <Alert variant="destructive">
+              <TriangleAlert className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>No analysis data available. Please ensure you've selected a valid analysis.</AlertDescription>
+            </Alert>
+          </div>
+        </main>
+      );
+  }
 
   let formatted_played_date = formatDate(analysis.played_date);
 

@@ -76,6 +76,9 @@ export default function CreateForm() {
     };
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000); // 5 minutes
+
       const response = await fetch(
         "http://localhost/api/create_analysis",
         {
@@ -84,24 +87,34 @@ export default function CreateForm() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formattedData),
+          signal: controller.signal
         }
       );
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to create analysis");
       }
 
-      const result = await response.json();
-      console.log("Analysis created successfully:", result);
+      window.location.reload();
     } catch (error) {
-      console.error("Error creating analysis:", error);
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-        duration: 5000,
-      });
+      if (error.name === 'AbortError') {
+        toast({
+          title: "Error",
+          description: "The request timed out after 5 minutes. Please try again.",
+          variant: "destructive",
+          duration: Infinity,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+          duration: Infinity,
+        });
+      }
     } finally {
       setIsSubmitting(false);
       setModalOpen(false);
