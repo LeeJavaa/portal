@@ -129,7 +129,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # https://docs.djangoproject.com/en/5.1/ref/settings/#std-setting-MEDIA_ROOT
 
-MEDIA_URL = 'media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = "/var/www/portal/media"
 
 # Default primary key field type
