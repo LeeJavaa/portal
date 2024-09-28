@@ -77,9 +77,6 @@ def get_analysis(request, analysis_id: int):
         serialized_analysis = serialize_analysis(analysis)
         logger.info(f"Successfully fetched analysis with id {analysis_id}")
         return serialized_analysis
-    except ObjectDoesNotExist as e:
-        logger.error(f"Analysis with id {analysis_id} not found: {e}")
-        return Response({"error": f"Analysis with id {analysis_id} not found"}, status=404)
     except Exception as e:
         logger.error(f"Error fetching analysis with id {analysis_id}: {e}")
         return Response({"error": f"Error fetching analysis with id {analysis_id}"}, status=500)
@@ -101,15 +98,8 @@ def create_analysis(request, payload: AnalysisIn):
             output_file=payload.input_file,
         )
 
-        processing_result, processing_error_message = process_video(analysis)
-
-        if processing_result:
-            logger.info("Analysis created successfully")
-            return Response({"id": analysis.id}, status=201)
-        else:
-            analysis.delete()
-            logger.error("Analysis deleted, processing failed")
-            return Response({"error": processing_error_message}, status=500)
+        logger.info("Analysis created successfully")
+        return Response({"id": analysis.id}, status=201)
     except IntegrityError as e:
         logger.error(f"Error creating analysis: {e}")
         return Response({"error": f"{e}: That's not good... Are you sure you entered everything correctly?"}, status=500)
