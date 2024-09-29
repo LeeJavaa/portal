@@ -20,10 +20,10 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.x'
 
@@ -51,7 +51,7 @@ jobs:
         python manage.py test
 
     - name: Set up Node.js
-      uses: actions/setup-node@v3.0.0
+      uses: actions/setup-node@v4
       with:
         node-version: '22.9.0'
 
