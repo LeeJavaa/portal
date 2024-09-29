@@ -9,6 +9,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: test_db
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
     - uses: actions/checkout@v2
 
@@ -21,9 +31,21 @@ jobs:
       run: |
         pip install -r requirements.txt
 
+    - name: Run migrations
+      env:
+        DJANGO_SETTINGS_MODULE: backend.settings_ci
+      run: |
+        cd backend
+        python manage.py migrate
+
     - name: Run backend tests
       env:
         DJANGO_SETTINGS_MODULE: backend.settings_ci
+        MYSQL_HOST: 127.0.0.1
+        MYSQL_PORT: 3306
+        MYSQL_DATABASE: test_db
+        MYSQL_USER: root
+        MYSQL_PASSWORD: rootpassword
       run: |
         cd backend
         python manage.py test

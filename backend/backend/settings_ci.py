@@ -1,4 +1,18 @@
+import os
 from .settings import *  # Import all settings from the main settings file
+
+# Override the database configuration
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('MYSQL_DATABASE', 'test_db'),
+        'USER': os.environ.get('MYSQL_USER', 'root'),
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'rootpassword'),
+        'HOST': os.environ.get('MYSQL_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('MYSQL_PORT', '3306'),
+    }
+}
+
 
 # Override the LOGGING setting
 LOGGING = {
