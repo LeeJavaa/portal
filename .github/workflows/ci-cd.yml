@@ -23,7 +23,7 @@ jobs:
 
     - name: Run backend tests
       env:
-        DJANGO_SETTINGS_MODULE: backend.backend.settings_ci
+        DJANGO_SETTINGS_MODULE: backend.settings_ci
       run: |
         cd backend
         python manage.py test
