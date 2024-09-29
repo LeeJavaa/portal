@@ -22,6 +22,8 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run backend tests
+      env:
+        DJANGO_SETTINGS_MODULE: backend.backend.settings_ci
       run: |
         cd backend
         python manage.py test
