@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -66,6 +66,20 @@ export default function CreateForm() {
     },
   });
 
+    // New function to reset the form and step
+    const resetForm = useCallback(() => {
+      form.reset();
+      setFormStep(0);
+    }, [form]);
+  
+    // Updated function to handle dialog state change
+    const handleDialogChange = useCallback((open) => {
+      setModalOpen(open);
+      if (!open) {
+        resetForm();
+      }
+    }, [resetForm]);
+
   async function onSubmit(data) {
     setIsSubmitting(true);
 
@@ -122,7 +136,7 @@ export default function CreateForm() {
   }
 
   return (
-    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+    <Dialog open={modalOpen} onOpenChange={handleDialogChange}>
       <DialogTrigger asChild>
         <Button variant="outline">New Analysis</Button>
       </DialogTrigger>
