@@ -15,12 +15,12 @@ export default function AnalysisBlock({ analysis }) {
         prefetch={false}
       />
       <img
-        src="/media/bear.jpg"
+        src={`http://localhost/static/analysis/img/${analysis.map}.jpg`}
         width={300}
-        height={300}
+        height={200}
         alt="Analysis Thumbnail Image"
         className="h-full w-full object-cover transition-all duration-300 group-hover:scale-105"
-        style={{ aspectRatio: "300/300", objectFit: "cover" }}
+        style={{ aspectRatio: "300/200", objectFit: "cover" }}
       />
       <div className="absolute inset-0 bg-black/70 p-4 transition-all duration-300 group-hover:bg-black/50">
         <div className="flex h-full flex-col justify-between">
