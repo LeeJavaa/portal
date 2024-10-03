@@ -7,12 +7,8 @@ export default function AnalysisBlock({ analysis }) {
   return (
     <div className="group relative overflow-hidden rounded-lg border border-muted">
       <Link
-        href={{
-          pathname: `/analysis/${analysis.id}`,
-          query: { analysis: JSON.stringify(analysis) },
-        }}
+        href={`/analysis/${analysis.id}`}
         className="absolute inset-0 z-10"
-        prefetch={false}
       />
       <img
         src={`http://localhost/static/analysis/img/${analysis.map}.jpg`}

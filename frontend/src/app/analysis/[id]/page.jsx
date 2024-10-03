@@ -1,5 +1,3 @@
-"use client";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -12,10 +10,18 @@ import {
   Flag,
 } from "lucide-react";
 
-export default function Page({ params }) {
-  const searchParams = useSearchParams();
-  const analysisParam = searchParams.get("analysis");
-  const analysis = analysisParam ? JSON.parse(analysisParam) : null;
+async function getAnalysis(id) {
+  // Replace with your actual API endpoint
+  const res = await fetch(`http://localhost/api/analysis/${id}`, { cache: 'no-store' });
+  if (!res.ok) {
+    throw new Error('Failed to fetch analysis');
+  }
+  return res.json();
+}
+
+
+export default async function Page({ params }) {
+    const analysis = await getAnalysis(params.id);
 
     if (!analysis) {
       return (
