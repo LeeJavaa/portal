@@ -1,6 +1,5 @@
 "use client";
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 
 import {
   Dialog,
@@ -31,6 +30,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "./ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -47,9 +56,9 @@ import { CalendarDays, ArrowRight, Loader } from "lucide-react";
 
 export default function CreateForm() {
   const [modalOpen, setModalOpen] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formStep, setFormStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
   const { toast } = useToast();
 
   const form = useForm({
@@ -66,19 +75,30 @@ export default function CreateForm() {
     },
   });
 
-    // New function to reset the form and step
-    const resetForm = useCallback(() => {
-      form.reset();
-      setFormStep(0);
-    }, [form]);
+  // New function to reset the form and step
+  const resetForm = useCallback(() => {
+    form.reset();
+    setFormStep(0);
+  }, [form]);
   
-    // Updated function to handle dialog state change
-    const handleDialogChange = useCallback((open) => {
+  // Updated function to handle dialog state change
+  const handleDialogChange = useCallback((open) => {
+    if(!open && form.formState.isDirty){
+      setShowConfirmDialog(true);
+    } else {
       setModalOpen(open);
-      if (!open) {
-        resetForm();
-      }
-    }, [resetForm]);
+    }
+  }, [form]);
+
+  const handleConfirmClose = () => {
+    setShowConfirmDialog(false);
+    setModalOpen(false);
+    resetForm();
+  };
+
+  const handleCancelClose = () => {
+    setShowConfirmDialog(false);
+  };
 
   async function onSubmit(data) {
     setIsSubmitting(true);
@@ -136,7 +156,8 @@ export default function CreateForm() {
   }
 
   return (
-    <Dialog open={modalOpen} onOpenChange={handleDialogChange}>
+    <>
+        <Dialog open={modalOpen} onOpenChange={handleDialogChange}>
       <DialogTrigger asChild>
         <Button variant="outline">New Analysis</Button>
       </DialogTrigger>
@@ -502,5 +523,20 @@ export default function CreateForm() {
         </Form>
       </DialogContent>
     </Dialog>
+    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure you want to close?</AlertDialogTitle>
+          <AlertDialogDescription>
+            If you close this form, you'll lose all entered data. Is that what you want to do?
+          </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelClose}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmClose}>Close</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 }
