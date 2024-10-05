@@ -4,5 +4,7 @@ Include
 pyvenv.cfg
 static
 
+*.pyc
+
 *.mp4
 .idea
