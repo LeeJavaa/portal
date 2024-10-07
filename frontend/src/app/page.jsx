@@ -1,5 +1,8 @@
+'use client';
+import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import AnalysisBlock from "@/components/AnalysisBlock";
 import analysesData from "@/mock/mapAnalysis.json";
 import tournamentsData from "@/mock/tournament.json";
@@ -7,6 +10,8 @@ import tournamentsData from "@/mock/tournament.json";
 export default function Home() {
   const analyses = analysesData.mapAnalyses;
   const tournaments = tournamentsData.tournaments;
+
+  const [expandedTournaments, setExpandedTournaments] = useState({});
 
   // Group maps by tournament
   const mapAnalysesByTournament = tournaments.reduce((acc, tournament) => {
@@ -16,6 +21,13 @@ export default function Home() {
     };
     return acc;
   }, {})
+
+  const toggleExpanded = (tournamentId) => {
+    setExpandedTournaments(prev => ({
+      ...prev,
+      [tournamentId]: !prev[tournamentId]
+    }));
+  };
   
   return (
     <main className="container px-4 py-8 max-w-screen-xl mx-auto">
@@ -32,11 +44,32 @@ export default function Home() {
             {analyses.length === 0 ? (
               <p>No analyses available for this tournament.</p>
             ) : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:gap-6">
-                {analyses.map((analysis) => (
-                  <AnalysisBlock key={analysis.id} analysis={analysis} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:gap-6">
+                  {analyses.slice(0, 4).map((analysis) => (
+                    <AnalysisBlock key={analysis.id} analysis={analysis} />
+                  ))}
+                </div>
+                {analyses.length > 4 && (
+                  <div className="mt-4">
+                    {expandedTournaments[tournament.id] && (
+                      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:gap-6 mb-4">
+                        {analyses.slice(4).map((analysis) => (
+                          <AnalysisBlock key={analysis.id} analysis={analysis} />
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex justify-center">
+                      <Button 
+                        onClick={() => toggleExpanded(tournament.id)}
+                        className="mt-2"
+                      >
+                        {expandedTournaments[tournament.id] ? 'Show Less' : 'Show More'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         ))
