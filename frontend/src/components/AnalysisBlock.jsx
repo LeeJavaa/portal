@@ -3,7 +3,7 @@ import Link from "next/link";
 import formatDate from "../../utils/dateHandling";
 
 export default function AnalysisBlock({ analysis }) {
-  let formatted_played_date = formatDate(analysis.played_date);
+  let formatted_played_date = formatDate(analysis.playedDate);
   return (
     <div className="group relative overflow-hidden rounded-lg border border-muted">
       <Link
