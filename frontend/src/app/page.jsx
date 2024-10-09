@@ -1,13 +1,17 @@
 "use client";
 import { useState } from "react";
+
 import AnalysisBlock from "@/components/AnalysisBlock";
 import FilterSheet from "@/components/FilterSheet";
+
 import { TriangleAlert } from "lucide-react";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Toggle } from "@/components/ui/toggle";
 import mapData from "@/mock/mapAnalysis.json";
+
 import seriesData from "@/mock/seriesAnalysis.json";
 import tournamentsData from "@/mock/tournament.json";
 
@@ -74,8 +78,8 @@ export default function Home() {
     : mapAnalysesByTournament;
 
   return (
-    <main className="container px-4 py-8 max-w-screen-xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
+    <main className="container py-8">
+      <div className="flex items-center justify-start mb-4 gap-x-6">
         <Toggle
           onClick={toggleSelectionMode}
           variant={selectionMode ? "secondary" : "outline"}
@@ -83,8 +87,9 @@ export default function Home() {
           {selectionMode ? "Cancel Selection" : "Select Analyses"}
         </Toggle>
         <div className="flex items-center space-x-2">
-          <span>Show Series</span>
+          <span>Maps</span>
           <Switch checked={showSeries} onCheckedChange={setShowSeries} />
+          <span>Series</span>
         </div>
       </div>
 

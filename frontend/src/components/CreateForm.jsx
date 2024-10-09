@@ -162,7 +162,7 @@ export default function CreateForm() {
         <DialogTrigger asChild>
           <Button variant="outline">New Analysis</Button>
         </DialogTrigger>
-        <DialogContent className="bg-black">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Create a new analysis</DialogTitle>
             <DialogDescription>
