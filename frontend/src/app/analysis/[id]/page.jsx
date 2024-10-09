@@ -4,37 +4,37 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import formatDate from "../../../../utils/dateHandling";
 
 import { TriangleAlert } from "lucide-react";
-import {
-  CalendarDays,
-  Map,
-  Flag,
-} from "lucide-react";
+import { CalendarDays, Map, Flag } from "lucide-react";
 
 async function getAnalysis(id) {
   // Replace with your actual API endpoint
-  const res = await fetch(`http://localhost/api/analysis/${id}`, { cache: 'no-store' });
+  const res = await fetch(`http://localhost/api/analysis/${id}`, {
+    cache: "no-store",
+  });
   if (!res.ok) {
-    throw new Error('Failed to fetch analysis');
+    throw new Error("Failed to fetch analysis");
   }
   return res.json();
 }
 
-
 export default async function Page({ params }) {
-    const analysis = await getAnalysis(params.id);
+  const analysis = await getAnalysis(params.id);
 
-    if (!analysis) {
-      return (
-        <main className="flex-1 flex flex-col items-center justify-center px-4 md:px-6 py-12">
-          <div className="w-full max-w-4xl">
-            <Alert variant="destructive">
-              <TriangleAlert className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>No analysis data available. Please ensure you've selected a valid analysis.</AlertDescription>
-            </Alert>
-          </div>
-        </main>
-      );
+  if (!analysis) {
+    return (
+      <main className="flex-1 flex flex-col items-center justify-center px-4 md:px-6 py-12">
+        <div className="w-full max-w-4xl">
+          <Alert variant="destructive">
+            <TriangleAlert className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              No analysis data available. Please ensure you&apos;ve selected a
+              valid analysis.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </main>
+    );
   }
 
   let formatted_played_date = formatDate(analysis.played_date);
@@ -42,7 +42,7 @@ export default async function Page({ params }) {
   return (
     <main className="flex-1 flex flex-col items-center justify-center gap-6 px-4 md:px-6 py-12">
       <div className="w-full max-w-4xl rounded-lg overflow-hidden">
-      <Image
+        <Image
           src={`http://localhost/static/analysis/img/${analysis.map}.jpg`}
           alt={`Map: ${analysis.map}`}
           width={1000}

@@ -22,10 +22,7 @@ export default function FilterSheet({ activeFilters = 0, onApplyFilter }) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          className="fixed bottom-4 right-4 z-90"
-        >
+        <Button variant="outline" className="fixed bottom-4 right-4 z-90">
           Filter ({activeFilters})
         </Button>
       </SheetTrigger>

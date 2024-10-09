@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { useState } from "react";
 import AnalysisBlock from "@/components/AnalysisBlock";
 import FilterSheet from "@/components/FilterSheet";
@@ -26,7 +26,9 @@ export default function Home() {
     return tournaments.reduce((acc, tournament) => {
       acc[tournament.id] = {
         tournament: tournament,
-        analyses: analyses.filter(analysis => analysis.tournament === tournament.id)
+        analyses: analyses.filter(
+          (analysis) => analysis.tournament === tournament.id
+        ),
       };
       return acc;
     }, {});
@@ -36,9 +38,9 @@ export default function Home() {
   const seriesAnalysesByTournament = groupAnalysesByTournament(seriesAnalyses);
 
   const toggleExpanded = (tournamentId) => {
-    setExpandedTournaments(prev => ({
+    setExpandedTournaments((prev) => ({
       ...prev,
-      [tournamentId]: !prev[tournamentId]
+      [tournamentId]: !prev[tournamentId],
     }));
   };
 
@@ -50,10 +52,10 @@ export default function Home() {
   };
 
   const toggleAnalysisSelection = (analysis) => {
-    setSelectedAnalyses(prev => {
-      const isSelected = prev.some(a => a.id === analysis.id);
+    setSelectedAnalyses((prev) => {
+      const isSelected = prev.some((a) => a.id === analysis.id);
       if (isSelected) {
-        return prev.filter(a => a.id !== analysis.id);
+        return prev.filter((a) => a.id !== analysis.id);
       } else {
         return [...prev, analysis];
       }
@@ -64,15 +66,17 @@ export default function Home() {
     // Implement filter logic here
     console.log("Applying filters");
     // For now, let's just increment the active filters count
-    setActiveFilters(prev => prev + 1);
+    setActiveFilters((prev) => prev + 1);
   };
 
-  const currentAnalyses = showSeries ? seriesAnalysesByTournament : mapAnalysesByTournament;
-  
+  const currentAnalyses = showSeries
+    ? seriesAnalysesByTournament
+    : mapAnalysesByTournament;
+
   return (
     <main className="container px-4 py-8 max-w-screen-xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <Toggle 
+        <Toggle
           onClick={toggleSelectionMode}
           variant={selectionMode ? "secondary" : "outline"}
         >
@@ -80,10 +84,7 @@ export default function Home() {
         </Toggle>
         <div className="flex items-center space-x-2">
           <span>Show Series</span>
-          <Switch
-            checked={showSeries}
-            onCheckedChange={setShowSeries}
-          />
+          <Switch checked={showSeries} onCheckedChange={setShowSeries} />
         </div>
       </div>
 
@@ -103,12 +104,14 @@ export default function Home() {
               <>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:gap-6">
                   {analyses.slice(0, 4).map((analysis) => (
-                    <AnalysisBlock 
-                      key={analysis.id} 
+                    <AnalysisBlock
+                      key={analysis.id}
                       analysis={analysis}
                       selectionMode={selectionMode}
-                      isSelected={selectedAnalyses.some(a => a.id === analysis.id)}
-                      onSelect={() => toggleAnalysisSelection(analysis)} 
+                      isSelected={selectedAnalyses.some(
+                        (a) => a.id === analysis.id
+                      )}
+                      onSelect={() => toggleAnalysisSelection(analysis)}
                     />
                   ))}
                 </div>
@@ -117,22 +120,27 @@ export default function Home() {
                     {expandedTournaments[tournament.id] && (
                       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:gap-6 mb-4">
                         {analyses.slice(4).map((analysis) => (
-                          <AnalysisBlock 
-                            key={analysis.id} 
-                            an alysis={analysis}
+                          <AnalysisBlock
+                            key={analysis.id}
+                            an
+                            alysis={analysis}
                             selectionMode={selectionMode}
-                            isSelected={selectedAnalyses.some(a => a.id === analysis.id)}
-                            onSelect={() => toggleAnalysisSelection(analysis)} 
-                          /> 
+                            isSelected={selectedAnalyses.some(
+                              (a) => a.id === analysis.id
+                            )}
+                            onSelect={() => toggleAnalysisSelection(analysis)}
+                          />
                         ))}
                       </div>
                     )}
                     <div className="flex justify-center">
-                      <Button 
+                      <Button
                         onClick={() => toggleExpanded(tournament.id)}
                         className="mt-2"
                       >
-                        {expandedTournaments[tournament.id] ? 'Show Less' : 'Show More'}
+                        {expandedTournaments[tournament.id]
+                          ? "Show Less"
+                          : "Show More"}
                       </Button>
                     </div>
                   </div>
@@ -145,19 +153,21 @@ export default function Home() {
 
       {selectionMode && (
         <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-border p-4 flex justify-between items-center">
-          <div>
-            Selected: {selectedAnalyses.length} analyses
-          </div>
+          <div>Selected: {selectedAnalyses.length} analyses</div>
           <div>
             <Button
-              onClick={() => {/* Handle create series analysis */}}
+              onClick={() => {
+                /* Handle create series analysis */
+              }}
               disabled={showSeries}
               className="mr-2"
             >
               Create Series Analysis
             </Button>
             <Button
-              onClick={() => {/* Handle create custom analysis */}}
+              onClick={() => {
+                /* Handle create custom analysis */
+              }}
             >
               Create Custom Analysis
             </Button>
@@ -165,7 +175,12 @@ export default function Home() {
         </div>
       )}
 
-      <FilterSheet activeFilters={activeFilters} onApplyFilter={handleApplyFilter} />
+      {!selectionMode && (
+        <FilterSheet
+          activeFilters={activeFilters}
+          onApplyFilter={handleApplyFilter}
+        />
+      )}
     </main>
   );
 }
