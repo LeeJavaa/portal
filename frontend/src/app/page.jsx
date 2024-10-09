@@ -1,6 +1,7 @@
 'use client';
 import { useState } from "react";
 import AnalysisBlock from "@/components/AnalysisBlock";
+import FilterSheet from "@/components/FilterSheet";
 import { TriangleAlert } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ export default function Home() {
   const [showSeries, setShowSeries] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedAnalyses, setSelectedAnalyses] = useState([]);
+  const [activeFilters, setActiveFilters] = useState(0);
 
   const groupAnalysesByTournament = (analyses) => {
     return tournaments.reduce((acc, tournament) => {
@@ -56,6 +58,13 @@ export default function Home() {
         return [...prev, analysis];
       }
     });
+  };
+
+  const handleApplyFilter = () => {
+    // Implement filter logic here
+    console.log("Applying filters");
+    // For now, let's just increment the active filters count
+    setActiveFilters(prev => prev + 1);
   };
 
   const currentAnalyses = showSeries ? seriesAnalysesByTournament : mapAnalysesByTournament;
@@ -155,6 +164,8 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <FilterSheet activeFilters={activeFilters} onApplyFilter={handleApplyFilter} />
     </main>
   );
 }
