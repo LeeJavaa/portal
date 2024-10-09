@@ -10,31 +10,25 @@ import {
   SheetTrigger,
   SheetFooter,
 } from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export default function FilterSheet({ activeFilters = 0, onApplyFilter }) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" className="fixed bottom-4 right-4 z-90">
-          Filter ({activeFilters})
+        <Button variant="outline">
+          {activeFilters ? `Filter (${activeFilters})` : "Filter"}
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Filter Analyses</SheetTitle>
           <SheetDescription>
-            Use this filter menu to filter between maps or series
+            Specify what you want to filter analyses on below. You can filter on
+            a single field, or a combination of many fields.
           </SheetDescription>
         </SheetHeader>
-        <div className="grid gap-4 py-4">
-          <div className="flex flex-col gap-y-2 mt-4">
+        <div className="flex flex-col gap-y-6 mt-4 mb-6">
+          <div className="flex flex-col gap-y-3 mt-4">
             <Label htmlFor="tournament" className="text-left">
               Tournament
             </Label>
@@ -72,7 +66,9 @@ export default function FilterSheet({ activeFilters = 0, onApplyFilter }) {
           </div>
         </div>
         <SheetFooter>
-          <Button onClick={onApplyFilter}>Apply Filter</Button>
+          <div className="w-full flex items-center justify-center">
+            <Button onClick={onApplyFilter}>Apply Filter(s)</Button>
+          </div>
         </SheetFooter>
       </SheetContent>
     </Sheet>

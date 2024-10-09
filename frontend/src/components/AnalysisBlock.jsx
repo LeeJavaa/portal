@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import formatDate from "../../utils/dateHandling";
+import { CircleCheck } from "lucide-react";
 
 export default function AnalysisBlock({
   analysis,
@@ -20,22 +21,22 @@ export default function AnalysisBlock({
 
   return (
     <div
-      className={`group overflow-hidden rounded-lg border ${
+      className={`group overflow-hidden ${
         isSelected ? "border-primary" : "border-muted"
-      } ${selectionMode ? "cursor-pointer" : ""}`}
+      } cursor-pointer`}
       onClick={handleClick}
     >
-      <div className="relative">
+      <div className="relative overflow-hidden rounded-lg">
         <Link href={`/analysis/${analysis.id}`} onClick={handleClick}>
           <Image
             src={`http://localhost/static/analysis/img/${thumbnail}.jpg`}
             width={300}
-            height={200}
+            height={150}
             alt="Analysis Thumbnail Image"
-            className={`h-full w-full object-cover transition-all duration-300 ${
+            className={`h-full w-full rounded-lg object-cover transition-all duration-300 ${
               selectionMode ? "" : "group-hover:scale-105"
             }`}
-            style={{ aspectRatio: "300/200", objectFit: "cover" }}
+            style={{ aspectRatio: "300/150", objectFit: "cover" }}
           />
         </Link>
         <div
@@ -44,35 +45,22 @@ export default function AnalysisBlock({
           } transition-opacity duration-300 ${
             selectionMode ? "" : "group-hover:opacity-100"
           }`}
-        ></div>
+        />
         {isSelected && (
-          <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
+          <div className="absolute top-2 right-2">
+            <CircleCheck className="h-7 w-7" />
           </div>
         )}
       </div>
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-primary mb-2">
+      <div className="mt-2">
+        <h3 className="text-lg font-semibold text-primary mb-1">
           {analysis.title}
         </h3>
-        <div className="text-sm text-muted-foreground space-y-1">
-          {analysis.seriesAnalysis && <p>Series: {analysis.seriesAnalysis}</p>}
-          <p>Played: {formatted_played_date}</p>
+        <div className="text-sm text-muted-foreground">
           <p>
-            Teams: {analysis.teamOne} vs {analysis.teamTwo}
+            {analysis.teamOne} vs {analysis.teamTwo}
           </p>
+          <p>{formatted_played_date}</p>
         </div>
       </div>
     </div>

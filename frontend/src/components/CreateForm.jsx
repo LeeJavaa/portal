@@ -52,7 +52,7 @@ import { analysisSchema } from "@/validators/newAnalysis.ts";
 
 import { cn } from "@/lib/utils";
 
-import { CalendarDays, ArrowRight, Loader } from "lucide-react";
+import { CalendarDays, ArrowRight, Loader, Plus } from "lucide-react";
 
 export default function CreateForm() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -160,7 +160,10 @@ export default function CreateForm() {
     <>
       <Dialog open={modalOpen} onOpenChange={handleDialogChange}>
         <DialogTrigger asChild>
-          <Button variant="outline">New Analysis</Button>
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            New Analysis
+          </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
