@@ -1,6 +1,5 @@
 "use client";
 import { useState, useCallback } from "react";
-
 import {
   Dialog,
   DialogContent,
@@ -43,6 +42,7 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
+import { DateTimePicker } from "./ui/datetime-picker";
 import { useToast } from "@/hooks/use-toast";
 
 import { format } from "date-fns";
@@ -52,7 +52,13 @@ import { analysisSchema } from "@/validators/newAnalysis.ts";
 
 import { cn } from "@/lib/utils";
 
-import { CalendarDays, ArrowRight, Loader, Plus } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarDays,
+  Image as ImageIcon,
+  Loader,
+  Plus,
+} from "lucide-react";
 
 export default function CreateForm() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -187,7 +193,10 @@ export default function CreateForm() {
                     <FormItem>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="FaZe vs OpTic" {...field} />
+                        <Input
+                          placeholder="OpTic vs NYSL Champs GF Map 1"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -199,38 +208,13 @@ export default function CreateForm() {
                   name="played_date"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <FormLabel>Date and Time</FormLabel>
+                      <FormControl>
+                        <DateTimePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
