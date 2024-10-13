@@ -29,6 +29,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,9 +40,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "./ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
+import { Progress } from "@/components/ui/progress";
 import { DateTimePicker } from "./ui/datetime-picker";
 import { useToast } from "@/hooks/use-toast";
 
@@ -54,49 +64,62 @@ import { cn } from "@/lib/utils";
 
 import {
   ArrowRight,
-  CalendarDays,
   Image as ImageIcon,
   Loader,
   Plus,
+  Upload,
 } from "lucide-react";
 
 export default function CreateForm() {
   const [modalOpen, setModalOpen] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formStep, setFormStep] = useState(0);
+  const [scoreboardUploaded, setScoreboardUploaded] = useState(false);
+  const [scoreboardProcessed, setScoreboardProcessed] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState(66);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(analysisSchema),
     defaultValues: {
-      played_date: "",
-      input_file: "",
       title: "",
-      map: "",
-      game_mode: "",
-      start_time: 0.0,
-      team_one: "",
-      team_two: "",
+      played_date: "",
+      tournament: "",
     },
   });
 
   // New function to reset the form and step
   const resetForm = useCallback(() => {
     form.reset();
+    setScoreboardUploaded(false);
+    setScoreboardProcessed(false);
     setFormStep(0);
-  }, [form]);
+  }, [form, scoreboardProcessed, scoreboardUploaded]);
+
+  const handleScoreboardUpload = () => {
+    setScoreboardUploaded(true);
+  };
+
+  const handleScoreboardProcessing = () => {
+    setScoreboardProcessed(true);
+    setFormStep(1);
+  };
 
   // Updated function to handle dialog state change
   const handleDialogChange = useCallback(
     (open) => {
-      if (!open && form.formState.isDirty) {
+      if (
+        (!open && form.formState.isDirty) ||
+        (!open && scoreboardUploaded) ||
+        (!open && scoreboardProcessed)
+      ) {
         setShowConfirmDialog(true);
       } else {
         setModalOpen(open);
       }
     },
-    [form]
+    [form, scoreboardUploaded, scoreboardProcessed]
   );
 
   const handleConfirmClose = () => {
@@ -115,7 +138,6 @@ export default function CreateForm() {
     const formattedData = {
       ...data,
       played_date: new Date(data.played_date).toISOString(),
-      start_time: parseFloat(data.start_time),
     };
 
     try {
@@ -159,6 +181,7 @@ export default function CreateForm() {
     } finally {
       setIsSubmitting(false);
       setModalOpen(false);
+      resetForm();
     }
   }
 
@@ -171,18 +194,288 @@ export default function CreateForm() {
             New Analysis
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className={formStep == 2 ? "max-w-screen-2xl" : ""}>
           <DialogHeader>
             <DialogTitle>Create a new analysis</DialogTitle>
             <DialogDescription>
-              Fill in the information below to create a new gameplay analysis
+              Follow these steps to create a new analysis
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
               <div
-                className={cn("space-y-3", {
+                className={cn("flex flex-col items-center space-y-4", {
                   hidden: formStep != 0,
+                })}
+              >
+                <ImageIcon className="h-24 w-24 text-muted-foreground" />
+                <div className="flex flex-row justify-center space-x-6">
+                  <Button onClick={handleScoreboardUpload} type="button">
+                    <Upload className="mr-2 h-4 w-4" /> Upload Scoreboard
+                  </Button>
+                  <Button
+                    disabled={!scoreboardUploaded}
+                    onClick={handleScoreboardProcessing}
+                    type="button"
+                  >
+                    <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    Process Scoreboard
+                  </Button>
+                </div>
+              </div>
+              <div
+                className={cn("flex flex-col items-center space-y-4", {
+                  hidden: formStep != 1,
+                })}
+              >
+                <Progress value={processingProgress} className="w-full" />
+                <Alert>
+                  <AlertTitle>Hold on!</AlertTitle>
+                  <AlertDescription>
+                    We're just busy processing that scoreboard real quick
+                  </AlertDescription>
+                </Alert>
+              </div>
+              <div
+                className={cn("flex flex-col items-center space-y-4", {
+                  hidden: formStep != 2,
+                })}
+              >
+                <Alert variant="destructive">
+                  <AlertTitle>Can you fix this for us?</AlertTitle>
+                  <AlertDescription>
+                    Some data couldn't be processed correctly. Please fill it in
+                    correctly.
+                  </AlertDescription>
+                </Alert>
+                <Table>
+                  <TableCaption>Scoreboard awaiting confirmation</TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[250px] border-r relative flex">
+                        <Input className=" w-2/3" defaultValue="OpTic Texas" />
+                        <Input
+                          className="absolute right-5 w-[55px]"
+                          defaultValue="250"
+                        />
+                      </TableHead>
+                      <TableHead className="text-center">
+                        Kills/Deaths
+                      </TableHead>
+                      <TableHead className="text-center">Assists</TableHead>
+                      <TableHead className="text-center">
+                        Non-Traded Kills
+                      </TableHead>
+                      <TableHead className="text-center">
+                        Highest Streak
+                      </TableHead>
+                      <TableHead className="text-center border-r">
+                        Damage
+                      </TableHead>
+                      <TableHead className="text-right">Hill Time</TableHead>
+                      <TableHead className="text-right">
+                        Average Hill Time
+                      </TableHead>
+                      <TableHead className="text-right">
+                        Objective Kills
+                      </TableHead>
+                      <TableHead className="text-right">
+                        Contested Hill Time
+                      </TableHead>
+                      <TableHead className="text-right">
+                        Kills per hill
+                      </TableHead>
+                      <TableHead className="text-right">
+                        Damage per hill
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium border-r w-[250px]">
+                        <Input defaultValue="Kenny" className="" />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Input defaultValue="29/19" className="w-[65px]" />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Input defaultValue="6" className="w-[45px]" />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Input defaultValue="23" className="w-[45px]" />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Input defaultValue="2" className="w-[45px]" />
+                      </TableCell>
+                      <TableCell className="text-center border-r">
+                        <Input defaultValue="5173" className="w-[70px]" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Input defaultValue="0:53" className="w-[60px]" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Input defaultValue="0:04" className="w-[60px]" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Input defaultValue="5" className="w-[55px]" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Input defaultValue="0:04" className="w-[60px]" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Input defaultValue="2.45" className="w-[60px]" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Input
+                          defaultValue="436.81"
+                          className="w-[60px] border-destructive"
+                        />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium border-r">
+                        KENNY
+                      </TableCell>
+                      <TableCell className="text-center">29/19</TableCell>
+                      <TableCell className="text-center">6</TableCell>
+                      <TableCell className="text-center">23</TableCell>
+                      <TableCell className="text-center">2</TableCell>
+                      <TableCell className="text-center border-r">
+                        5173
+                      </TableCell>
+                      <TableCell className="text-right">0:53</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">5</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">2.45</TableCell>
+                      <TableCell className="text-right">436.81</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium border-r">
+                        KENNY
+                      </TableCell>
+                      <TableCell className="text-center">29/19</TableCell>
+                      <TableCell className="text-center">6</TableCell>
+                      <TableCell className="text-center">23</TableCell>
+                      <TableCell className="text-center">2</TableCell>
+                      <TableCell className="text-center border-r">
+                        5173
+                      </TableCell>
+                      <TableCell className="text-right">0:53</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">5</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">2.45</TableCell>
+                      <TableCell className="text-right">436.81</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium border-r">
+                        KENNY
+                      </TableCell>
+                      <TableCell className="text-center">29/19</TableCell>
+                      <TableCell className="text-center">6</TableCell>
+                      <TableCell className="text-center">23</TableCell>
+                      <TableCell className="text-center">2</TableCell>
+                      <TableCell className="text-center border-r">
+                        5173
+                      </TableCell>
+                      <TableCell className="text-right">0:53</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">5</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">2.45</TableCell>
+                      <TableCell className="text-right">436.81</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-muted-foreground font-medium w-[250px] relative flex">
+                        <Input
+                          className=" w-2/3"
+                          defaultValue="New York Subliners"
+                        />
+                        <Input
+                          className="absolute right-5 w-[55px]"
+                          defaultValue="250"
+                        />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium border-r">
+                        KENNY
+                      </TableCell>
+                      <TableCell className="text-center">29/19</TableCell>
+                      <TableCell className="text-center">6</TableCell>
+                      <TableCell className="text-center">23</TableCell>
+                      <TableCell className="text-center">2</TableCell>
+                      <TableCell className="text-center border-r">
+                        5173
+                      </TableCell>
+                      <TableCell className="text-right">0:53</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">5</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">2.45</TableCell>
+                      <TableCell className="text-right">436.81</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium border-r">
+                        KENNY
+                      </TableCell>
+                      <TableCell className="text-center">29/19</TableCell>
+                      <TableCell className="text-center">6</TableCell>
+                      <TableCell className="text-center">23</TableCell>
+                      <TableCell className="text-center">2</TableCell>
+                      <TableCell className="text-center border-r">
+                        5173
+                      </TableCell>
+                      <TableCell className="text-right">0:53</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">5</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">2.45</TableCell>
+                      <TableCell className="text-right">436.81</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium border-r">
+                        KENNY
+                      </TableCell>
+                      <TableCell className="text-center">29/19</TableCell>
+                      <TableCell className="text-center">6</TableCell>
+                      <TableCell className="text-center">23</TableCell>
+                      <TableCell className="text-center">2</TableCell>
+                      <TableCell className="text-center border-r">
+                        5173
+                      </TableCell>
+                      <TableCell className="text-right">0:53</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">5</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">2.45</TableCell>
+                      <TableCell className="text-right">436.81</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium border-r">
+                        KENNY
+                      </TableCell>
+                      <TableCell className="text-center">29/19</TableCell>
+                      <TableCell className="text-center">6</TableCell>
+                      <TableCell className="text-center">23</TableCell>
+                      <TableCell className="text-center">2</TableCell>
+                      <TableCell className="text-center border-r">
+                        5173
+                      </TableCell>
+                      <TableCell className="text-right">0:53</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">5</TableCell>
+                      <TableCell className="text-right">0:04</TableCell>
+                      <TableCell className="text-right">2.45</TableCell>
+                      <TableCell className="text-right">436.81</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+              <div
+                className={cn("space-y-3", {
+                  hidden: formStep != 3,
                 })}
               >
                 {/* Title */}
@@ -198,6 +491,36 @@ export default function CreateForm() {
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Tournament */}
+                <FormField
+                  control={form.control}
+                  name="tournament"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>File Name</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="What tourny was this?" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="5">
+                            Call of Duty Champs 2024
+                          </SelectItem>
+                          <SelectItem value="4">Major IV Finals</SelectItem>
+                          <SelectItem value="3">Major III Finals</SelectItem>
+                          <SelectItem value="2">Major II Finals</SelectItem>
+                          <SelectItem value="1">Major I Finals</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -219,227 +542,13 @@ export default function CreateForm() {
                     </FormItem>
                   )}
                 />
-                {/* Input File */}
-                <FormField
-                  control={form.control}
-                  name="input_file"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>File Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="faze_optic_rio_2024_08_23"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div
-                className={cn("space-y-3", {
-                  hidden: formStep != 1,
-                })}
-              >
-                {/* Map */}
-                <FormField
-                  control={form.control}
-                  name="map"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Map</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select the map this was played on" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="6 star">6 Star</SelectItem>
-                          <SelectItem value="karachi">Karachi</SelectItem>
-                          <SelectItem value="rio">Rio</SelectItem>
-                          <SelectItem value="sub base">Sub Base</SelectItem>
-                          <SelectItem value="vista">Vista</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Game Mode */}
-                <FormField
-                  control={form.control}
-                  name="game_mode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Game Mode</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select the game mode of this game" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="hardpoint">Hardpoint</SelectItem>
-                          <SelectItem value="snd">SND</SelectItem>
-                          <SelectItem value="control">Control</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Start Time */}
-                <FormField
-                  control={form.control}
-                  name="start_time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Start Time</FormLabel>
-                      <FormControl>
-                        <Input placeholder="3.142" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        How far into the VOD did the actual game start?
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div
-                className={cn("space-y-3", {
-                  hidden: formStep != 2,
-                })}
-              >
-                {/* Team One */}
-                <FormField
-                  control={form.control}
-                  name="team_one"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Team One</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select the game mode of this game" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="atlanta faze">
-                            Atlanta FaZe
-                          </SelectItem>
-                          <SelectItem value="optic texas">
-                            OpTic Texas
-                          </SelectItem>
-                          <SelectItem value="nysl">
-                            New York Subliners
-                          </SelectItem>
-                          <SelectItem value="toronto ultra">
-                            Toronto Ultra
-                          </SelectItem>
-                          <SelectItem value="lat">LA Thieves</SelectItem>
-                          <SelectItem value="vancouver surge">
-                            Vancouver Surge
-                          </SelectItem>
-                          <SelectItem value="miami heretics">
-                            Miami Heretics
-                          </SelectItem>
-                          <SelectItem value="minnesota rokkr">
-                            Minnesota Rokkr
-                          </SelectItem>
-                          <SelectItem value="lag">
-                            Los Angeles Guerrillas
-                          </SelectItem>
-                          <SelectItem value="royal ravens">
-                            Carolina Royal Ravens
-                          </SelectItem>
-                          <SelectItem value="boston breach">
-                            Boston Breach
-                          </SelectItem>
-                          <SelectItem value="vegas falcons">
-                            Vegas Falcons
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Team Two */}
-                <FormField
-                  control={form.control}
-                  name="team_two"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Team Two</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select the game mode of this game" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="atlanta faze">
-                            Atlanta FaZe
-                          </SelectItem>
-                          <SelectItem value="optic texas">
-                            OpTic Texas
-                          </SelectItem>
-                          <SelectItem value="nysl">
-                            New York Subliners
-                          </SelectItem>
-                          <SelectItem value="toronto ultra">
-                            Toronto Ultra
-                          </SelectItem>
-                          <SelectItem value="lat">LA Thieves</SelectItem>
-                          <SelectItem value="vancouver surge">
-                            Vancouver Surge
-                          </SelectItem>
-                          <SelectItem value="miami heretics">
-                            Miami Heretics
-                          </SelectItem>
-                          <SelectItem value="minnesota rokkr">
-                            Minnesota Rokkr
-                          </SelectItem>
-                          <SelectItem value="lag">
-                            Los Angeles Guerrillas
-                          </SelectItem>
-                          <SelectItem value="royal ravens">
-                            Carolina Royal Ravens
-                          </SelectItem>
-                          <SelectItem value="boston breach">
-                            Boston Breach
-                          </SelectItem>
-                          <SelectItem value="vegas falcons">
-                            Vegas Falcons
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
               <div className="flex gap-2">
                 <Button
                   type="submit"
                   disabled={isSubmitting}
                   className={cn({
-                    hidden: formStep != 2,
+                    hidden: formStep != 3,
                   })}
                 >
                   {isSubmitting ? (
@@ -454,42 +563,17 @@ export default function CreateForm() {
                 <Button
                   type="button"
                   className={cn({
-                    hidden: formStep == 2,
+                    hidden: formStep == 0 || formStep == 3,
                   })}
                   variant={"ghost"}
                   onClick={() => {
-                    if (formStep == 0) {
-                      form.trigger(["title", "played_date", "input_file"]);
-                      const titleState = form.getFieldState("title");
-                      const playedDateState = form.getFieldState("played_date");
-                      const inputFileState = form.getFieldState("input_file");
-                      if (!titleState.isDirty || titleState.invalid) {
-                        return;
-                      }
-                      if (!playedDateState.isDirty || playedDateState.invalid) {
-                        return;
-                      }
-                      if (!inputFileState.isDirty || inputFileState.invalid) {
-                        return;
-                      }
-                      setFormStep(1);
-                    } else if (formStep == 1) {
-                      form.trigger(["map", "game_mode", "start_time"]);
-                      const mapState = form.getFieldState("map");
-                      const gameModeState = form.getFieldState("game_mode");
-                      const startTimeState = form.getFieldState("start_time");
-                      if (!mapState.isDirty || mapState.invalid) {
-                        return;
-                      }
-                      if (!gameModeState.isDirty || gameModeState.invalid) {
-                        return;
-                      }
-                      if (!startTimeState.isDirty || startTimeState.invalid) {
-                        return;
-                      }
+                    // Just a placeholder for now
+                    if (formStep == 1) {
                       setFormStep(2);
-                    } else {
-                      //pass
+                    }
+
+                    if (formStep == 2) {
+                      setFormStep(3);
                     }
                   }}
                 >
@@ -499,16 +583,16 @@ export default function CreateForm() {
                 <Button
                   type="button"
                   className={cn({
-                    hidden: formStep == 0,
+                    hidden: formStep == 0 || formStep == 1,
                   })}
                   variant={"ghost"}
                   onClick={() => {
-                    if (formStep == 1) {
+                    if (formStep == 2) {
                       setFormStep(0);
-                    } else if (formStep == 2) {
-                      setFormStep(1);
-                    } else {
-                      //pass
+                    }
+
+                    if (formStep == 3) {
+                      setFormStep(2);
                     }
                   }}
                 >
