@@ -63,7 +63,7 @@ export default function CreateForm() {
   const [scoreboard, setScoreboard] = useState(null);
   const [scoreboardProcessed, setScoreboardProcessed] = useState(false);
   const [scoreboardPreview, setScoreboardPreview] = useState("");
-  const [processingProgress, setProcessingProgress] = useState(66);
+  const [processingProgress, setProcessingProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -104,9 +104,22 @@ export default function CreateForm() {
   };
 
   const handleScoreboardProcessing = () => {
-    setScoreboardProcessed(true);
     setFormStep(1);
     setFormStepHistory(1);
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 1;
+      setProcessingProgress(progress);
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        setScoreboardProcessed(true);
+        setFormStep(2);
+        setFormStepHistory(2);
+        setProcessingProgress(0);
+      }
+    }, 30);
   };
 
   const handleDialogChange = useCallback(
@@ -575,16 +588,10 @@ export default function CreateForm() {
               <Button
                 type="button"
                 className={cn({
-                  hidden: !(formStep == 1 || formStep == 2),
+                  hidden: formStep != 2,
                 })}
                 variant={"ghost"}
                 onClick={() => {
-                  // Just a placeholder for now
-                  if (formStep == 1) {
-                    setFormStep(2);
-                    setFormStepHistory(2);
-                  }
-
                   if (formStep == 2) {
                     setFormStep(3);
                     setFormStepHistory(3);
