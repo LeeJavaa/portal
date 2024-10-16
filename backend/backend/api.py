@@ -1,20 +1,22 @@
 import logging
-
 from datetime import datetime
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.db import IntegrityError
 from typing import List
 
-from django.shortcuts import get_object_or_404
-
+import boto3
 from analysis.controllers.video_processing import process_video
 from analysis.models import Analysis, Map, Team
-
+from botocore.exceptions import ClientError
+from django.conf import settings
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.db import IntegrityError
+from django.shortcuts import get_object_or_404
 from ninja import NinjaAPI, Schema
 from ninja.responses import Response
 
 api = NinjaAPI()
 logger = logging.getLogger('gunicorn.error')
+
+s3_client = boto3.client('s3')
 
 class AnalysisOut(Schema):
     id: int
@@ -39,6 +41,10 @@ class AnalysisIn(Schema):
     start_time: float
     team_one: str
     team_two:str
+
+class PreSignedUrlOut(Schema):
+    url: str
+    fields: dict
 
 def serialize_analysis(analysis):
     return {
@@ -110,3 +116,37 @@ def create_analysis(request, payload: AnalysisIn):
         logger.error(f"Error creating analysis: {e}")
         return Response({"error": str(e)}, status=400)
 
+@api.get("/generate_upload_scoreboard_url")
+def generate_upload_scoreboard_url(request, file_name: str, file_type: str):
+    try:
+        presigned_post = s3_client.generate_presigned_post(
+            Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+            Key=file_name,
+            Fields={"Content-Type": file_type},
+            ExpiresIn=3600
+        )
+        return PreSignedUrlOut(url=presigned_post['url'], fields=presigned_post['fields'])
+    except ClientError as e:
+        logger.error(f"Error generating pre-signed URL for upload: {e}")
+        return Response({"error": "Failed to generate pre-signed URL for upload"}, status=500)
+    except Exception as e:
+        logger.error(f"Error generating pre-signed URL for upload: {e}")
+        return Response({"error": str(e)}, status=500)
+
+@api.get("/generate_view_scoreboard_url/")
+def generate_view_scoreboard_url(request, file_name: str):
+    try:
+        url = s3_client.generate_presigned_url('get_object',
+            Params={
+                'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                'Key': file_name
+            },
+            ExpiresIn=3600
+        )
+        return {"url": url}
+    except ClientError as e:
+        logger.error(f"Error generating pre-signed URL for viewing: {e}")
+        return Response({"error": "Failed to generate pre-signed URL for viewing"}, status=500)
+    except Exception as e:
+        logger.error(f"Error generating pre-signed URL for viewing: {e}")
+        return Response({"error": str(e)}, status=500)
