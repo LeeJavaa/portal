@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "./ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { DateTimePicker } from "./ui/datetime-picker";
 import { useToast } from "@/hooks/use-toast";
@@ -48,21 +49,25 @@ import { cn } from "@/lib/utils";
 import {
   ArrowRight,
   CircleAlert,
+  Cpu,
   Image as ImageIcon,
-  Loader,
   Plus,
   Upload,
 } from "lucide-react";
+import Image from "next/image";
 
 export default function CreateForm() {
   const [modalOpen, setModalOpen] = useState(false);
   const [formStep, setFormStep] = useState(0);
   const [formStepHistory, setFormStepHistory] = useState(0);
-  const [scoreboardUploaded, setScoreboardUploaded] = useState(false);
+  const [scoreboard, setScoreboard] = useState(null);
   const [scoreboardProcessed, setScoreboardProcessed] = useState(false);
+  const [scoreboardPreview, setScoreboardPreview] = useState("");
   const [processingProgress, setProcessingProgress] = useState(66);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  const allowedScoreboardFileTypes = ["image/jpeg", "image/png", "image/gif"];
 
   const form = useForm({
     resolver: zodResolver(analysisSchema),
@@ -73,17 +78,29 @@ export default function CreateForm() {
     },
   });
 
-  // New function to reset the form and step
   const resetForm = useCallback(() => {
     form.reset();
-    setScoreboardUploaded(false);
+    setScoreboard(null);
+    setScoreboardPreview(null);
     setScoreboardProcessed(false);
     setFormStep(0);
     setFormStepHistory(0);
-  }, [form, scoreboardProcessed, scoreboardUploaded]);
+  }, [form, scoreboardProcessed, scoreboard, scoreboardPreview]);
 
-  const handleScoreboardUpload = () => {
-    setScoreboardUploaded(true);
+  const handleScoreboardChange = (e) => {
+    e.preventDefault();
+    const scoreboardFile = e.target.files[0];
+
+    if (
+      scoreboardFile &&
+      allowedScoreboardFileTypes.includes(scoreboardFile.type)
+    ) {
+      setScoreboard(scoreboardFile);
+      setScoreboardPreview(URL.createObjectURL(scoreboardFile));
+    } else {
+      setScoreboard(null);
+      setScoreboardPreview("");
+    }
   };
 
   const handleScoreboardProcessing = () => {
@@ -92,12 +109,12 @@ export default function CreateForm() {
     setFormStepHistory(1);
   };
 
-  // Updated function to handle dialog state change
   const handleDialogChange = useCallback(
     (open) => {
       if (
         (!open && form.formState.isDirty) ||
-        (!open && scoreboardUploaded) ||
+        (!open && scoreboard) ||
+        (!open && scoreboardPreview) ||
         (!open && scoreboardProcessed)
       ) {
         setFormStep(-1);
@@ -105,7 +122,7 @@ export default function CreateForm() {
         setModalOpen(open);
       }
     },
-    [form, scoreboardUploaded, scoreboardProcessed]
+    [form, scoreboard, scoreboardPreview, scoreboardProcessed]
   );
 
   const handleConfirmClose = () => {
@@ -207,17 +224,31 @@ export default function CreateForm() {
                 hidden: formStep != 0,
               })}
             >
-              <ImageIcon className="h-24 w-24 text-muted-foreground" />
+              {!scoreboard ? (
+                <ImageIcon className="h-24 w-24 text-muted-foreground" />
+              ) : (
+                <Image src={scoreboardPreview} height={400} width={400} />
+              )}
               <div className="flex flex-row justify-center space-x-6">
-                <Button onClick={handleScoreboardUpload} type="button">
+                <label
+                  for="scoreboardInput"
+                  className="cursor-pointer h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                >
                   <Upload className="mr-2 h-4 w-4" /> Upload Scoreboard
-                </Button>
+                </label>
+                <Input
+                  id="scoreboardInput"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleScoreboardChange}
+                />
                 <Button
-                  disabled={!scoreboardUploaded}
+                  disabled={!scoreboard}
                   onClick={handleScoreboardProcessing}
                   type="button"
                 >
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  <Cpu className="mr-2 h-4 w-4" />
                   Process Scoreboard
                 </Button>
               </div>
