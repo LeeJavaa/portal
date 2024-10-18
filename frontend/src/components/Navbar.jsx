@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import CreateForm from "./CreateForm";
+import NewAnalysisForm from "@/components/NewAnalysisForm";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -36,7 +36,7 @@ export default function Navbar() {
             </span>
           </Link>
         </nav>
-        <CreateForm />
+        <NewAnalysisForm />
       </div>
     </header>
   );

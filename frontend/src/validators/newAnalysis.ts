@@ -1,6 +1,16 @@
 import { z } from "zod";
 
 export const analysisSchema = z.object({
+  game_mode: z.string().min(1, "Please specify the game mode."),
+  map: z.string().min(1, "Don't forget to mention the map!"),
+  team_one: z.string().min(1, "Team one name is required."),
+  team_one_score: z
+    .number()
+    .min(0, "Team one score must be a non-negative number."),
+  team_two: z.string().min(1, "Team two name is required."),
+  team_two_score: z
+    .number()
+    .min(0, "Team two score must be a non-negative number."),
   played_date: z.date({
     required_error: "When did this happen? We need a date! 📅",
     invalid_type_error:
