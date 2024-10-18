@@ -17,15 +17,21 @@ import GameDataDisplay from "./new-analysis-form/GameDataDisplay";
 import ScoreboardDisplay from "./new-analysis-form/ScoreboardDisplay";
 import AnalysisData from "./new-analysis-form/AnalysisData";
 import CloseDisplay from "./new-analysis-form/CloseDisplay";
+import { generateUniqueFileName } from "@/utils/fileHandling";
+import {
+  getPresignedUploadUrl,
+  initiateScoreboardProcessing,
+  uploadScoreboardToS3,
+} from "@/api/newAnalysisForm";
 
 export default function NewAnalysisForm() {
   const [formStep, setFormStep] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
   const [scoreboard, setScoreboard] = useState(null);
-  const [scoreboardProcessed, setScoreboardProcessed] = useState(false);
-  const [scoreboardPreview, setScoreboardPreview] = useState("");
+  const [isScoreboardUploading, setIsScoreboardUploading] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
+  const [scoreboardProcessed, setScoreboardProcessed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -47,10 +53,9 @@ export default function NewAnalysisForm() {
   const resetForm = useCallback(() => {
     form.reset();
     setScoreboard(null);
-    setScoreboardPreview(null);
     setScoreboardProcessed(false);
     setFormStep(0);
-  }, [form, scoreboardProcessed, scoreboard, scoreboardPreview]);
+  }, [form, scoreboardProcessed, scoreboard]);
 
   const handleScoreboardChange = (e) => {
     e.preventDefault();
@@ -62,14 +67,31 @@ export default function NewAnalysisForm() {
       allowedScoreboardFileTypes.includes(scoreboardFile.type)
     ) {
       setScoreboard(scoreboardFile);
-      setScoreboardPreview(URL.createObjectURL(scoreboardFile));
     } else {
       setScoreboard(null);
-      setScoreboardPreview("");
     }
   };
 
-  const handleScoreboardProcessing = () => {
+  const handleScoreboardProcessing = async () => {
+    if (!scoreboard) return;
+    setIsScoreboardUploading(true);
+    try {
+      const uniqueFileName = generateUniqueFileName(scoreboard.name);
+      const { url, fields } = await getPresignedUploadUrl(
+        uniqueFileName,
+        scoreboard.type
+      );
+      await uploadScoreboardToS3(url, fields, scoreboard);
+      const processingResult = await initiateScoreboardProcessing(
+        uniqueFileName
+      );
+      console.log(processingResult);
+    } catch (error) {
+      console.error("Error processing scoreboard:", error);
+    } finally {
+      setIsScoreboardUploading(false);
+    }
+
     setFormStep(1);
     let progress = 0;
     const interval = setInterval(() => {
@@ -90,7 +112,6 @@ export default function NewAnalysisForm() {
       if (
         (!open && form.formState.isDirty) ||
         (!open && scoreboard) ||
-        (!open && scoreboardPreview) ||
         (!open && scoreboardProcessed)
       ) {
         setConfirmCloseOpen(true);
@@ -98,7 +119,7 @@ export default function NewAnalysisForm() {
         setModalOpen(open);
       }
     },
-    [form, scoreboard, scoreboardPreview, scoreboardProcessed]
+    [form, scoreboard, scoreboardProcessed]
   );
 
   const handleConfirmClose = () => {
@@ -109,11 +130,6 @@ export default function NewAnalysisForm() {
 
   const handleCancelClose = () => {
     setConfirmCloseOpen(false);
-  };
-
-  const handleErrorFixing = (e) => {
-    e.preventDefault();
-    console.log(e.target);
   };
 
   async function onSubmit(data) {
@@ -191,9 +207,9 @@ export default function NewAnalysisForm() {
         {formStep == 0 && !confirmCloseOpen && (
           <UploadDisplay
             scoreboard={scoreboard}
-            preview={scoreboardPreview}
             onChange={handleScoreboardChange}
             onProcess={handleScoreboardProcessing}
+            isUploading={isScoreboardUploading}
           />
         )}
         {formStep == 1 && !confirmCloseOpen && (

@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import formatDate from "../../../../utils/dateHandling";
+import formatDate from "../../../utils/dateHandling";
 
 import { TriangleAlert } from "lucide-react";
 import { CalendarDays, Map, Flag } from "lucide-react";

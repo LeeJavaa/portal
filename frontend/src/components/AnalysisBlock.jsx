@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import formatDate from "../../utils/dateHandling";
+import formatDate from "../utils/dateHandling";
 import { CircleCheck } from "lucide-react";
 
 export default function AnalysisBlock({
