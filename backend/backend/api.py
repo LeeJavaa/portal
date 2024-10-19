@@ -20,7 +20,6 @@ from analysis.controllers.response_generation import (
     generate_delete_custom_analysis_response
 )
 from analysis.controllers.scoreboard_processing import (
-    process_scoreboard,
     process_map_analysis_creation,
     process_series_analysis_creation,
     process_custom_analysis_creation_from_maps,
@@ -105,8 +104,8 @@ class MapAnalysesResponse(Schema):
 
 class SeriesAnalysesFilter(Schema):
     tournament: Optional[str] = None
-    team: Optional[str] = None
-    opponent: Optional[str] = None
+    team_one: Optional[str] = None
+    team_two: Optional[str] = None
     player: Optional[str] = None
 
 class SeriesAnalysisCompressedOut(Schema):
@@ -361,7 +360,7 @@ def get_series_analysis(request, payload: AnalysisFilter):
         raise HttpError(400, f"Error occurred while getting series analysis: {str(e)}")
 
 @api.get("/custom_analysis", response=CustomAnalysisOut)
-def get_map_analysis(request, payload: AnalysisFilter):
+def get_custom_analysis(request, payload: AnalysisFilter):
     try:
         custom_analysis = generate_custom_analysis_response(payload)
         return {"custom_analysis": CustomAnalysisOut(**custom_analysis)}
