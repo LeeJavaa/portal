@@ -105,7 +105,7 @@ def delete_map_analysis(map_analysis_id):
     """
     pass
 
-def _delete_series_analysis(series_analysis_id):
+def delete_series_analysis(series_analysis_id):
     """
     Deletes a single series analysis, according to the id given.
 

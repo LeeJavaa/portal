@@ -1,15 +1,12 @@
-async def start_processing_task(scoreboard):
-    # This function should start the processing task
-    # You might use Celery, Django Channels, or some other async task queue
-    # For this example, we'll just return a dummy task ID
-    return "task_123456"
+from celery.result import AsyncResult
 
 async def check_progress(task_id: str):
-    # This function should check the progress of the task
-    # You might use Celery, Django Channels, or a database to store and retrieve progress
-    # For this example, we'll simulate progress
-    import random
-    progress = random.randint(0, 100)
-    if progress == 100:
-        return {'progress': 100, 'data': 'Processed scoreboard data'}
-    return {'progress': progress}
+    result = AsyncResult(task_id)
+    if result.state == 'PENDING':
+        return {'progress': 0}
+    elif result.state == 'SUCCESS':
+        return result.result  # This should contain both progress (100) and data
+    elif result.state == 'FAILURE':
+        return {'progress': 100, 'error': str(result.result)}
+    else:
+        return result.info  # This should contain the progress
