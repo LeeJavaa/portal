@@ -19,7 +19,7 @@ export default function AnalysisBlock({
     }
   };
 
-  return (
+  const content = (
     <div
       className={`group overflow-hidden ${
         isSelected ? "border-primary" : "border-muted"
@@ -27,18 +27,16 @@ export default function AnalysisBlock({
       onClick={handleClick}
     >
       <div className="relative overflow-hidden rounded-lg">
-        <Link href={`/analysis/${analysis.id}`} onClick={handleClick}>
-          <Image
-            src={`http://localhost/static/analysis/img/${thumbnail}.jpg`}
-            width={300}
-            height={150}
-            alt="Analysis Thumbnail Image"
-            className={`h-full w-full rounded-lg object-cover transition-all duration-300 ${
-              selectionMode ? "" : "group-hover:scale-105"
-            }`}
-            style={{ aspectRatio: "300/150", objectFit: "cover" }}
-          />
-        </Link>
+        <Image
+          src={`http://localhost/static/analysis/img/${thumbnail}.jpg`}
+          width={300}
+          height={150}
+          alt="Analysis Thumbnail Image"
+          className={`h-full w-full rounded-lg object-cover transition-all duration-300 ${
+            selectionMode ? "" : "group-hover:scale-105"
+          }`}
+          style={{ aspectRatio: "300/150", objectFit: "cover" }}
+        />
         <div
           className={`absolute inset-0 bg-gradient-to-b from-transparent to-black/70 ${
             isSelected ? "opacity-100" : "opacity-0"
@@ -65,4 +63,10 @@ export default function AnalysisBlock({
       </div>
     </div>
   );
+
+  if (selectionMode) {
+    return content;
+  }
+
+  return <Link href={`/analysis/${analysis.id}`}>{content}</Link>;
 }

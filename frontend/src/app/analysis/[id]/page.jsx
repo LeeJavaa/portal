@@ -1,79 +1,135 @@
-import Image from "next/image";
+"use client";
+import Scoreboard from "@/components/Scoreboard";
+import { Button } from "@/components/ui/button";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Trash2, Image as ImageIcon, Monitor } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import formatDate from "../../../utils/dateHandling";
+export default function Page() {
+  const playerData = [
+    {
+      name: "KENNY",
+      kd: "29/19",
+      assists: "6",
+      ntk: "23",
+      highestStreak: "2",
+      dmg: "5173",
+      ht: "0:53",
+      avgHt: "0:04",
+      objKills: "5",
+      contHt: "0:04",
+      kph: "2.45",
+      dph: "436.81",
+    },
+  ];
 
-import { TriangleAlert } from "lucide-react";
-import { CalendarDays, Map, Flag } from "lucide-react";
+  const chartData = [
+    { month: "January", desktop: 186, mobile: 80 },
+    { month: "February", desktop: 305, mobile: 200 },
+    { month: "March", desktop: 237, mobile: 120 },
+    { month: "April", desktop: 73, mobile: 190 },
+    { month: "May", desktop: 209, mobile: 130 },
+    { month: "June", desktop: 214, mobile: 140 },
+  ];
 
-async function getAnalysis(id) {
-  // Replace with your actual API endpoint
-  const res = await fetch(`http://localhost/api/analysis/${id}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    throw new Error("Failed to fetch analysis");
-  }
-  return res.json();
-}
-
-export default async function Page({ params }) {
-  const analysis = await getAnalysis(params.id);
-
-  if (!analysis) {
-    return (
-      <main className="flex-1 flex flex-col items-center justify-center px-4 md:px-6 py-12">
-        <div className="w-full max-w-4xl">
-          <Alert variant="destructive">
-            <TriangleAlert className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              No analysis data available. Please ensure you&apos;ve selected a
-              valid analysis.
-            </AlertDescription>
-          </Alert>
-        </div>
-      </main>
-    );
-  }
-
-  let formatted_played_date = formatDate(analysis.played_date);
+  const chartConfig = {
+    desktop: {
+      label: "Desktop",
+      icon: Monitor,
+      color: "hsl(var(--chart-2))",
+    },
+    mobile: {
+      label: "Mobile",
+      color: "hsl(var(--chart-3))",
+    },
+  };
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-center gap-6 px-4 md:px-6 py-12">
-      <div className="w-full max-w-4xl rounded-lg overflow-hidden">
-        <Image
-          src={`http://localhost/static/analysis/img/${analysis.map}.jpg`}
-          alt={`Map: ${analysis.map}`}
-          width={1000}
-          height={500}
-          layout="responsive"
-          objectFit="cover"
-          className="rounded-lg"
-        />
+    <main>
+      <h1>Title</h1>
+      <Scoreboard playerData={playerData} caption="" input={false} />
+      <div className="flex">
+        <Select>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Team" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ot">OpTic Texas</SelectItem>
+            <SelectItem value="nysl">New York Subliners</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Player" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Kenny">Kenny</SelectItem>
+            <SelectItem value="Dashy">Dashy</SelectItem>
+            <SelectItem value="Shotzzy">Shotzzy</SelectItem>
+            <SelectItem value="Pred">Pred</SelectItem>
+            <SelectItem value="Hydra">Hydra</SelectItem>
+            <SelectItem value="Sib">Sib</SelectItem>
+            <SelectItem value="Skyz">Skyz</SelectItem>
+            <SelectItem value="Kismet">Kismet</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button>Apply Filter</Button>
+        <Button variant="outline">
+          <Trash2 className="w-4 h-4" />
+        </Button>
+        <Dialog>
+          <DialogTrigger>View Original</DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Original Scoreboard Screenshot</DialogTitle>
+              <DialogDescription>Behold your eyes on heaven,</DialogDescription>
+            </DialogHeader>
+            <ImageIcon className="w-32 h-32" />
+          </DialogContent>
+        </Dialog>
       </div>
-      <div className="w-full max-w-4xl space-y-2">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">{analysis.title}</h1>
-        </div>
-        <div className="flex items-center gap-8 text-sm text-muted-foreground">
-          <div className="flex gap-x-2">
-            <CalendarDays className="w-5 h-5" />
-            <span>{formatted_played_date}</span>
-          </div>
-          <div className="flex gap-x-2">
-            <Map className="w-5 h-5" />
-            <span>{analysis.map}</span>
-          </div>
-          <div className="flex gap-x-2">
-            <Flag className="w-5 h-5" />
-            <span>T1: {analysis.team_one}</span>
-          </div>
-          <div className="flex gap-x-2">
-            <Flag className="w-5 h-5" />
-            <span>T2: {analysis.team_two}</span>
-          </div>
-        </div>
+      <div>OpTic Texas 250 - 212 New York Subliners</div>
+      <div>Karachi, Hardpoint</div>
+      <div>OpTic Texas vs NYSL GF, Call of Duty Championships 2024</div>
+      <div>21 July 2024, 6pm</div>
+      <div className="w-[500px] mb-7">
+        <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+          <BarChart accessibilityLayer data={chartData}>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tickFormatter={(value) => value.slice(0, 3)}
+            />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <ChartLegend content={<ChartLegendContent />} />
+            <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
+            <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
+          </BarChart>
+        </ChartContainer>
       </div>
     </main>
   );
