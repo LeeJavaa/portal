@@ -128,13 +128,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = "/var/www/portal/static"
+STATIC_ROOT = "/home/lee/engineering/portal/portal/backend/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # https://docs.djangoproject.com/en/5.1/ref/settings/#std-setting-MEDIA_ROOT
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = "/var/www/portal/media"
+MEDIA_ROOT = "/home/lee/engineering/portal/portal/backend/media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

@@ -2,6 +2,7 @@
 In this file we will do all the handling with respect to fetching and uploading items to the S3 bucket.
 """
 import boto3
+import numpy as np
 
 from django.conf import settings
 
@@ -62,3 +63,16 @@ def get_object_from_bucket(file_name: str):
     s3_content = s3_object['Body'].read()
 
     return s3_content
+
+def binary_to_np_array(content):
+    """
+    Converts binary data to a numpy array.
+
+    args:
+        - content [Str]: The binary data to convert.
+    returns:
+        - np_array [NumPy Array]: The converted binary data.
+    """
+    np_array = np.frombuffer(content, dtype=np.uint8)
+
+    return np_array
