@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import sys
@@ -20,6 +21,7 @@ django.setup()
 
 from django.conf import settings
 
+logger = logging.getLogger('gunicorn.error')
 
 class GameDataField(Enum):
     """

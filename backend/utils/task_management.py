@@ -1,12 +1,14 @@
 from celery.result import AsyncResult
 
-async def check_progress(task_id: str):
-    result = AsyncResult(task_id)
-    if result.state == 'PENDING':
-        return {'progress': 0}
-    elif result.state == 'SUCCESS':
-        return result.result  # This should contain both progress (100) and data
-    elif result.state == 'FAILURE':
-        return {'progress': 100, 'error': str(result.result)}
-    else:
-        return result.info  # This should contain the progress
+def check_progress(task_id: str):
+    """Helper function to check Celery task progress"""
+    task = AsyncResult(task_id)
+
+    if task.state == 'PENDING':
+        return {'progress': 0, 'data': {}}
+    elif task.state == 'SUCCESS':
+        return task.result
+    elif task.state == 'FAILURE':
+        return {'progress': 0, 'data': {}, 'error': str(task.result)}
+    elif task.state == 'PROGRESS':
+        return task.info

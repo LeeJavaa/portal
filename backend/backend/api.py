@@ -205,13 +205,13 @@ async def process_scoreboard_progress(request, task_id: str):
     async def event_stream():
         while True:
             try:
-                progress_res = await check_progress(task_id)
+                progress_res = check_progress(task_id)
 
                 if progress_res.get('progress') == 100:
                     yield f"data: {json.dumps(progress_res)}\n\n"
                     break
                 else:
-                    yield f"data: {json.dumps({'progress': progress_res.get('progress', 0)})}n\n"
+                    yield f"data: {json.dumps({'progress': progress_res.get('progress', 0)})}\n\n"
 
                 await asyncio.sleep(1)
             except asyncio.CancelledError:
@@ -223,7 +223,13 @@ async def process_scoreboard_progress(request, task_id: str):
                 yield f"event: error\ndata: {json.dumps({'error': error_message})}\n\n"
                 break
     try:
-        return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+        response = StreamingHttpResponse(
+            event_stream(),
+            content_type='text/event-stream'
+        )
+        response['Cache-Control'] = 'no-cache'
+        response['X-Accel-Buffering'] = 'no'
+        return response
     except Exception as e:
         logger.error(f"Failed to create StreamingHttpResponse for task {task_id}: {str(e)}")
         raise HttpError(500, "Internal server error")

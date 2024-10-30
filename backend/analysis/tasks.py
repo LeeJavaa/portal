@@ -40,10 +40,50 @@ def process_scoreboard(self, scoreboard: str):
         -
     """
     try:
-        game_data, player_data = extract_data(scoreboard)
-        processed_data = process_data(game_data, player_data)
-        return processed_data
+        print('Starting task')
+        self.update_state(
+            state='PROGRESS',
+            meta={
+                'progress': 0,
+                'data': {}
+            }
+        )
 
+        print('Extracting data')
+        self.update_state(
+            state='PROGRESS',
+            meta={
+                'progress': 25,
+                'data': {}
+            }
+        )
+        game_data, player_data = extract_data(scoreboard)
+
+        print('Processing data')
+        self.update_state(
+            state='PROGRESS',
+            meta={
+                'progress': 75,
+                'data': {}
+            }
+        )
+        processed_data = process_data(game_data, player_data)
+
+        print("Task complete")
+        result = {
+            'progress': 100,
+            'data': processed_data
+        }
+        return result
     except Exception as e:
+        print("Task error")
         logger.error(f"Error processing scoreboard: {str(e)}")
+        self.update_state(
+            state='FAILURE',
+            meta={
+                'progress': 0,
+                'data': {},
+                'error': str(e)
+            }
+        )
         raise
