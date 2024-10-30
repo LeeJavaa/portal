@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 export default function Page() {
   const combinePlayerPerformanceData = (data) => {
     return data.playerMapPerformances
-      .filter((performance) => performance.mapAnalysis === 1)
+      .filter((performance) => performance.mapAnalysis === 2)
       .map((performance) => {
         // Find corresponding game mode performance data
         const hpPerformance = performance.playerPerformanceHP
@@ -82,7 +82,7 @@ export default function Page() {
   );
 
   const mapMetadata = mapAnalyses.mapAnalyses.filter(
-    (mapAnalysis) => mapAnalysis.id === 1
+    (mapAnalysis) => mapAnalysis.id === 2
   )[0];
 
   const playerData = [

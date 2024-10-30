@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/chart";
 import { Pie, PieChart } from "recharts";
 
-export default function DonutChart({ config, data }) {
+export default function ContentionChart({ config, data }) {
   return (
     <Card className="flex flex-col bg-background">
       <CardHeader className="items-center pb-0">
