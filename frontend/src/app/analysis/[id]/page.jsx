@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 export default function Page() {
   const combinePlayerPerformanceData = (data) => {
     return data.playerMapPerformances
-      .filter((performance) => performance.mapAnalysis === 2)
+      .filter((performance) => performance.mapAnalysis === 3)
       .map((performance) => {
         // Find corresponding game mode performance data
         const hpPerformance = performance.playerPerformanceHP
@@ -22,14 +22,15 @@ export default function Page() {
         const sndPerformance = performance.playerPerformanceSND
           ? data.playerMapPerformanceSNDs.find(
               (snd) =>
-                snd.playerPerformance === performance.playerPerformanceSND
+                snd.playerPerformance - 8 === performance.playerPerformanceSND
             )
           : null;
 
         const controlPerformance = performance.playerPerformanceControl
           ? data.playerMapPerformanceControls.find(
               (ctrl) =>
-                ctrl.playerPerformance === performance.playerPerformanceControl
+                ctrl.playerPerformance - 16 ===
+                performance.playerPerformanceControl
             )
           : null;
 
@@ -80,6 +81,8 @@ export default function Page() {
   const playerPerformanceData = combinePlayerPerformanceData(
     playerMapPerformances
   );
+
+  console.log(playerPerformanceData);
 
   const mapMetadata = mapAnalyses.mapAnalyses.filter(
     (mapAnalysis) => mapAnalysis.id === 2

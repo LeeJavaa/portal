@@ -10,15 +10,15 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-export default function KDChart({ config, data }) {
+export default function TiersCaptured({ config, data }) {
   return (
-    <Card className="flex flex-col bg-background">
+    <Card className="bg-background">
       <CardHeader className="items-center">
-        <CardTitle>Player K/D ratio</CardTitle>
-        <CardDescription>
-          The kills to death ratio for each player
+        <CardTitle>Player Tiers Captured</CardTitle>
+        <CardDescription className="text-center">
+          How many tiers did each player capture?
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -33,24 +33,17 @@ export default function KDChart({ config, data }) {
               tickFormatter={(value) => value.slice(0, 3)}
             />
             <YAxis
-              dataKey="kdRatio"
+              dataKey="ctrl_tiersCaptured"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <Bar dataKey="kdRatio">
-              {data.map((item) => (
-                <Cell
-                  key={item.player}
-                  fill={
-                    item.kdRatio > 1
-                      ? "hsl(var(--chart-2))"
-                      : "hsl(var(--chart-5))"
-                  }
-                />
-              ))}
-            </Bar>
+            <Bar
+              dataKey="ctrl_tiersCaptured"
+              fill="var(--color-kills)"
+              radius={4}
+            />
           </BarChart>
         </ChartContainer>
       </CardContent>

@@ -13,6 +13,18 @@ import OKChart from "../data-visualisation/OKChart";
 import CTChart from "../data-visualisation/CTChart";
 import KPHChart from "../data-visualisation/KPHChart";
 import DPHChart from "../data-visualisation/DPHChart";
+import BombsPlanted from "../data-visualisation/BombsPlanted";
+import BombsDefused from "../data-visualisation/BombsDefused";
+import FirstBloods from "../data-visualisation/FirstBloods";
+import FirstDeaths from "../data-visualisation/FirstDeaths";
+import KillsPerRoundSND from "../data-visualisation/KillsPerRoundSND";
+import DamagePerRoundSND from "../data-visualisation/DamagePerRoundSND";
+import TiersCaptured from "../data-visualisation/TiersCaptured";
+import ObjectiveKillsCTRL from "../data-visualisation/ObjectiveKillsCTRL";
+import OffenseKills from "../data-visualisation/OffenseKills";
+import DefenseKills from "../data-visualisation/DefenseKills";
+import KillsPerRoundCTRL from "../data-visualisation/KillsPerRoundCTRL";
+import DamagePerRoundCTRL from "../data-visualisation/DamagePerRoundCTRL";
 
 export default function DataVis({ playerPerformanceData, mapMetadata }) {
   const pieChartData = [
@@ -59,6 +71,14 @@ export default function DataVis({ playerPerformanceData, mapMetadata }) {
     },
   };
 
+  const hardpoint = playerPerformanceData.some(
+    (data) => "hp_highestStreak" in data
+  );
+  const snd = playerPerformanceData.some((data) => "snd_bombsPlanted" in data);
+  const control = playerPerformanceData.some(
+    (data) => "ctrl_tiersCaptured" in data
+  );
+
   return (
     <section className="mt-8 mb-8">
       <div className="grid grid-cols-3 gap-x-2 gap-y-3">
@@ -69,14 +89,53 @@ export default function DataVis({ playerPerformanceData, mapMetadata }) {
         <DeathsChart config={chartConfig} data={playerPerformanceData} />
         <AssistsChart config={chartConfig} data={playerPerformanceData} />
         <NTKChart config={chartConfig} data={playerPerformanceData} />
-        <HSChart config={chartConfig} data={playerPerformanceData} />
-        <DamageChart config={chartConfig} data={playerPerformanceData} />
-        <HTChart config={chartConfig} data={playerPerformanceData} />
-        <AHTChart config={chartConfig} data={playerPerformanceData} />
-        <OKChart config={chartConfig} data={playerPerformanceData} />
-        <CTChart config={chartConfig} data={playerPerformanceData} />
-        <KPHChart config={chartConfig} data={playerPerformanceData} />
-        <DPHChart config={chartConfig} data={playerPerformanceData} />
+        {hardpoint && (
+          <>
+            <HSChart config={chartConfig} data={playerPerformanceData} />
+            <DamageChart config={chartConfig} data={playerPerformanceData} />
+            <HTChart config={chartConfig} data={playerPerformanceData} />
+            <AHTChart config={chartConfig} data={playerPerformanceData} />
+            <OKChart config={chartConfig} data={playerPerformanceData} />
+            <CTChart config={chartConfig} data={playerPerformanceData} />
+            <KPHChart config={chartConfig} data={playerPerformanceData} />
+            <DPHChart config={chartConfig} data={playerPerformanceData} />
+          </>
+        )}
+        {snd && (
+          <>
+            <BombsPlanted config={chartConfig} data={playerPerformanceData} />
+            <BombsDefused config={chartConfig} data={playerPerformanceData} />
+            <FirstBloods config={chartConfig} data={playerPerformanceData} />
+            <FirstDeaths config={chartConfig} data={playerPerformanceData} />
+            <KillsPerRoundSND
+              config={chartConfig}
+              data={playerPerformanceData}
+            />
+            <DamagePerRoundSND
+              config={chartConfig}
+              data={playerPerformanceData}
+            />
+          </>
+        )}
+        {control && (
+          <>
+            <TiersCaptured config={chartConfig} data={playerPerformanceData} />
+            <ObjectiveKillsCTRL
+              config={chartConfig}
+              data={playerPerformanceData}
+            />
+            <OffenseKills config={chartConfig} data={playerPerformanceData} />
+            <DefenseKills config={chartConfig} data={playerPerformanceData} />
+            <KillsPerRoundCTRL
+              config={chartConfig}
+              data={playerPerformanceData}
+            />
+            <DamagePerRoundCTRL
+              config={chartConfig}
+              data={playerPerformanceData}
+            />
+          </>
+        )}
       </div>
     </section>
   );
