@@ -29,7 +29,7 @@ from analysis.controllers.model_control import (
     delete_series_analyses,
     delete_series_analysis
 )
-from analysis.controllers.scoreboard_processing import process_scoreboard
+from analysis.tasks import process_scoreboard
 from django.http import StreamingHttpResponse
 
 from utils.s3_handling import generate_upload_scoreboard_url, generate_view_scoreboard_url, get_object_from_bucket
@@ -186,7 +186,7 @@ def view_scoreboard_url(request, file_name: str):
         logger.error(f"Error generating pre-signed URL for viewing: {e}")
         return Response({"error": str(e)}, status=500)
 
-@api.post("/new_map_analysis_step_one")
+@api.get("/new_map_analysis_step_one")
 def process_scoreboard_data(request, file_name: str):
     try:
         scoreboard = get_object_from_bucket(file_name)
