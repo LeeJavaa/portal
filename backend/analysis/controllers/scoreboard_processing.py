@@ -9,8 +9,6 @@ from pathlib import Path
 
 import cv2
 import django
-from celery import shared_task
-from celery.utils.log import get_task_logger
 from paddleocr import PaddleOCR
 from utils.s3_handling import binary_to_np_array, get_object_from_bucket
 
@@ -22,7 +20,6 @@ django.setup()
 
 from django.conf import settings
 
-logger = get_task_logger(__name__)
 
 class GameDataField(Enum):
     """
@@ -80,50 +77,6 @@ class PlayerStats:
     kills_per_hill: Tuple[str, float]
     dmg_per_hill: Tuple[str, float]
 
-
-@shared_task(bind=True)
-def process_scoreboard(self, scoreboard: str):
-    """
-    This function handles the task of performing OCR on a scoreboard screenshot and extracting the relevant data from
-    it. This will also update a progress variable that will be used during SSE to display the progress update on the
-    frontend.
-
-    The data returned may look something as follows:
-    {
-        "game_mode": "Hardpoint",
-        "map": "Karachi",
-        "team_one": "OpTic Texas",
-        "team_one_score": 250,
-        "team_two": "New York Subliners",
-        "team_two_score": 212,
-        "player_stats" : {
-            "Kenny" : {}
-            "Dashy" : {},
-            "Shotzzy" : {},
-            "Pred" : {},
-            "Hydra" : {},
-            "Kismet" : {},
-            "Skyz" : {},
-            "Sib" : {}
-        }
-    }
-
-    args:
-        - scoreboard [Str]: The scoreboard screenshot as a string (base64 encoded image)
-    returns:
-        - progress [Int (0 -> 100)]: The progress of the scoreboard processing. This is a value between 0 and 100.
-        - data [Dict]: A dictionary response of the extracted data. Empty until processing is complete. Example above.
-    raises:
-        -
-    """
-    try:
-        game_data, player_data = extract_data(scoreboard)
-        processed_data = process_data(game_data, player_data)
-        return processed_data
-
-    except Exception as e:
-        logger.error(f"Error processing scoreboard: {str(e)}")
-        raise
 
 def extract_data(scoreboard: str):
     try:
@@ -262,17 +215,18 @@ def adjust_bounds_for_row(bounds: Tuple[Tuple[float, float], Tuple[float, float]
     Row 0-3 are team 1, rows 4-7 are team 2 with a larger gap between them.
     """
     NORMAL_ROW_HEIGHT = 59  # Normal distance between rows within a team
-    TEAM_GAP = 132  # Gap between team 1 and team 2 (685 - 553)
+    TEAM_GAP = 120  # Gap between team 1 and team 2 (685 - 553)
 
     ((x1, y1), (x2, y2)) = bounds
-    base_y = y1  # Original y coordinate from first row
+    base_y1 = y1  # Original y coordinate from first row
+    base_y2 = y2
 
     if row < 4:  # Team 1
         y_offset = row * NORMAL_ROW_HEIGHT
     else:  # Team 2
         y_offset = (row * NORMAL_ROW_HEIGHT) + TEAM_GAP
 
-    return (x1, base_y + y_offset), (x2, base_y + y_offset)
+    return (x1, base_y1 + y_offset), (x2, base_y2 + y_offset)
 
 
 def process_player_row(detections: List[OCRDetection], row_number: int) -> Optional[PlayerStats]:
