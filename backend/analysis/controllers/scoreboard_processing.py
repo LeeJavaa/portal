@@ -149,9 +149,10 @@ def process_data(game_data, player_data):
                     "kills_per_hill": player.kills_per_hill,
                     "dmg_per_hill": player.dmg_per_hill
                 }
-                # Add team association based on row number
-                stats_dict["team"] = 1 if row < 4 else 2
                 players.append(stats_dict)
+
+        if not players:
+            raise ValueError("No valid player data found")
 
         return {
             "metadata": {
@@ -169,7 +170,6 @@ def process_data(game_data, player_data):
             },
             "players": players
         }
-
     except Exception as e:
         logger.error(f"Error processing scoreboard data: {str(e)}")
         raise Exception(f"Error in process_data: {str(e)}")
@@ -178,36 +178,51 @@ def parse_ocr_detection(detection: List) -> OCRDetection:
     """
     Convert raw OCR detection to OCRDetection object
     """
-    region, (text, confidence) = detection
-    return OCRDetection(region, text, confidence)
+    try:
+        region, (text, confidence) = detection
+        return OCRDetection(region, text, confidence)
+    except Exception as e:
+        raise ValueError(f"Failed to parse OCR detection: {str(e)}")
 
 def get_region_center(region: List[List[float]]) -> Tuple[float, float]:
     """
     Calculate center point of detection region
     """
-    x_coords = [point[0] for point in region]
-    y_coords = [point[1] for point in region]
-    return sum(x_coords) / 4, sum(y_coords) / 4
+    try:
+        x_coords = [point[0] for point in region]
+        y_coords = [point[1] for point in region]
+        return sum(x_coords) / 4, sum(y_coords) / 4
+    except (ValueError, TypeError, IndexError) as e:
+        raise ValueError(f"Invalid region format: {str(e)}")
 
 def is_point_in_bounds(point: Tuple[float, float], bounds: Tuple[Tuple[float, float], Tuple[float, float]], tolerance: int = 10) -> bool:
     """
     Check if point falls within specified bounds with tolerance
     Added tolerance to account for slight variations in OCR detection regions
     """
-    (min_x, min_y), (max_x, max_y) = bounds
-    x, y = point
-    return (min_x - tolerance <= x <= max_x + tolerance and
-            min_y - tolerance <= y <= max_y + tolerance)
+    try:
+        (min_x, min_y), (max_x, max_y) = bounds
+        if max_x < min_x or max_y < min_y:
+            raise ValueError("Invalid bounds: max values must be greater than min values")
+
+        x, y = point
+        return (min_x - tolerance <= x <= max_x + tolerance and
+                min_y - tolerance <= y <= max_y + tolerance)
+    except (TypeError, ValueError) as e:
+        raise ValueError(f"Invalid coordinate data: {str(e)}")
 
 def find_detection_for_field(detections: List[OCRDetection], field_bounds: Tuple[Tuple[float, float], Tuple[float, float]]) -> Optional[Tuple[str, float]]:
     """
     Find matching detection for a given field based on region bounds
     """
-    for detection in detections:
-        center = get_region_center(detection.region)
-        if is_point_in_bounds(center, field_bounds):
-            return detection.text, detection.confidence
-    return None
+    try:
+        for detection in detections:
+            center = get_region_center(detection.region)
+            if is_point_in_bounds(center, field_bounds):
+                return detection.text, detection.confidence
+        return None
+    except Exception as e:
+        raise ValueError(f"Failed to process field detection: {str(e)}")
 
 
 def adjust_bounds_for_row(bounds: Tuple[Tuple[float, float], Tuple[float, float]], row: int) -> Tuple[
@@ -216,56 +231,53 @@ def adjust_bounds_for_row(bounds: Tuple[Tuple[float, float], Tuple[float, float]
     Adjust coordinate bounds for a specific row number, accounting for the team gap.
     Row 0-3 are team 1, rows 4-7 are team 2 with a larger gap between them.
     """
-    NORMAL_ROW_HEIGHT = 59  # Normal distance between rows within a team
-    TEAM_GAP = 120  # Gap between team 1 and team 2 (685 - 553)
+    try:
+        NORMAL_ROW_HEIGHT = 59  # Normal distance between rows within a team
+        TEAM_GAP = 120  # Gap between team 1 and team 2 (685 - 553)
 
-    ((x1, y1), (x2, y2)) = bounds
-    base_y1 = y1  # Original y coordinate from first row
-    base_y2 = y2
+        ((x1, y1), (x2, y2)) = bounds
+        base_y1 = float(y1)
+        base_y2 = float(y2)
 
-    if row < 4:  # Team 1
-        y_offset = row * NORMAL_ROW_HEIGHT
-    else:  # Team 2
-        y_offset = (row * NORMAL_ROW_HEIGHT) + TEAM_GAP
+        y_offset = (row * NORMAL_ROW_HEIGHT) + (TEAM_GAP if row >= 4 else 0)
 
-    return (x1, base_y1 + y_offset), (x2, base_y2 + y_offset)
+        return (x1, base_y1 + y_offset), (x2, base_y2 + y_offset)
+    except Exception as e:
+        raise Exception(f"Failed to adjus bounds: {str(e)}")
 
 
 def process_player_row(detections: List[OCRDetection], row_number: int) -> Optional[PlayerStats]:
     """Process OCR detections for a single player row"""
     # Adjust field bounds based on row position
-    row_fields = {
-        field: adjust_bounds_for_row(field.value, row_number)
-        for field in PlayerDataField
-    }
+    try:
+        row_fields = {
+            field: adjust_bounds_for_row(field.value, row_number)
+            for field in PlayerDataField
+        }
 
-    # Find detections for each field
-    fields = {
-        name: find_detection_for_field(detections, adjusted_bounds)
-        for name, adjusted_bounds in row_fields.items()
-    }
+        # Find detections for each field
+        fields = {
+            name: find_detection_for_field(detections, adjusted_bounds)
+            for name, adjusted_bounds in row_fields.items()
+        }
 
-    # Return None if no significant detections found for this row
-    if not fields[PlayerDataField.NAME]:  # If no name detected, assume row is empty
-        return None
+        # Return None if no significant detections found for this row
+        if not fields[PlayerDataField.NAME]:  # If no name detected, assume row is empty
+            return None
 
-    return PlayerStats(
-        name=fields[PlayerDataField.NAME] or ("", 0.0),
-        kd=fields[PlayerDataField.KD] or ("0", 0.0),
-        assists=fields[PlayerDataField.ASSISTS] or ("0", 0.0),
-        non_traded_kills=fields[PlayerDataField.NON_TRADED_KILLS] or ("0", 0.0),
-        highest_streak=fields[PlayerDataField.HIGHEST_STREAK] or ("0", 0.0),
-        damage=fields[PlayerDataField.DAMAGE] or ("0", 0.0),
-        hill_time=fields[PlayerDataField.HILL_TIME] or ("0:00", 0.0),
-        avg_hill_time=fields[PlayerDataField.AVG_HILL_TIME] or ("0:00", 0.0),
-        obj_kills=fields[PlayerDataField.OBJ_KILLS] or ("0", 0.0),
-        contested_time=fields[PlayerDataField.CONTESTED_TIME] or ("0:00", 0.0),
-        kills_per_hill=fields[PlayerDataField.KILLS_PER_HILL] or ("0", 0.0),
-        dmg_per_hill=fields[PlayerDataField.DMG_PER_HILL] or ("0", 0.0)
-    )
-
-if __name__ == "__main__":
-    file_name = '095d3556-8d8d-4c73-a303-bf15484f5c18.png'
-    scoreboard = get_object_from_bucket(file_name)
-    scoreboard_data = process_scoreboard(scoreboard)
-    print(scoreboard_data)
+        return PlayerStats(
+            name=fields[PlayerDataField.NAME] or ("", 0.0),
+            kd=fields[PlayerDataField.KD] or ("0", 0.0),
+            assists=fields[PlayerDataField.ASSISTS] or ("0", 0.0),
+            non_traded_kills=fields[PlayerDataField.NON_TRADED_KILLS] or ("0", 0.0),
+            highest_streak=fields[PlayerDataField.HIGHEST_STREAK] or ("0", 0.0),
+            damage=fields[PlayerDataField.DAMAGE] or ("0", 0.0),
+            hill_time=fields[PlayerDataField.HILL_TIME] or ("0:00", 0.0),
+            avg_hill_time=fields[PlayerDataField.AVG_HILL_TIME] or ("0:00", 0.0),
+            obj_kills=fields[PlayerDataField.OBJ_KILLS] or ("0", 0.0),
+            contested_time=fields[PlayerDataField.CONTESTED_TIME] or ("0:00", 0.0),
+            kills_per_hill=fields[PlayerDataField.KILLS_PER_HILL] or ("0", 0.0),
+            dmg_per_hill=fields[PlayerDataField.DMG_PER_HILL] or ("0", 0.0)
+        )
+    except Exception as e:
+        raise Exception(f"Failed to process player row: {str(e)}")

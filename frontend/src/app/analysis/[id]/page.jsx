@@ -82,8 +82,6 @@ export default function Page() {
     playerMapPerformances
   );
 
-  console.log(playerPerformanceData);
-
   const mapMetadata = mapAnalyses.mapAnalyses.filter(
     (mapAnalysis) => mapAnalysis.id === 2
   )[0];
