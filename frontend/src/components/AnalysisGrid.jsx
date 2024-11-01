@@ -2,6 +2,7 @@ import AnalysisBlock from "@/components/AnalysisBlock";
 
 export default function AnalysisGrid({
   analyses,
+  showSeries,
   selectionMode,
   selectedAnalyses,
   toggleAnalysisSelection,
@@ -12,6 +13,7 @@ export default function AnalysisGrid({
         <AnalysisBlock
           key={analysis.id}
           analysis={analysis}
+          showSeries={showSeries}
           selectionMode={selectionMode}
           isSelected={selectedAnalyses.some((a) => a.id === analysis.id)}
           onSelect={() => toggleAnalysisSelection(analysis)}

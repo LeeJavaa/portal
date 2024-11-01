@@ -25,6 +25,7 @@ export default function Tournament({
         <>
           <AnalysisGrid
             analyses={analyses.slice(0, 4)}
+            showSeries={showSeries}
             selectionMode={selectionMode}
             selectedAnalyses={selectedAnalyses}
             toggleAnalysisSelection={toggleAnalysisSelection}
@@ -34,6 +35,7 @@ export default function Tournament({
               {expandedTournaments[tournamentId] && (
                 <AnalysisGrid
                   analyses={analyses.slice(4)}
+                  showSeries={showSeries}
                   selectionMode={selectionMode}
                   selectedAnalyses={selectedAnalyses}
                   toggleAnalysisSelection={toggleAnalysisSelection}

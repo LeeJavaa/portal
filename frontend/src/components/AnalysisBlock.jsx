@@ -5,6 +5,7 @@ import { CircleCheck } from "lucide-react";
 
 export default function AnalysisBlock({
   analysis,
+  showSeries,
   selectionMode,
   isSelected,
   onSelect,
@@ -68,5 +69,9 @@ export default function AnalysisBlock({
     return content;
   }
 
-  return <Link href={`/analysis/${analysis.id}`}>{content}</Link>;
+  if (showSeries) {
+    return <Link href={`/analysis/series/${analysis.id}`}>{content}</Link>;
+  }
+
+  return <Link href={`/analysis/map/${analysis.id}`}>{content}</Link>;
 }
