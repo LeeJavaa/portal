@@ -1,4 +1,20 @@
-def create_map_analysis(payload):
+from datetime import datetime
+from typing import Dict, Any
+
+from analysis.models import (
+    MapAnalysis,
+    PlayerMapPerformance,
+    PlayerMapPerformanceHP,
+    PlayerMapPerformanceSND,
+    PlayerMapPerformanceControl
+)
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db import transaction
+from django.utils import timezone
+from general.models import GameMode, Map, Player, Team, Tournament
+from utils.analysis_handling import parse_kd, parse_time_to_seconds
+
+def create_map_analysis(payload: Dict[str, Any]) -> int:
     """
     Creates a single map analysis object from the request payload.
 
@@ -9,7 +25,117 @@ def create_map_analysis(payload):
     raises:
         -
     """
-    pass
+    try:
+        if payload.played_data > timezone.now():
+            raise ValidationError("Played date cannot be in the future")
+
+        try:
+            tournament = Tournament.objects.get(id=payload.tournament)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist(f"Tournament with id {payload.tournament} does not exist")
+
+        try:
+            team_one = Team.objects.get(code=payload.team_one.lower())
+            team_two = Team.objects.get(code=payload.team_two.lower())
+        except ObjectDoesNotExist as e:
+            raise ObjectDoesNotExist(f"Team with code {str(e)} does not exist")
+
+        try:
+            game_mode = GameMode.objects.get(code=payload.game_mode.lower())
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist(f"Game mode {payload.game_mode} does not exist")
+
+        try:
+            map_object = Map.objects.get(name=payload.map.lower())
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist(f"Map {payload.map} does not exist")
+
+        if payload.team_one_score == payload.team_two_score:
+            raise ValidationError("Scores can not be equal")
+        winner = team_one if payload.team_one_score > payload.team_two_score else team_two
+
+        player_objects = {}
+        for player_name in payload.player_stats.keys():
+            try:
+                player_objects[player_name] = Player.objects.get(gamertag_dirty=player_name)
+            except ObjectDoesNotExist:
+                raise ObjectDoesNotExist(f"Player {player_name} does not exist. Are you sure that's their gamer tag?")
+
+        with transaction.atomic():
+            map_analysis = MapAnalysis.objects.create(
+                tournament=tournament,
+                title=payload.title,
+                screenshot=payload.scoreboard_file_name,
+                team_one=team_one,
+                team_two=team_two,
+                team_one_score=payload.team_one_score,
+                team_two_score=payload.team_two_score,
+                winner=winner,
+                played_date=payload.played_date,
+                map=map_object,
+                game_mode=game_mode
+            )
+
+            for player_name, stats in payload.player_stats.items():
+                kills, deaths = parse_kd(stats['k/d'])
+                kd_ratio = kills / deaths if deaths > 0 else kills
+
+                player_perf = PlayerMapPerformance.objects.create(
+                    map_analysis=map_analysis,
+                    player=player_objects[player_name],
+                    kills=kills,
+                    deaths=deaths,
+                    kd_ratio=kd_ratio,
+                    assists=int(stats['assists']),
+                    ntk=int(stats['ntk'])
+                )
+
+                if game_mode == GameMode.objects.get(code='hp'):
+                    PlayerMapPerformanceHP.objects.create(
+                        player_performance=player_perf,
+                        highest_streak=int(stats['hs']),
+                        damage=int(stats['dmg']),
+                        hill_time=parse_time_to_seconds(stats['ht']),
+                        average_hill_time=parse_time_to_seconds(stats['avg_ht']),
+                        objective_kills=int(stats['obj_kills']),
+                        contested_hill_time=parse_time_to_seconds(stats['cont_ht']),
+                        kills_per_hill=float(stats['kph']),
+                        damage_per_hill=float(stats['dph'])
+                    )
+                elif game_mode == GameMode.objects.get(code='snd'):
+                    PlayerMapPerformanceSND.objects.create(
+                        player_performance=player_perf,
+                        bombs_planted=int(stats.get('planted', 0)),
+                        bombs_defused=int(stats.get('defused', 0)),
+                        first_bloods=int(stats.get('fb', 0)),
+                        first_deaths=int(stats.get('fd', 0)),
+                        kills_per_round=float(stats['kpr']),
+                        damage_per_round=float(stats['dpr'])
+                    )
+                elif game_mode == GameMode.objects.get(code='cntrl'):
+                    PlayerMapPerformanceControl.objects.create(
+                        player_performance=player_perf,
+                        tiers_captured=int(stats.get('tiers', 0)),
+                        objective_kills=int(stats['obj_kills']),
+                        offense_kills=int(stats.get('off_kills', 0)),
+                        defense_kills=int(stats.get('def_kills', 0)),
+                        kills_per_round=float(stats['kpr']),
+                        damage_per_round=float(stats['dpr'])
+                    )
+
+            try:
+                map_analysis.full_clean()
+            except ValidationError as e:
+                # If validation fails, the transaction will be rolled back
+                raise ValidationError(f"Data validation failed: {str(e)}")
+
+        return map_analysis.id
+    except ValidationError as e:
+        raise ValidationError(f"Validation error: {str(e)}")
+    except ObjectDoesNotExist as e:
+        raise ObjectDoesNotExist(f"Object not found: {str(e)}")
+    except Exception as e:
+        raise Exception(f"Unexpected error creating map analysis: {str(e)}")
 
 def create_series_analysis(map_ids):
     """

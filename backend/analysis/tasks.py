@@ -1,5 +1,7 @@
 from celery import shared_task
 from celery.utils.log import get_task_logger
+
+from utils.task_management import ProgressTracker
 from .controllers.scoreboard_processing import extract_data, process_data
 
 logger = get_task_logger(__name__)
@@ -48,22 +50,10 @@ def process_scoreboard(self, scoreboard: str):
             }
         )
 
-        self.update_state(
-            state='PROGRESS',
-            meta={
-                'progress': 25,
-                'data': {}
-            }
-        )
+        extract_tracker = ProgressTracker(self, start_progress=0, end_progress=70)
         game_data, player_data = extract_data(scoreboard)
 
-        self.update_state(
-            state='PROGRESS',
-            meta={
-                'progress': 75,
-                'data': {}
-            }
-        )
+        process_tracker = ProgressTracker(self, start_progress=70, end_progress=100)
         processed_data = process_data(game_data, player_data)
 
         result = {

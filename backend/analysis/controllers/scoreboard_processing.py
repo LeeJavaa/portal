@@ -12,6 +12,7 @@ import cv2
 import django
 from paddleocr import PaddleOCR
 from utils.s3_handling import binary_to_np_array, get_object_from_bucket
+from utils.task_management import ProgressTracker
 
 # This is to run Django in a standalone configuration
 project_path = Path(__file__).resolve().parent.parent
@@ -80,9 +81,11 @@ class PlayerStats:
     dmg_per_hill: Tuple[str, float]
 
 
-def extract_data(scoreboard: str):
+def extract_data(scoreboard: str, progress_tracker: Optional[ProgressTracker] = None):
     try:
         ocr = PaddleOCR()
+        if progress_tracker:
+            progress_tracker.update(5)
 
         player_mask_path = os.path.join(settings.STATIC_ROOT, 'utils', 'mask_players.png')
         game_mask_path = os.path.join(settings.STATIC_ROOT, 'utils', 'mask_game.png')
@@ -91,21 +94,39 @@ def extract_data(scoreboard: str):
         if not all(os.path.exists(path) for path in [player_mask_path, game_mask_path]):
             raise FileNotFoundError("One or more required utility files are missing")
 
+        if progress_tracker:
+            progress_tracker.update(10)
+
         sb_full = cv2.imdecode(np_array_image, cv2.IMREAD_COLOR)
         if sb_full is None:
             raise ValueError("Failed to load the scoreboard image")
 
         sb = cv2.cvtColor(sb_full, cv2.COLOR_BGR2GRAY)
+
+        if progress_tracker:
+            progress_tracker.update(20)
+
         player_mask = cv2.imread(player_mask_path, 0)
         game_mask = cv2.imread(game_mask_path, 0)
         if player_mask is None or game_mask is None:
             raise ValueError("Failed to load mask images")
 
+        if progress_tracker:
+            progress_tracker.update(30)
+
         masked_players = cv2.bitwise_and(sb, sb, mask=player_mask)
         masked_game = cv2.bitwise_and(sb, sb, mask=game_mask)
 
+        if progress_tracker:
+            progress_tracker.update(40)
+
         players_result = ocr.ocr(masked_players)
+        if progress_tracker:
+            progress_tracker.update(75)
+
         game_result = ocr.ocr(masked_game)
+        if progress_tracker:
+            progress_tracker.update(100)
 
         if not players_result or not game_result:
             raise ValueError("OCR failed to extract data from the image")
@@ -115,7 +136,7 @@ def extract_data(scoreboard: str):
         logger.error(f"Error extracting scoreboard data: {str(e)}")
         raise Exception(f"Error in get_data: {str(e)}")
 
-def process_data(game_data, player_data):
+def process_data(game_data, player_data, progress_tracker: Optional[ProgressTracker] = None):
     """
     Main entry point for processing scoreboard data
     """
@@ -124,14 +145,21 @@ def process_data(game_data, player_data):
         game_ocr = [parse_ocr_detection(d) for d in game_data[0]]
         player_ocr = [parse_ocr_detection(d) for d in player_data[0]]
 
+        if progress_tracker:
+            progress_tracker.update(20)
+
         # Process game metadata
         game_data = {
             field.name.lower(): find_detection_for_field(game_ocr, field.value)
             for field in GameDataField
         }
 
+        if progress_tracker:
+            progress_tracker.update(50)
+
         # Process player data
         players = []
+        total_players = 8
         for row in range(8):
             player = process_player_row(player_ocr, row)
             if player:
@@ -151,8 +179,15 @@ def process_data(game_data, player_data):
                 }
                 players.append(stats_dict)
 
+            if progress_tracker:
+                current_player_progress = 50 + (40 * (row + 1) / total_players)
+                progress_tracker.update(current_player_progress)
+
         if not players:
             raise ValueError("No valid player data found")
+
+        if progress_tracker:
+            progress_tracker.update(100)
 
         return {
             "metadata": {
