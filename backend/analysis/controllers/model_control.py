@@ -2,11 +2,13 @@ from datetime import datetime
 from typing import Dict, Any
 
 from analysis.models import (
+    CustomAnalysis,
     MapAnalysis,
     PlayerMapPerformance,
     PlayerMapPerformanceHP,
     PlayerMapPerformanceSND,
-    PlayerMapPerformanceControl
+    PlayerMapPerformanceControl,
+    SeriesAnalysis
 )
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
@@ -26,7 +28,7 @@ def create_map_analysis(payload: Dict[str, Any]) -> int:
         -
     """
     try:
-        if payload.played_data > timezone.now():
+        if payload.played_date > timezone.now():
             raise ValidationError("Played date cannot be in the future")
 
         try:
@@ -112,7 +114,7 @@ def create_map_analysis(payload: Dict[str, Any]) -> int:
                         kills_per_round=float(stats['kpr']),
                         damage_per_round=float(stats['dpr'])
                     )
-                elif game_mode == GameMode.objects.get(code='cntrl'):
+                elif game_mode == GameMode.objects.get(code='ctl'):
                     PlayerMapPerformanceControl.objects.create(
                         player_performance=player_perf,
                         tiers_captured=int(stats.get('tiers', 0)),
@@ -137,18 +139,89 @@ def create_map_analysis(payload: Dict[str, Any]) -> int:
     except Exception as e:
         raise Exception(f"Unexpected error creating map analysis: {str(e)}")
 
-def create_series_analysis(map_ids):
+def create_series_analysis(map_ids, title):
     """
     Creates a single series analysis object from the map analyses that were provided.
 
     args:
         - map_ids [List]: A list of map analysis object ids that will make up the series analysis.
+        - title [Str]: The title of the series analysis
     returns:
         - id [int]: The id of the created series analysis object
     raises:
-        -
+        - ValidationError: If less than 3 maps are provided
+        - ValidationError: If maps don't belong to the same teams
+        - ValidationError: If maps don't belong to the same tournament
+        - ValidationError: If neither team has won 3 maps
     """
-    pass
+    try:
+        series_length = len(map_ids)
+        if series_length < 3:
+            raise ValidationError("A series must contain at least 3 maps")
+
+        map_analyses = MapAnalysis.objects.filter(id__in=map_ids)
+
+        if len(map_analyses) != series_length:
+            raise ValidationError("One or more map IDs do not exist")
+
+        maps_in_series = map_analyses.filter(series_analysis__isnull=False)
+        if maps_in_series.exists():
+            map_ids_in_series = list(maps_in_series.values_list('id', flat=True))
+            raise ValidationError(
+                f"Maps with IDs {map_ids_in_series} are already part of another series"
+            )
+
+        first_map = map_analyses[0]
+
+        tournaments = set(map_analysis.tournament_id for map_analysis in map_analyses)
+        if len(tournaments) > 1:
+            raise ValidationError("All maps must belong to the same tournament")
+
+        teams = set()
+        for map_analysis in map_analyses:
+            teams.add(map_analysis.team_one_id)
+            teams.add(map_analysis.team_two_id)
+
+        if len(teams) != 2:
+            raise ValidationError("All maps must be between the same two teams")
+
+        team_wins = {}
+        for map_analysis in map_analyses:
+            team_wins[map_analysis.winner_id] = team_wins.get(map_analysis.winner_id, 0) + 1
+
+        winning_team_id = None
+        for team_id, wins in team_wins.items():
+            if wins >= 3:
+                winning_team_id = team_id
+                break
+
+        if not winning_team_id:
+            raise ValidationError("Neither team has won 3 maps in this series")
+
+        earliest_played_date = min(map_analysis.played_date for map_analysis in map_analyses)
+
+        with transaction.atomic():
+            series_analysis = SeriesAnalysis.objects.create(
+                tournament=first_map.tournament,
+                title=title,
+                winner_id=winning_team_id,
+                played_date=earliest_played_date,
+                team_one=first_map.team_one,
+                team_two=first_map.team_two,
+                team_one_map_count=team_wins.get(first_map.team_one_id, 0),
+                team_two_map_count=team_wins.get(first_map.team_two_id, 0)
+            )
+
+            map_analyses.update(series_analysis=series_analysis)
+
+            return series_analysis
+
+    except ValidationError:
+        raise
+    except Exception as e:
+        raise ValidationError(f"Error creating series analysis: {str(e)}")
+
+
 
 def create_custom_analysis_from_maps(map_ids):
     """

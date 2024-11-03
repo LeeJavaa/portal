@@ -53,7 +53,7 @@ class MapAnalysisIn(Schema):
 
 class SeriesAnalysisIn(Schema):
     title: str
-    map_ids: List[str]
+    map_ids: List[int]
 
 class CustomAnalysisIn(Schema):
     title: str
@@ -247,8 +247,7 @@ def create_map_analysis_object(request, payload: MapAnalysisIn):
 @api.post("/create_series_analysis")
 def create_series_analysis_object(request, payload: SeriesAnalysisIn):
     try:
-        valid_map_ids = [int(map_id) for map_id in payload.map_ids if map_id.isdigit()]
-        response = create_series_analysis(valid_map_ids)
+        response = create_series_analysis(payload.map_ids, payload.title)
 
         return {"id": str(response.id)}
     except Exception as e:
