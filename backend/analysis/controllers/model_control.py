@@ -8,6 +8,7 @@ from analysis.models import (
     PlayerMapPerformanceHP,
     PlayerMapPerformanceSND,
     PlayerMapPerformanceControl,
+    PlayerSeriesPerformance,
     SeriesAnalysis
 )
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -158,6 +159,8 @@ def create_series_analysis(map_ids, title):
         series_length = len(map_ids)
         if series_length < 3:
             raise ValidationError("A series must contain at least 3 maps")
+        if series_length > 5:
+            raise ValidationError("A series cannot contain more than 5 maps")
 
         map_analyses = MapAnalysis.objects.filter(id__in=map_ids)
 
@@ -200,6 +203,28 @@ def create_series_analysis(map_ids, title):
 
         earliest_played_date = min(map_analysis.played_date for map_analysis in map_analyses)
 
+        player_map_performances = PlayerMapPerformance.objects.filter(
+            map_analysis__in=map_analyses
+        ).select_related('player')
+
+        player_series_stats = {}
+        for performance in player_map_performances:
+            player_id = performance.player_id
+            if player_id not in player_series_stats:
+                player_series_stats[player_id] = {
+                    'player': performance.player,
+                    'total_kills': 0,
+                    'total_deaths': 0,
+                    'total_assists': 0,
+                    'total_ntk': 0
+                }
+
+            stats = player_series_stats[player_id]
+            stats['total_kills'] += performance.kills
+            stats['total_deaths'] += performance.deaths
+            stats['total_assists'] += performance.assists
+            stats['total_ntk'] += performance.ntk
+
         with transaction.atomic():
             series_analysis = SeriesAnalysis.objects.create(
                 tournament=first_map.tournament,
@@ -213,6 +238,28 @@ def create_series_analysis(map_ids, title):
             )
 
             map_analyses.update(series_analysis=series_analysis)
+
+            player_series_performances = []
+            for player_id, stats in player_series_stats.items():
+                total_kills = stats['total_kills']
+                total_deaths = stats['total_deaths']
+                series_kd_ratio = (
+                    float(total_kills) / total_deaths if total_deaths > 0 else float(total_kills)
+                )
+
+                performance = PlayerSeriesPerformance(
+                    series_analysis=series_analysis,
+                    player=stats['player'],
+                    total_kills=total_kills,
+                    total_deaths=total_deaths,
+                    series_kd_ratio=series_kd_ratio,
+                    total_assists=stats['total_assists'],
+                    total_ntk=stats['total_ntk']
+                )
+                player_series_performances.append(performance)
+
+            # Bulk create all player series performances
+            PlayerSeriesPerformance.objects.bulk_create(player_series_performances)
 
             return series_analysis
 

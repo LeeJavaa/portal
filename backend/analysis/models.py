@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 
@@ -24,7 +25,13 @@ class MapAnalysis(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
-    series_analysis = models.ForeignKey(SeriesAnalysis, on_delete=models.SET_NULL, null=True, blank=True, unique=True)
+    series_analysis = models.ForeignKey(
+        SeriesAnalysis,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='maps'
+    )
     title = models.CharField(max_length=50)
     thumbnail = models.CharField(max_length=100, null=True, blank=True)
     screenshot = models.CharField(max_length=100)
@@ -36,15 +43,6 @@ class MapAnalysis(models.Model):
     played_date = models.DateTimeField(validators=[MaxValueValidator(limit_value=timezone.now)])
     map = models.ForeignKey(Map, on_delete=models.CASCADE)
     game_mode = models.ForeignKey(GameMode, on_delete=models.CASCADE)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['series_analysis'],
-                condition=models.Q(series_analysis__isnull=False),
-                name='unique_map_series'
-            )
-        ]
 
     def __str__(self):
         return self.title
