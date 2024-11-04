@@ -9,6 +9,7 @@ export default function AnalysisBlock({
   selectionMode,
   isSelected,
   onSelect,
+  seriesGallery,
 }) {
   let formatted_played_date = formatDate(analysis.playedDate);
   let thumbnail = analysis.map ? analysis.map : analysis.thumbnail;
@@ -51,16 +52,19 @@ export default function AnalysisBlock({
           </div>
         )}
       </div>
+
       <div className="mt-2">
         <h3 className="text-lg font-semibold text-primary mb-1">
           {analysis.title}
         </h3>
-        <div className="text-sm text-muted-foreground">
-          <p>
-            {analysis.teamOne} vs {analysis.teamTwo}
-          </p>
-          <p>{formatted_played_date}</p>
-        </div>
+        {!seriesGallery && (
+          <div className="text-sm text-muted-foreground">
+            <p>
+              {analysis.teamOne} vs {analysis.teamTwo}
+            </p>
+            <p>{formatted_played_date}</p>
+          </div>
+        )}
       </div>
     </div>
   );

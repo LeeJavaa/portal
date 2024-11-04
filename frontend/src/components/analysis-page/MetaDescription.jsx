@@ -1,12 +1,5 @@
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import Link from "next/link";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { SquareArrowOutUpRight } from "lucide-react";
 
 export default function MetaDescription() {
@@ -18,7 +11,9 @@ export default function MetaDescription() {
             <TableCell className="font-medium pl-0">Series</TableCell>
             <TableCell className="flex items-center gap-x-4 pr-0">
               <span className="hover:cursor-pointer hover:underline font-medium w-full text-right">
-                OpTic Texas vs NYSL GF, Call of Duty Championships 2024
+                <Link href="/analysis/series/1">
+                  OpTic Texas vs NYSL GF, Call of Duty Championships 2024
+                </Link>
               </span>
               <SquareArrowOutUpRight className="h-4 w-4" />
             </TableCell>

@@ -21,7 +21,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 
-export default function FilterBar() {
+export default function FilterBar({ mapAnalysis }) {
   return (
     <div className="flex justify-between mt-8">
       <div className="flex gap-x-2 items-center">
@@ -56,18 +56,22 @@ export default function FilterBar() {
         <Button>Apply Filter</Button>
       </div>
       <div className="flex gap-x-5">
-        <Dialog>
-          <DialogTrigger className="hover:underline">
-            View Original
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Original Scoreboard Screenshot</DialogTitle>
-              <DialogDescription>Behold your eyes on heaven,</DialogDescription>
-            </DialogHeader>
-            <ImageIcon className="w-32 h-32 mx-auto" />
-          </DialogContent>
-        </Dialog>
+        {mapAnalysis && (
+          <Dialog>
+            <DialogTrigger className="hover:underline">
+              View Original
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Original Scoreboard Screenshot</DialogTitle>
+                <DialogDescription>
+                  Behold your eyes on heaven,
+                </DialogDescription>
+              </DialogHeader>
+              <ImageIcon className="w-32 h-32 mx-auto" />
+            </DialogContent>
+          </Dialog>
+        )}
         <Dialog>
           <DialogTrigger asChild className="hover:underline">
             <Button variant="outline">
