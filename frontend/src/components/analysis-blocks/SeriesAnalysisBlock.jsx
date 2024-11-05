@@ -1,18 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
-import formatDate from "../utils/dateHandling";
+import formatDate from "../../utils/dateHandling";
 import { CircleCheck } from "lucide-react";
 
-export default function AnalysisBlock({
+export default function SeriesAnalysisBlock({
   analysis,
-  showSeries,
   selectionMode,
   isSelected,
   onSelect,
-  seriesGallery,
 }) {
   let formatted_played_date = formatDate(analysis.playedDate);
-  let thumbnail = analysis.map ? analysis.map : analysis.thumbnail;
 
   const handleClick = (e) => {
     if (selectionMode) {
@@ -30,7 +27,7 @@ export default function AnalysisBlock({
     >
       <div className="relative overflow-hidden rounded-lg">
         <Image
-          src={`http://localhost/static/analysis/img/${thumbnail}.jpg`}
+          src={`http://localhost/static/analysis/img/${analysis.thumbnail}.jpg`}
           width={300}
           height={150}
           alt="Analysis Thumbnail Image"
@@ -57,14 +54,12 @@ export default function AnalysisBlock({
         <h3 className="text-lg font-semibold text-primary mb-1">
           {analysis.title}
         </h3>
-        {!seriesGallery && (
-          <div className="text-sm text-muted-foreground">
-            <p>
-              {analysis.teamOne} vs {analysis.teamTwo}
-            </p>
-            <p>{formatted_played_date}</p>
-          </div>
-        )}
+        <div className="text-sm text-muted-foreground">
+          <p>
+            {analysis.teamOne} vs {analysis.teamTwo}
+          </p>
+          <p>{formatted_played_date}</p>
+        </div>
       </div>
     </div>
   );
@@ -73,9 +68,5 @@ export default function AnalysisBlock({
     return content;
   }
 
-  if (showSeries) {
-    return <Link href={`/analysis/series/${analysis.id}`}>{content}</Link>;
-  }
-
-  return <Link href={`/analysis/map/${analysis.id}`}>{content}</Link>;
+  return <Link href={`/analysis/series/${analysis.id}`}>{content}</Link>;
 }
