@@ -3,7 +3,9 @@ from typing import Dict, Any
 
 from analysis.models import (
     CustomAnalysis,
+    CustomAnalysisMapAnalysis,
     MapAnalysis,
+    PlayerCustomAnalysisPerformance,
     PlayerMapPerformance,
     PlayerMapPerformanceHP,
     PlayerMapPerformanceSND,
@@ -268,22 +270,91 @@ def create_series_analysis(map_ids, title):
     except Exception as e:
         raise ValidationError(f"Error creating series analysis: {str(e)}")
 
-
-
-def create_custom_analysis_from_maps(map_ids):
+def create_custom_analysis_from_maps(title, map_ids):
     """
     Creates a single custom analysis object from the map analyses that were provided.
 
     args:
+        - title [Str]: The title of the custom analysis
         - map_ids [List]: A list of map analysis object ids that will make up the custom analysis.
     returns:
         - id [int]: The id of the created custom analysis object
     raises:
         -
     """
-    pass
+    try:
+        if len(map_ids) < 2:
+            raise ValidationError("At least two map IDs must be provided")
 
-def create_custom_analysis_from_series(series_ids):
+        map_analyses = MapAnalysis.objects.filter(id__in=map_ids)
+
+        if len(map_analyses) != len(map_ids):
+            raise ValidationError("One or more map IDs provided do not exist")
+
+        player_map_performances = PlayerMapPerformance.objects.filter(
+            map_analysis__in=map_analyses
+        ).select_related('player')
+
+        player_custom_analysis_stats = {}
+        for performance in player_map_performances:
+            player_id = performance.player_id
+            if player_id not in player_custom_analysis_stats:
+                player_custom_analysis_stats[player_id] = {
+                    'player': performance.player,
+                    'total_kills': 0,
+                    'total_deaths': 0,
+                    'total_assists': 0,
+                    'total_ntk': 0
+                }
+
+            stats = player_custom_analysis_stats[player_id]
+            stats['total_kills'] += performance.kills
+            stats['total_deaths'] += performance.deaths
+            stats['total_assists'] += performance.assists
+            stats['total_ntk'] += performance.ntk
+
+        with transaction.atomic():
+            custom_analysis = CustomAnalysis.objects.create(
+                title=title,
+            )
+
+            custom_analysis_map_relations = [
+                CustomAnalysisMapAnalysis(
+                    custom_analysis=custom_analysis,
+                    map_analysis=map_analysis
+                )
+                for map_analysis in map_analyses
+            ]
+            CustomAnalysisMapAnalysis.objects.bulk_create(custom_analysis_map_relations)
+
+            player_performances = []
+            for player_id, stats in player_custom_analysis_stats.items():
+                total_kills = stats['total_kills']
+                total_deaths = stats['total_deaths']
+                custom_analysis_kd_ratio = (
+                    float(total_kills) / total_deaths if total_deaths > 0 else float(total_kills)
+                )
+
+                performance = PlayerCustomAnalysisPerformance(
+                    custom_analysis=custom_analysis,
+                    player=stats['player'],
+                    total_kills=total_kills,
+                    total_deaths=total_deaths,
+                    custom_analysis_kd_ratio=custom_analysis_kd_ratio,
+                    total_assists=stats['total_assists'],
+                    total_ntk=stats['total_ntk']
+                )
+                player_performances.append(performance)
+
+            PlayerCustomAnalysisPerformance.objects.bulk_create(player_performances)
+
+            return custom_analysis
+    except ValidationError:
+        raise
+    except Exception as e:
+        raise ValidationError(f"Error creating custom analysis: {str(e)}")
+
+def create_custom_analysis_from_series(title, series_ids):
     """
     Creates a single custom analysis object from the series analyses that were provided.
 
@@ -294,7 +365,27 @@ def create_custom_analysis_from_series(series_ids):
     raises:
         -
     """
-    pass
+    try:
+        if len(series_ids) < 2:
+            raise ValidationError("At least two series must be provided")
+
+        series_analyses = SeriesAnalysis.objects.filter(id__in=series_ids)
+
+        if len(series_analyses) != len(series_ids):
+            raise ValidationError("One or more series IDs provided do not exist")
+
+        map_ids = list(MapAnalysis.objects.filter(
+            series_analysis__in=series_analyses
+        ).values_list('id', flat=True))
+
+        if not map_ids:
+            raise ValidationError("No maps found in the provided series")
+
+        return create_custom_analysis_from_maps(title, map_ids)
+    except ValidationError:
+            raise
+    except Exception as e:
+        raise ValidationError(f"Error creating custom analysis from series: {str(e)}")
 
 def delete_map_analyses(map_analyses_ids):
     """
@@ -303,12 +394,40 @@ def delete_map_analyses(map_analyses_ids):
     args:
         - map_analyses_ids [List]: list of map analyses ids
     returns:
-        - success [bool]: whether the deletion was successful
+        - status [bool]: whether the deletion was successful
         - count [int]: amount of map analysis objects deleted
     raises:
         -
     """
-    pass
+    try:
+        if not map_analyses_ids:
+            raise ValidationError("No map analysis IDs provided")
+
+        successful_deletions = 0
+        failed_ids = []
+
+        for map_analysis_id in map_analyses_ids:
+            try:
+                response = delete_map_analysis(map_analysis_id)
+                if response == 'success':
+                    successful_deletions += 1
+            except ValidationError:
+                failed_ids.append(map_analysis_id)
+
+        if failed_ids:
+            raise ValidationError(
+                f"Failed to delete map analyses with IDs: {failed_ids}. "
+                f"Successfully deleted {successful_deletions} map analyses."
+            )
+
+        return {
+            "status": 'success',
+            "count": successful_deletions
+        }
+    except ValidationError:
+        raise
+    except Exception as e:
+        raise ValidationError(f"Error during bulk map analyses deletion: {str(e)}")
 
 def delete_series_analyses(series_analyses_ids):
     """
@@ -322,7 +441,35 @@ def delete_series_analyses(series_analyses_ids):
     raises:
         -
     """
-    pass
+    try:
+        if not series_analyses_ids:
+            raise ValidationError("No series analysis IDs provided")
+
+        successful_deletions = 0
+        failed_ids = []
+
+        for series_analysis_id in series_analyses_ids:
+            try:
+                response = delete_series_analysis(series_analysis_id)
+                if response == 'success':
+                    successful_deletions += 1
+            except ValidationError:
+                failed_ids.append(series_analysis_id)
+
+        if failed_ids:
+            raise ValidationError(
+                f"Failed to delete series analyses with IDs: {failed_ids}. "
+                f"Successfully deleted {successful_deletions} series analyses."
+            )
+
+        return {
+            "status": 'success',
+            "count": successful_deletions
+        }
+    except ValidationError:
+        raise
+    except Exception as e:
+        raise ValidationError(f"Error during bulk series analyses deletion: {str(e)}")
 
 def delete_custom_analyses(custom_analyses_ids):
     """
@@ -336,7 +483,35 @@ def delete_custom_analyses(custom_analyses_ids):
     raises:
         -
     """
-    pass
+    try:
+        if not custom_analyses_ids:
+            raise ValidationError("No custom analysis IDs provided")
+
+        successful_deletions = 0
+        failed_ids = []
+
+        for custom_analysis_id in custom_analyses_ids:
+            try:
+                response = delete_custom_analysis(custom_analysis_id)
+                if response == 'success':
+                    successful_deletions += 1
+            except ValidationError:
+                failed_ids.append(custom_analysis_id)
+
+        if failed_ids:
+            raise ValidationError(
+                f"Failed to delete custom analyses with IDs: {failed_ids}. "
+                f"Successfully deleted {successful_deletions} custom analyses."
+            )
+
+        return {
+            "status": 'success',
+            "count": successful_deletions
+        }
+    except ValidationError:
+        raise
+    except Exception as e:
+        raise ValidationError(f"Error during bulk custom analyses deletion: {str(e)}")
 
 def delete_map_analysis(map_analysis_id):
     """
@@ -349,7 +524,18 @@ def delete_map_analysis(map_analysis_id):
     raises:
         -
     """
-    pass
+    try:
+        map_analysis = MapAnalysis.objects.filter(id=map_analysis_id).first()
+
+        if not map_analysis:
+            raise ValidationError(f"Map analysis with ID {map_analysis_id} does not exist")
+
+        map_analysis.delete()
+        return "success"
+    except ValidationError:
+        raise
+    except Exception as e:
+        raise ValidationError(f"Error deleting map analysis: {str(e)}")
 
 def delete_series_analysis(series_analysis_id):
     """
@@ -362,7 +548,18 @@ def delete_series_analysis(series_analysis_id):
     raises:
         -
     """
-    pass
+    try:
+        series_analysis = SeriesAnalysis.objects.filter(id=series_analysis_id).first()
+
+        if not series_analysis:
+            raise ValidationError(f"Series analysis with ID {series_analysis_id} does not exist")
+
+        series_analysis.delete()
+        return "success"
+    except ValidationError:
+        raise
+    except Exception as e:
+        raise ValidationError(f"Error deleting series analysis: {str(e)}")
 
 def delete_custom_analysis(custom_analysis_id):
     """
@@ -375,4 +572,15 @@ def delete_custom_analysis(custom_analysis_id):
     raises:
         -
     """
-    pass
+    try:
+        custom_analysis = CustomAnalysis.objects.filter(id=custom_analysis_id).first()
+
+        if not custom_analysis:
+            raise ValidationError(f"Custom analysis with ID {custom_analysis_id} does not exist")
+
+        custom_analysis.delete()
+        return "success"
+    except ValidationError:
+        raise
+    except Exception as e:
+        raise ValidationError(f"Error deleting custom analysis: {str(e)}")

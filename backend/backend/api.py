@@ -57,8 +57,8 @@ class SeriesAnalysisIn(Schema):
 
 class CustomAnalysisIn(Schema):
     title: str
-    map_ids: List[str] = []
-    series_ids: List[str] = []
+    map_ids: List[int] = []
+    series_ids: List[int] = []
 
 class MapAnalysesFilterIn(Schema):
     tournament: Optional[str] = None
@@ -156,7 +156,10 @@ class MapAnalysisIncompleteOut(Schema):
     player_stats: Dict[str, Dict[str, List[Any]]]
 
 class DeleteAnalysesIn(Schema):
-    ids: List[str]
+    ids: List[int]
+
+class DeleteAnalysisIn(Schema):
+    id: int
 
 class PreSignedUrlOut(Schema):
     url: str
@@ -257,8 +260,7 @@ def create_series_analysis_object(request, payload: SeriesAnalysisIn):
 @api.post("/create_custom_analysis_from_maps")
 def create_custom_analysis_object_from_maps(request, payload: CustomAnalysisIn):
     try:
-        valid_map_ids = [int(map_id) for map_id in payload.map_ids if map_id.isdigit()]
-        response = create_custom_analysis_from_maps(valid_map_ids)
+        response = create_custom_analysis_from_maps(payload.title, payload.map_ids)
 
         return {"id": str(response.id)}
     except Exception as e:
@@ -268,8 +270,7 @@ def create_custom_analysis_object_from_maps(request, payload: CustomAnalysisIn):
 @api.post("/create_custom_analysis_from_series")
 def create_custom_analysis_object_from_series(request, payload: CustomAnalysisIn):
     try:
-        valid_series_ids = [int(series_id) for series_id in payload.series_ids if series_id.isdigit()]
-        response = create_custom_analysis_from_series(valid_series_ids)
+        response = create_custom_analysis_from_series(payload.title, payload.series_ids)
 
         return {"id": str(response.id)}
     except Exception as e:
@@ -336,10 +337,9 @@ def get_custom_analysis(request, payload: AnalysisFilterIn):
 @api.delete("/map_analyses")
 def delete_map_analysis_objects(request, payload: DeleteAnalysesIn):
     try:
-        valid_ids = [int(map_id) for map_id in payload.ids if map_id.isdigit()]
-        response = delete_map_analyses(valid_ids)
+        response = delete_map_analyses(payload.ids)
 
-        return {"status": str(response.status), "count": str(response.count)}
+        return {"status": str(response['status']), "count": str(response['count'])}
     except Exception as e:
         logger.error(f"Error deleting map analyses: {e}")
         return {"message": f"Error occurred while deleting map analyses: {str(e)}"}
@@ -347,10 +347,9 @@ def delete_map_analysis_objects(request, payload: DeleteAnalysesIn):
 @api.delete("/series_analyses")
 def delete_series_analysis_objects(request, payload: DeleteAnalysesIn):
     try:
-        valid_ids = [int(series_id) for series_id in payload.ids if series_id.isdigit()]
-        response = delete_series_analyses(valid_ids)
+        response = delete_series_analyses(payload.ids)
 
-        return {"status": str(response.status), "count": str(response.count)}
+        return {"status": str(response['status']), "count": str(response['count'])}
     except Exception as e:
         logger.error(f"Error deleting series analyses: {e}")
         return {"message": f"Error occurred while deleting series analyses: {str(e)}"}
@@ -358,37 +357,36 @@ def delete_series_analysis_objects(request, payload: DeleteAnalysesIn):
 @api.delete("/custom_analyses")
 def delete_custom_analysis_objects(request, payload: DeleteAnalysesIn):
     try:
-        valid_ids = [int(custom_id) for custom_id in payload.ids if custom_id.isdigit()]
-        response = delete_custom_analyses(valid_ids)
+        response = delete_custom_analyses(payload.ids)
 
-        return {"status": str(response.status), "count": str(response.count)}
+        return {"status": str(response['status']), "count": str(response['count'])}
     except Exception as e:
         logger.error(f"Error deleting custom analyses: {e}")
         return {"message": f"Error occurred while deleting custom analyses: {str(e)}"}
 
 @api.delete("/map_analysis")
-def delete_map_analysis_object(request, map_analysis_id):
+def delete_map_analysis_object(request, payload: DeleteAnalysisIn):
     try:
-        response = delete_map_analysis(map_analysis_id)
-        return {"status": str(response.status)}
+        response = delete_map_analysis(payload.id)
+        return {"status": str(response)}
     except Exception as e:
         logger.error(f"Error deleting map analysis: {e}")
         raise HttpError(400, f"Error occurred while deleting map analysis: {str(e)}")
 
 @api.delete("/series_analysis")
-def delete_series_analysis_object(request, series_analysis_id):
+def delete_series_analysis_object(request, payload: DeleteAnalysisIn):
     try:
-        response = delete_series_analysis(series_analysis_id)
-        return {"status": str(response.status)}
+        response = delete_series_analysis(payload.id)
+        return {"status": str(response)}
     except Exception as e:
         logger.error(f"Error deleting series analysis: {e}")
         raise HttpError(400, f"Error occurred while deleting series analysis: {str(e)}")
 
 @api.delete("/custom_analysis")
-def delete_custom_analysis_object(request, custom_analysis_id):
+def delete_custom_analysis_object(request, payload: DeleteAnalysisIn):
     try:
-        response = delete_custom_analysis(custom_analysis_id)
-        return {"status": str(response.status)}
+        response = delete_custom_analysis(payload.id)
+        return {"status": str(response)}
     except Exception as e:
         logger.error(f"Error deleting custom analysis: {e}")
         raise HttpError(400, f"Error occurred while deleting custom analysis: {str(e)}")

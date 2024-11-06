@@ -24,15 +24,15 @@ export default function Navbar() {
               Public
             </span>
           </Link>
-          <Link href="/private">
+          <Link href="/custom">
             <span
               className={`font-bold transition-colors hover:text-primary ${
-                pathname === "/private"
+                pathname === "/custom"
                   ? "text-primary underline"
                   : "text-muted-foreground"
               }`}
             >
-              Private
+              Custom
             </span>
           </Link>
         </nav>

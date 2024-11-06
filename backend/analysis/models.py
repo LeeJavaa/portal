@@ -47,12 +47,30 @@ class MapAnalysis(models.Model):
     def __str__(self):
         return self.title
 
+    def delete(self, *args, **kwargs):
+        custom_analyses = CustomAnalysis.objects.filter(
+            map_analyses__id=self.id
+        )
+        custom_analyses.delete()
+
+        if self.series_analysis:
+            series = self.series_analysis
+            self.series_analysis = None
+            self.save()
+            series.delete()
+
+        super().delete(*args, **kwargs)
+
 class CustomAnalysis(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
     title = models.CharField(max_length=50)
     thumbnail = models.CharField(max_length=100, null=True, blank=True)
-    map_analyses = models.ManyToManyField(MapAnalysis, through='CustomAnalysisMapAnalysis')
+    map_analyses = models.ManyToManyField(
+        MapAnalysis,
+        through='CustomAnalysisMapAnalysis',
+        related_name='custom_analyses'
+    )
 
     def __str__(self):
         return self.title
