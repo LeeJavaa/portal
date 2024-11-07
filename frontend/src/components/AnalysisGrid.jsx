@@ -11,19 +11,15 @@ export default function AnalysisGrid({
   toggleAnalysisSelection,
 }) {
   const renderAnalysisBlock = (analysis) => {
-    const commonProps = {
-      key: analysis.id,
-      analysis: analysis,
-    };
-
     if (showCustoms) {
-      return <CustomAnalysisBlock {...commonProps} />;
+      return <CustomAnalysisBlock key={analysis.id} analysis={analysis} />;
     }
 
     if (showSeries) {
       return (
         <SeriesAnalysisBlock
-          {...commonProps}
+          key={analysis.id}
+          analysis={analysis}
           selectionMode={selectionMode}
           isSelected={selectedAnalyses.some((a) => a.id === analysis.id)}
           onSelect={() => toggleAnalysisSelection(analysis)}
@@ -33,7 +29,8 @@ export default function AnalysisGrid({
 
     return (
       <MapAnalysisBlock
-        {...commonProps}
+        key={analysis.id}
+        analysis={analysis}
         selectionMode={selectionMode}
         isSelected={selectedAnalyses.some((a) => a.id === analysis.id)}
         onSelect={() => toggleAnalysisSelection(analysis)}
