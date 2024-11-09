@@ -61,7 +61,7 @@ class CustomAnalysisIn(Schema):
     series_ids: List[int] = []
 
 class MapAnalysesFilterIn(Schema):
-    tournament: Optional[str] = None
+    tournament: Optional[int] = None
     game_mode: Optional[str] = None
     map: Optional[str] = None
     team_one: Optional[str] = None
@@ -69,7 +69,7 @@ class MapAnalysesFilterIn(Schema):
     player: Optional[str] = None
 
 class SeriesAnalysesFilterIn(Schema):
-    tournament: Optional[str] = None
+    tournament: Optional[int] = None
     team_one: Optional[str] = None
     team_two: Optional[str] = None
     player: Optional[str] = None
@@ -277,31 +277,28 @@ def create_custom_analysis_object_from_series(request, payload: CustomAnalysisIn
         logger.error(f"Error creating custom analysis: {e}")
         return {"error": f"Error occurred while creating custom analysis: {str(e)}"}, 400
 
-@api.get("/map_analyses", response=MapAnalysesOut)
+@api.get("/map_analyses")
 def get_map_analyses(request, payload: MapAnalysesFilterIn):
     try:
-        map_analyses = generate_map_analyses_response(payload)
-        result = [MapAnalysisCompressedOut(**map_analysis) for map_analysis in map_analyses]
+        result = generate_map_analyses_response(payload)
         return {"map_analyses": result}
     except Exception as e:
         logger.error(f"Error fetching map analyses: {e}")
         return Response({"error": str(e)}, status=500)
 
-@api.get("/series_analyses", response=SeriesAnalysesOut)
+@api.get("/series_analyses")
 def get_series_analyses(request, payload: SeriesAnalysesFilterIn):
     try:
-        series_analyses = generate_series_analyses_response(payload)
-        result = [SeriesAnalysisCompressedOut(**series_analysis) for series_analysis in series_analyses]
+        result = generate_series_analyses_response(payload)
         return {"series_analyses": result }
     except Exception as e:
         logger.error(f"Error fetching series analyses: {e}")
         return Response({"error": str(e)}, status=500)
 
-@api.get("/custom_analyses", response=CustomAnalysesOut)
+@api.get("/custom_analyses")
 def get_custom_analyses(request):
     try:
-        custom_analyses = generate_custom_analyses_response()
-        result = [CustomAnalysesCompressedOut(**custom_analysis) for custom_analysis in custom_analyses]
+        result = generate_custom_analyses_response()
         return {"custom_analyses": result}
     except Exception as e:
         logger.error(f"Error getting custom analyses: {e}")
