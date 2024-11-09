@@ -1,6 +1,6 @@
-from datetime import datetime
 from typing import Dict, Any
 
+import logging
 from analysis.models import (
     CustomAnalysis,
     CustomAnalysisMapAnalysis,
@@ -18,6 +18,8 @@ from django.db import transaction
 from django.utils import timezone
 from general.models import GameMode, Map, Player, Team, Tournament
 from utils.analysis_handling import parse_kd, parse_time_to_seconds
+
+logger = logging.getLogger('gunicorn.error')
 
 def create_map_analysis(payload: Dict[str, Any]) -> int:
     """
@@ -136,10 +138,13 @@ def create_map_analysis(payload: Dict[str, Any]) -> int:
 
         return map_analysis.id
     except ValidationError as e:
+        logger.error(f"Error creating map analysis: {str(e)}")
         raise ValidationError(f"Validation error: {str(e)}")
     except ObjectDoesNotExist as e:
+        logger.error(f"Object {str(e)} does not exist when creating map analysis")
         raise ObjectDoesNotExist(f"Object not found: {str(e)}")
     except Exception as e:
+        logger.error(f"Unexpected error creating map analysis: {str(e)}")
         raise Exception(f"Unexpected error creating map analysis: {str(e)}")
 
 def create_series_analysis(map_ids, title):
@@ -265,9 +270,11 @@ def create_series_analysis(map_ids, title):
 
             return series_analysis
 
-    except ValidationError:
+    except ValidationError as e:
+        logger.error(f"Error creating series analysis: {str(e)}")
         raise
     except Exception as e:
+        logger.error(f"Unexpected error creating series analysis: {str(e)}")
         raise ValidationError(f"Error creating series analysis: {str(e)}")
 
 def create_custom_analysis_from_maps(title, map_ids):
@@ -349,9 +356,11 @@ def create_custom_analysis_from_maps(title, map_ids):
             PlayerCustomAnalysisPerformance.objects.bulk_create(player_performances)
 
             return custom_analysis
-    except ValidationError:
+    except ValidationError as e:
+        logger.error(f"Error creating custom analysis from maps: {str(e)}")
         raise
     except Exception as e:
+        logger.error(f"Unexpected error creating custom analysis from maps: {str(e)}")
         raise ValidationError(f"Error creating custom analysis: {str(e)}")
 
 def create_custom_analysis_from_series(title, series_ids):
@@ -382,9 +391,11 @@ def create_custom_analysis_from_series(title, series_ids):
             raise ValidationError("No maps found in the provided series")
 
         return create_custom_analysis_from_maps(title, map_ids)
-    except ValidationError:
+    except ValidationError as e:
+            logger.error(f"Error creating custom analysis from series: {str(e)}")
             raise
     except Exception as e:
+        logger.error(f"Unexpected error creating custom analysis from series: {str(e)}")
         raise ValidationError(f"Error creating custom analysis from series: {str(e)}")
 
 def delete_map_analyses(map_analyses_ids):
@@ -424,9 +435,11 @@ def delete_map_analyses(map_analyses_ids):
             "status": 'success',
             "count": successful_deletions
         }
-    except ValidationError:
+    except ValidationError as e:
+        logger.error(f"Error during bulk map analyses deletion: {str(e)}")
         raise
     except Exception as e:
+        logger.error(f"Unexpected error during bulk map analyses deletion: {str(e)}")
         raise ValidationError(f"Error during bulk map analyses deletion: {str(e)}")
 
 def delete_series_analyses(series_analyses_ids):
@@ -466,9 +479,11 @@ def delete_series_analyses(series_analyses_ids):
             "status": 'success',
             "count": successful_deletions
         }
-    except ValidationError:
+    except ValidationError as e:
+        logger.error(f"Error during bulk series analyses deletion: {str(e)}")
         raise
     except Exception as e:
+        logger.error(f"Unexpected error during bulk series analyses deletion: {str(e)}")
         raise ValidationError(f"Error during bulk series analyses deletion: {str(e)}")
 
 def delete_custom_analyses(custom_analyses_ids):
@@ -508,9 +523,11 @@ def delete_custom_analyses(custom_analyses_ids):
             "status": 'success',
             "count": successful_deletions
         }
-    except ValidationError:
+    except ValidationError as e:
+        logger.error(f"Error during bulk custom analyses deletion: {str(e)}")
         raise
     except Exception as e:
+        logger.error(f"Unexpected error during bulk custom analyses deletion: {str(e)}")
         raise ValidationError(f"Error during bulk custom analyses deletion: {str(e)}")
 
 def delete_map_analysis(map_analysis_id):
@@ -532,9 +549,11 @@ def delete_map_analysis(map_analysis_id):
 
         map_analysis.delete()
         return "success"
-    except ValidationError:
+    except ValidationError as e:
+        logger.error(f"Error during map analysis deletion: {str(e)}")
         raise
     except Exception as e:
+        logger.error(f"Unexpected error during map analysis deletion: {str(e)}")
         raise ValidationError(f"Error deleting map analysis: {str(e)}")
 
 def delete_series_analysis(series_analysis_id):
@@ -556,9 +575,11 @@ def delete_series_analysis(series_analysis_id):
 
         series_analysis.delete()
         return "success"
-    except ValidationError:
+    except ValidationError as e:
+        logger.error(f"Error during series analysis deletion: {str(e)}")
         raise
     except Exception as e:
+        logger.error(f"Unexpected error during series analysis deletion: {str(e)}")
         raise ValidationError(f"Error deleting series analysis: {str(e)}")
 
 def delete_custom_analysis(custom_analysis_id):
@@ -580,7 +601,9 @@ def delete_custom_analysis(custom_analysis_id):
 
         custom_analysis.delete()
         return "success"
-    except ValidationError:
+    except ValidationError as e:
+        logger.error(f"Error during series analysis deletion: {str(e)}")
         raise
     except Exception as e:
+        logger.error(f"Unexpected error during series analysis deletion: {str(e)}")
         raise ValidationError(f"Error deleting custom analysis: {str(e)}")
