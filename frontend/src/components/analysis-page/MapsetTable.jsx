@@ -36,9 +36,9 @@ const MapsetTable = () => {
 
   return (
     <div className="w-full">
-      <Table className="border-t border-gray-200">
+      <Table className="border-t border-border">
         <TableHeader>
-          <TableRow className="border-b border-gray-200">
+          <TableRow className="border-b border-border">
             <TableHead className="w-1/3">Tournaments</TableHead>
             <TableHead className="w-1/3">Series</TableHead>
             <TableHead className="w-1/3">Maps</TableHead>
@@ -55,9 +55,8 @@ const MapsetTable = () => {
                       border-0
                       ${
                         sIndex === tournament.series.length - 1 &&
-                        mIndex === series.maps.length - 1 &&
-                        tIndex !== data.length - 1
-                          ? "border-b border-gray-200"
+                        mIndex === series.maps.length - 1
+                          ? "border-b border-border"
                           : ""
                       }
                     `}

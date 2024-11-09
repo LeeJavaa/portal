@@ -27,7 +27,7 @@ export default function Page() {
         OpTic vs NYSL Champs GF
       </h1>
       <MapsetTable />
-      <Separator className="mt-8" />
+      <Separator />
       <FilterBar mapAnalysis={false} />
       <DataVis
         playerPerformanceData={playerPerformanceData}
