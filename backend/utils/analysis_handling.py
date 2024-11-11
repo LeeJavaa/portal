@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Tuple
 
 def parse_kd(kd_string: str) -> Tuple[int, int]:
@@ -38,3 +39,16 @@ def parse_time_to_seconds(time_str: str) -> int:
         return minutes * 60 + seconds
     except ValueError:
         raise ValueError(f"Invalid time format: {time_str}. Expected format: 'minutes:seconds'")
+
+def parse_seconds_to_time(seconds: int) -> str:
+    """
+    Convert seconds to time string in format "1:23"
+
+    Args:
+        seconds (int): Total seconds
+
+    Returns:
+       time_str (str): Time in format "minutes:seconds"
+    """
+    time = str(timedelta(seconds=seconds))
+    return ":".join(time.split(":")[-2:])
