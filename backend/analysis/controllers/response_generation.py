@@ -2,10 +2,20 @@ from datetime import datetime
 from typing import List, Dict
 
 import logging
-from analysis.models import MapAnalysis, CustomAnalysis, SeriesAnalysis
-from django.core.exceptions import ValidationError
+from analysis.models import (
+    MapAnalysis,
+    CustomAnalysis,
+    PlayerCustomAnalysisPerformance,
+    PlayerMapPerformance,
+    PlayerMapPerformanceControl,
+    PlayerMapPerformanceHP,
+    PlayerMapPerformanceSND,
+    PlayerSeriesPerformance,
+    SeriesAnalysis
+)
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import Prefetch, Q
-from general.models import Tournament
+from utils.analysis_handling import parse_seconds_to_time
 
 logger = logging.getLogger('gunicorn.error')
 
@@ -239,7 +249,68 @@ def generate_map_analysis_response(filter_payload):
     raises:
         -
     """
-    pass
+    try:
+        try:
+            map_analysis = MapAnalysis.objects.get(id=filter_payload.id)
+        except ObjectDoesNotExist:
+            raise
+
+        all_performances = PlayerMapPerformance.objects.filter(
+            map_analysis=map_analysis
+        ).select_related(
+            'player',
+            'player__team',
+            'playermapperformancehp',
+            'playermapperformancesnd',
+            'playermapperformancecontrol'
+        )
+
+        filtered_performances = all_performances
+        if filter_payload.team:
+            filtered_performances = filtered_performances.filter(player__team__code=filter_payload.team)
+        if filter_payload.players:
+            filtered_performances = filtered_performances.filter(player__gamertag_clean__in=filter_payload.players)
+
+        all_sorted_performances = process_performances(map_analysis, all_performances)
+        player_performance_data = {}
+        for performance in all_sorted_performances:
+            player_performance_data[performance.player.gamertag_clean] = create_map_performance_dict(map_analysis, performance)
+
+        response = {
+            "id": map_analysis.id,
+            "created": map_analysis.created,
+            "lastModified": map_analysis.last_modified,
+            "tournament": map_analysis.tournament.id,
+            "seriesAnalysis": map_analysis.series_analysis.id if map_analysis.series_analysis else None,
+            "title": map_analysis.title,
+            "thumbnail": map_analysis.thumbnail,
+            "screenshot": map_analysis.screenshot,
+            "teamOne": map_analysis.team_one.name,
+            "teamTwo": map_analysis.team_two.name,
+            "teamOneScore": map_analysis.team_one_score,
+            "teamTwoScore": map_analysis.team_two_score,
+            "winner": map_analysis.winner.name,
+            "playedDate": map_analysis.played_date,
+            "map": map_analysis.map.name,
+            "gameMode": map_analysis.game_mode.name,
+            "playerPerformanceData": player_performance_data
+        }
+
+        if filter_payload.team or filter_payload.players:
+            filtered_sorted_performances = process_performances(map_analysis, filtered_performances)
+            filtered_player_performance_data = {}
+            for performance in filtered_sorted_performances:
+                filtered_player_performance_data[performance.player.gamertag_clean] = create_map_performance_dict(
+                    map_analysis, performance)
+            response["filteredPlayerPerformanceData"] = filtered_player_performance_data
+
+        return response
+    except ValidationError as ve:
+        logger.error(f"Validation error in generate_map_analysis_response: {ve}")
+        raise ValidationError(f"Invalid data: {str(ve)}")
+    except Exception as e:
+        logger.error(f"Unexpected error in generate_map_analysis_response: {e}")
+        raise Exception(f"Error processing map analysis: {str(e)}")
 
 def generate_series_analysis_response(filter_payload):
     """
@@ -253,7 +324,62 @@ def generate_series_analysis_response(filter_payload):
     raises:
         -
     """
-    pass
+    try:
+        try:
+            series_analysis = SeriesAnalysis.objects.get(id=filter_payload.id)
+        except ObjectDoesNotExist:
+            raise
+
+        all_performances = PlayerSeriesPerformance.objects.filter(
+            series_analysis=series_analysis
+        ).select_related(
+            'player',
+            'player__team'
+        )
+
+        filtered_performances = all_performances
+        if filter_payload.team:
+            filtered_performances = filtered_performances.filter(player__team__code=filter_payload.team)
+        if filter_payload.players:
+            filtered_performances = filtered_performances.filter(player__gamertag_clean__in=filter_payload.players)
+
+        all_sorted_performances = process_performances(series_analysis, all_performances)
+        player_performance_data = {}
+        for performance in all_sorted_performances:
+            player_performance_data[performance.player.gamertag_clean] = create_general_performance_dict(performance)
+
+        response = {
+            "id": series_analysis.id,
+            "created": series_analysis.created,
+            "lastModified": series_analysis.last_modified,
+            "tournament": series_analysis.tournament.id,
+            "title": series_analysis.title,
+            "thumbnail": series_analysis.thumbnail,
+            "winner": series_analysis.winner.name,
+            "playedDate": series_analysis.played_date,
+            "teamOne": series_analysis.team_one.name,
+            "teamTwo": series_analysis.team_two.name,
+            "teamOneMapCount": series_analysis.team_one_map_count,
+            "teamTwoMapCount": series_analysis.team_two_map_count,
+            "playerPerformanceData": player_performance_data
+        }
+
+        if filter_payload.team or filter_payload.players:
+            filtered_sorted_performances = process_performances(series_analysis, filtered_performances)
+            filtered_player_performance_data = {}
+            for performance in filtered_sorted_performances:
+                filtered_player_performance_data[performance.player.gamertag_clean] = create_general_performance_dict(
+                    series_analysis, performance
+                )
+            response["filteredPlayerPerformanceData"] = filtered_player_performance_data
+
+        return response
+    except ValidationError as ve:
+        logger.error(f"Validation error in generate_series_analysis_response: {ve}")
+        raise ValidationError(f"Invalid data: {str(ve)}")
+    except Exception as e:
+        logger.error(f"Unexpected error in generate_series_analysis_response: {e}")
+        raise Exception(f"Error processing series analysis: {str(e)}")
 
 def generate_custom_analysis_response(filter_payload):
     """
@@ -267,4 +393,256 @@ def generate_custom_analysis_response(filter_payload):
     raises:
         -
     """
-    pass
+    try:
+        try:
+            custom_analysis = CustomAnalysis.objects.get(id=filter_payload.id)
+        except ObjectDoesNotExist:
+            raise
+
+        all_performances = PlayerCustomAnalysisPerformance.objects.filter(
+            custom_analysis=custom_analysis
+        ).select_related(
+            'player',
+            'player__team'
+        )
+
+        filtered_performances = all_performances
+        if filter_payload.team:
+            filtered_performances = filtered_performances.filter(player__team__code=filter_payload.team)
+        if filter_payload.players:
+            filtered_performances = filtered_performances.filter(player__gamertag_clean__in=filter_payload.players)
+
+        all_sorted_performances = sorted(all_performances, key=lambda x: x.player.gamertag_clean)
+        player_performance_data = {}
+        for performance in all_sorted_performances:
+            player_performance_data[performance.player.gamertag_clean] = create_general_performance_dict(performance)
+
+        response = {
+            "id": custom_analysis.id,
+            "created": custom_analysis.created,
+            "lastModified": custom_analysis.last_modified,
+            "title": custom_analysis.title,
+            "thumbnail": custom_analysis.thumbnail,
+            "mapset": build_mapset_structure(custom_analysis),
+            "playerPerformanceData": player_performance_data
+        }
+
+        if filter_payload.team or filter_payload.players:
+            filtered_sorted_performances = sorted(filtered_performances, key=lambda x: x.player.gamertag_clean)
+            filtered_player_performance_data = {}
+            for performance in filtered_sorted_performances:
+                filtered_player_performance_data[performance.player.gamertag_clean] = create_general_performance_dict(
+                    performance
+                )
+            response["filteredPlayerPerformanceData"] = filtered_player_performance_data
+
+        return response
+    except ValidationError as ve:
+        logger.error(f"Validation error in generate_custom_analysis_response: {ve}")
+        raise ValidationError(f"Invalid data: {str(ve)}")
+    except Exception as e:
+        logger.error(f"Unexpected error in generate_custom_analysis_response: {e}")
+        raise Exception(f"Error processing custom analysis: {str(e)}")
+
+
+def process_performances(analysis, performances):
+    """
+        This processes and sorts player performances by team and player name.
+
+        args:
+            - analysis [MapAnalysis, SeriesAnalysis, CustomAnalysis]: The analysis object containing team information
+            - performances [QuerySet]: QuerySet of Performance objects to be processed
+        returns:
+            - sorted_performances [List]: A list of performances sorted by team (team one first) and player name
+        raises:
+            - ValidationError: If invalid team assignments are found
+            - Exception: For unexpected errors during processing
+    """
+    try:
+        team_one_performances = []
+        team_two_performances = []
+
+        for performance in performances:
+            if performance.player.team_id == analysis.team_one_id:
+                team_one_performances.append(performance)
+            elif performance.player.team_id == analysis.team_two_id:
+                team_two_performances.append(performance)
+            else:
+                continue
+
+        team_one_performances.sort(key=lambda x: x.player.gamertag_clean)
+        team_two_performances.sort(key=lambda x: x.player.gamertag_clean)
+
+        return team_one_performances + team_two_performances
+    except Exception as e:
+        logger.error(f"Unexpected error in process_performances: {e}")
+        raise Exception(f"Error processing player performances: {str(e)}")
+
+def create_map_performance_dict(map_analysis, performance):
+    """
+        This creates a dictionary containing all performance statistics for a player in a map.
+
+        args:
+            - map_analysis [MapAnalysis]: The map analysis object containing game mode information
+            - performance [PlayerMapPerformance]: The performance object containing player statistics
+        returns:
+            - performance_dict [Dict]: Dictionary containing all relevant performance statistics
+        raises:
+            - ValidationError: If required performance data is missing or invalid
+            - GameModeError: If game mode specific data is invalid
+            - Exception: For unexpected errors during processing
+    """
+    try:
+        perf_dict = {
+            "kills": performance.kills,
+            "deaths": performance.deaths,
+            "kdRatio": performance.kd_ratio,
+            "assists": performance.assists,
+            "ntk": performance.ntk
+        }
+
+        game_mode = map_analysis.game_mode.code
+        if game_mode == 'hp':
+            if not hasattr(performance, 'playermapperformancehp'):
+                raise ValidationError("Missing Hardpoint performance data")
+
+            hp_stats = performance.playermapperformancehp
+            perf_dict.update({
+                "dmg": hp_stats.damage,
+                "ht": parse_seconds_to_time(hp_stats.hill_time),
+                "avgHt": parse_seconds_to_time(hp_stats.average_hill_time),
+                "objKills": hp_stats.objective_kills,
+                "contHt": parse_seconds_to_time(hp_stats.contested_hill_time),
+                "kph": round(hp_stats.kills_per_hill, 2),
+                "dph": round(hp_stats.damage_per_hill, 2)
+            })
+        elif game_mode == 'snd':
+            if not hasattr(performance, 'playermapperformancesnd'):
+                raise ValidationError("Missing Search and Destroy performance data")
+
+            snd_stats = performance.playermapperformancesnd
+            perf_dict.update({
+                "bombsPlanted": snd_stats.bombs_planted,
+                "bombsDefused": snd_stats.bombs_defused,
+                "firstBloods": snd_stats.first_bloods,
+                "firstDeaths": snd_stats.first_deaths,
+                "kpr": round(snd_stats.kills_per_round, 2),
+                "dpr": round(snd_stats.damage_per_round, 2)
+            })
+        elif game_mode == 'ctrl':
+            if not hasattr(performance, 'playermapperformancecontrol'):
+                raise ValidationError("Missing Control performance data")
+
+            ctrl_stats = performance.playermapperformancecontrol
+            perf_dict.update({
+                "tiersCaptured": ctrl_stats.tiers_captured,
+                "objKills": ctrl_stats.objective_kills,
+                "offenseKills": ctrl_stats.offense_kills,
+                "defenseKills": ctrl_stats.defense_kills,
+                "kpr": round(ctrl_stats.kills_per_round, 2),
+                "dpr": round(ctrl_stats.damage_per_round, 2)
+            })
+
+        return perf_dict
+    except ValidationError as ve:
+        logger.error(f"Validation error in generate_map_analysis_response: {str(ve)}")
+        raise Exception(f"Validation error creating performance dictionary: {str(ve)}")
+    except Exception as e:
+        logger.error(f"Unexpected error in create_performance_dict: {e}")
+        raise Exception(f"Error creating performance dictionary: {str(e)}")
+
+def create_general_performance_dict(performance):
+    """
+    This creates a dictionary containing all performance statistics for a player in a series or custom analysis.
+
+    args:
+        - analysis [SeriesAnalysis or CustomAnalysis]: The analysis object containing series information
+        - performance [Series or Custom Performance]: The performance object containing player statistics
+    returns:
+        - performance_dict [Dict]: Dictionary containing all relevant performance statistics
+    raises:
+        - ValidationError: If required performance data is missing or invalid
+        - Exception: For unexpected errors during processing
+    """
+    try:
+        if hasattr(performance, 'series_kd_ratio'):
+            kd_ratio = performance.series_kd_ratio
+        elif hasattr(performance, 'custom_analysis_kd_ratio'):
+            kd_ratio = performance.custom_analysis_kd_ratio
+        else:
+            raise ValidationError("Missing KD ratio field")
+
+        perf_dict = {
+            "totalKills": performance.total_kills,
+            "totalDeaths": performance.total_deaths,
+            "kdRatio": kd_ratio,
+            "totalAssists": performance.total_assists,
+            "totalNtk": performance.total_ntk
+        }
+
+        return perf_dict
+    except ValidationError as ve:
+        logger.error(f"Validation error in create_general_performance_dict: {str(ve)}")
+        raise ValidationError(f"Validation error creating performance dictionary: {str(ve)}")
+    except Exception as e:
+        logger.error(f"Unexpected error in create_general_performance_dict: {e}")
+        raise Exception(f"Error creating performance dictionary: {str(e)}")
+
+def build_mapset_structure(custom_analysis):
+    """
+    This builds the hierarchical mapset structure for a custom analysis.
+
+    args:
+        - custom_analysis [CustomAnalysis]: The custom analysis object containing the map analyses
+    returns:
+        - mapset [Dict]: Dictionary containing the hierarchical tournament-series-map structure
+    raises:
+        - ValidationError: If required relationships are missing
+        - Exception: For unexpected errors during processing
+    """
+    try:
+        map_analyses = MapAnalysis.objects.filter(
+            customanalysismapanalysis__custom_analysis=custom_analysis
+        ).select_related(
+            'tournament',
+            'series_analysis'
+        ).order_by('-played_date')
+
+        tournaments_dict = {}
+        for map_analysis in map_analyses:
+            tournament = map_analysis.tournament
+            series = map_analysis.series_analysis
+
+            if tournament.id not in tournaments_dict:
+                tournaments_dict[tournament.id] = {
+                    "id": tournament.id,
+                    "title": tournament.title,
+                    "series": {}
+                }
+
+            series_id = series.id if series else 'no_series'
+            if series_id not in tournaments_dict[tournament.id]["series"]:
+                tournaments_dict[tournament.id]["series"][series_id] = {
+                    "id": series.id if series else None,
+                    "title": series.title if series else None,
+                    "maps": []
+                }
+
+            tournaments_dict[tournament.id]["series"][series_id]["maps"].append({
+                "id": map_analysis.id,
+                "title": map_analysis.title
+            })
+
+        tournaments_list = []
+        for tournament_id, tournament_data in tournaments_dict.items():
+            series_list = []
+            for series_id, series_data in tournament_data["series"].items():
+                series_list.append(series_data)
+
+            tournament_data["series"] = sorted(series_list, key=lambda x: x["id"] if x["id"] else 0)
+            tournaments_list.append(tournament_data)
+
+        return {"tournaments": sorted(tournaments_list, key=lambda x: x["id"])}
+    except Exception as e:
+        logger.error(f"Unexpected error in build_mapset_structure: {e}")
+        raise Exception(f"Error building mapset structure: {str(e)}")

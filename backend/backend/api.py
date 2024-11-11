@@ -75,85 +75,9 @@ class SeriesAnalysesFilterIn(Schema):
     player: Optional[str] = None
 
 class AnalysisFilterIn(Schema):
-    id: str
+    id: int
     team: Optional[str] = None
-    player: Optional[str] = None
-
-class MapAnalysisCompressedOut(Schema):
-    id: int
-    played_date: str
-    tournament: str
-    thumbnail: str
-    series: Optional[str]
-    title: str
-    team_one: str
-    team_two: str
-
-class SeriesAnalysisCompressedOut(Schema):
-    id: int
-    played_date: str
-    tournament: str
-    thumbnail: str
-    title: str
-    team_one: str
-    team_two: str
-
-class CustomAnalysesCompressedOut(Schema):
-    id: int
-    played_date: str
-    thumbnail: str
-    title: str
-
-class MapAnalysesOut(Schema):
-    map_analyses: List[MapAnalysisCompressedOut]
-
-class SeriesAnalysesOut(Schema):
-    series_analyses: List[SeriesAnalysisCompressedOut]
-
-class CustomAnalysesOut(Schema):
-    custom_analyses: List[CustomAnalysesCompressedOut]
-
-class MapAnalysisOut(Schema):
-    title: str
-    played_date: str
-    team_one: str
-    team_two: str
-    team_one_score: int
-    team_two_score: int
-    winner: str
-    tournament: str
-    series: Optional[str]
-    scoreboard_file_name: str
-    map: str
-    game_mode: str
-    player_stats: Dict[str, Dict[str, Any]]
-
-class SeriesAnalysisOut(Schema):
-    title: str
-    played_date: str
-    team_one: str
-    team_two: str
-    team_one_mc: int
-    team_two_mc: int
-    winner: str
-    tournament: str
-    maps: List[MapAnalysisCompressedOut]
-    player_stats: Dict[str, Dict[str, Any]]
-
-class CustomAnalysisOut(Schema):
-    title: str
-    maps: List[MapAnalysisCompressedOut]
-    teams_list: List[str]
-    player_stats: Dict[str, Dict[str, Any]]
-
-class MapAnalysisIncompleteOut(Schema):
-    team_one: List[str]  # [value, confidence]
-    team_two: List[str]
-    team_one_score: List[int]
-    team_two_score: List[int]
-    game_mode: List[str]
-    map_name: List[str]
-    player_stats: Dict[str, Dict[str, List[Any]]]
+    players: Optional[List[str]] = None
 
 class DeleteAnalysesIn(Schema):
     ids: List[int]
@@ -304,29 +228,29 @@ def get_custom_analyses(request):
         logger.error(f"Error getting custom analyses: {e}")
         return {"error": f"Error occurred while getting custom analyses: {str(e)}"}, 400
 
-@api.get("/map_analysis", response=MapAnalysisOut)
+@api.get("/map_analysis")
 def get_map_analysis(request, payload: AnalysisFilterIn):
     try:
-        map_analysis = generate_map_analysis_response(payload)
-        return {"map_analysis": MapAnalysisOut(**map_analysis)}
+        result = generate_map_analysis_response(payload)
+        return {"map_analysis": result}
     except Exception as e:
         logger.error(f"Error getting map analysis: {e}")
         raise HttpError(400, f"Error occurred while getting map analysis: {str(e)}")
 
-@api.get("/series_analysis", response=SeriesAnalysisOut)
+@api.get("/series_analysis")
 def get_series_analysis(request, payload: AnalysisFilterIn):
     try:
-        series_analysis = generate_series_analysis_response(payload)
-        return {"series_analysis": SeriesAnalysisOut(**series_analysis)}
+        result = generate_series_analysis_response(payload)
+        return {"series_analysis": result}
     except Exception as e:
         logger.error(f"Error getting series analysis: {e}")
         raise HttpError(400, f"Error occurred while getting series analysis: {str(e)}")
 
-@api.get("/custom_analysis", response=CustomAnalysisOut)
+@api.get("/custom_analysis")
 def get_custom_analysis(request, payload: AnalysisFilterIn):
     try:
-        custom_analysis = generate_custom_analysis_response(payload)
-        return {"custom_analysis": CustomAnalysisOut(**custom_analysis)}
+        result = generate_custom_analysis_response(payload)
+        return {"custom_analysis": result}
     except Exception as e:
         logger.error(f"Error getting custom analysis: {e}")
         raise HttpError(400, f"Error occurred while getting custom analysis: {str(e)}")
