@@ -20,7 +20,6 @@ def parse_kd(kd_string: str) -> Tuple[int, int]:
     except ValueError:
         raise ValueError(f"Invalid K/D format: {kd_string}. Expected format: 'kills/deaths'")
 
-
 def parse_time_to_seconds(time_str: str) -> int:
     """
     Convert time string in format "1:23" to seconds.

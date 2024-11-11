@@ -141,13 +141,15 @@ async def process_scoreboard_progress(request, task_id: str):
                     yield f"data: {json.dumps({'progress': progress_res.get('progress', 0)})}\n\n"
 
                 await asyncio.sleep(1)
-            except asyncio.CancelledError:
+            except asyncio.CancelledError as e:
+                error_message = f"Error checking progress for task {task_id}: {str(e)}"
                 logger.error(f"SSE connection for task {task_id} was cancelled")
+                yield f"data: {json.dumps({'error': error_message})}\n\n"
                 break
             except Exception as e:
                 error_message = f"Error checking progress for task {task_id}: {str(e)}"
                 logger.error(error_message)
-                yield f"event: error\ndata: {json.dumps({'error': error_message})}\n\n"
+                yield f"data: {json.dumps({'error': error_message})}\n\n"
                 break
     try:
         response = StreamingHttpResponse(
@@ -158,8 +160,9 @@ async def process_scoreboard_progress(request, task_id: str):
         response['X-Accel-Buffering'] = 'no'
         return response
     except Exception as e:
-        logger.error(f"Failed to create StreamingHttpResponse for task {task_id}: {str(e)}")
-        raise HttpError(500, "Internal server error")
+        error_message = f"Failed to create StreamingHttpResponse for task {task_id}: {str(e)}"
+        logger.error(error_message)
+        return {"error": error_message}, 500
 
 @api.post("/new_map_analysis_confirmation")
 def create_map_analysis_object(request, payload: MapAnalysisIn):
@@ -169,7 +172,7 @@ def create_map_analysis_object(request, payload: MapAnalysisIn):
         return {"id": map_analysis_id}
     except Exception as e:
         logger.error(f"Error creating map analysis: {e}")
-        return Response({"error": str(e)}, status=500)
+        return{"error": f"Error occurred while creating map analysis: {str(e)}"}, 500
 
 @api.post("/create_series_analysis")
 def create_series_analysis_object(request, payload: SeriesAnalysisIn):
@@ -179,7 +182,7 @@ def create_series_analysis_object(request, payload: SeriesAnalysisIn):
         return {"id": str(response.id)}
     except Exception as e:
         logger.error(f"Error creating series analysis: {e}")
-        return {"error": f"Error occurred while creating series analysis: {str(e)}"}, 400
+        return {"error": f"Error occurred while creating series analysis: {str(e)}"}, 500
 
 @api.post("/create_custom_analysis_from_maps")
 def create_custom_analysis_object_from_maps(request, payload: CustomAnalysisIn):
@@ -189,7 +192,7 @@ def create_custom_analysis_object_from_maps(request, payload: CustomAnalysisIn):
         return {"id": str(response.id)}
     except Exception as e:
         logger.error(f"Error creating custom analysis: {e}")
-        return {"error": f"Error occurred while creating custom analysis: {str(e)}"}, 400
+        return {"error": f"Error occurred while creating custom analysis: {str(e)}"}, 500
 
 @api.post("/create_custom_analysis_from_series")
 def create_custom_analysis_object_from_series(request, payload: CustomAnalysisIn):
@@ -199,7 +202,7 @@ def create_custom_analysis_object_from_series(request, payload: CustomAnalysisIn
         return {"id": str(response.id)}
     except Exception as e:
         logger.error(f"Error creating custom analysis: {e}")
-        return {"error": f"Error occurred while creating custom analysis: {str(e)}"}, 400
+        return {"error": f"Error occurred while creating custom analysis: {str(e)}"}, 500
 
 @api.get("/map_analyses")
 def get_map_analyses(request, payload: MapAnalysesFilterIn):
@@ -208,7 +211,7 @@ def get_map_analyses(request, payload: MapAnalysesFilterIn):
         return {"map_analyses": result}
     except Exception as e:
         logger.error(f"Error fetching map analyses: {e}")
-        return Response({"error": str(e)}, status=500)
+        return{"error": f"Error fetching map analyses: {str(e)}"}, 500
 
 @api.get("/series_analyses")
 def get_series_analyses(request, payload: SeriesAnalysesFilterIn):
@@ -217,7 +220,7 @@ def get_series_analyses(request, payload: SeriesAnalysesFilterIn):
         return {"series_analyses": result }
     except Exception as e:
         logger.error(f"Error fetching series analyses: {e}")
-        return Response({"error": str(e)}, status=500)
+        return {"error": f"Error fetching series analyses: {str(e)}"}, 500
 
 @api.get("/custom_analyses")
 def get_custom_analyses(request):
@@ -226,7 +229,7 @@ def get_custom_analyses(request):
         return {"custom_analyses": result}
     except Exception as e:
         logger.error(f"Error getting custom analyses: {e}")
-        return {"error": f"Error occurred while getting custom analyses: {str(e)}"}, 400
+        return {"error": f"Error fetching custom analyses: {str(e)}"}, 500
 
 @api.get("/map_analysis")
 def get_map_analysis(request, payload: AnalysisFilterIn):
@@ -235,7 +238,7 @@ def get_map_analysis(request, payload: AnalysisFilterIn):
         return {"map_analysis": result}
     except Exception as e:
         logger.error(f"Error getting map analysis: {e}")
-        raise HttpError(400, f"Error occurred while getting map analysis: {str(e)}")
+        return {"error": f"Error fetching map analysis: {str(e)}"}, 500
 
 @api.get("/series_analysis")
 def get_series_analysis(request, payload: AnalysisFilterIn):
@@ -244,7 +247,7 @@ def get_series_analysis(request, payload: AnalysisFilterIn):
         return {"series_analysis": result}
     except Exception as e:
         logger.error(f"Error getting series analysis: {e}")
-        raise HttpError(400, f"Error occurred while getting series analysis: {str(e)}")
+        return {"error": f"Error fetching series analysis: {str(e)}"}, 500
 
 @api.get("/custom_analysis")
 def get_custom_analysis(request, payload: AnalysisFilterIn):
@@ -253,37 +256,34 @@ def get_custom_analysis(request, payload: AnalysisFilterIn):
         return {"custom_analysis": result}
     except Exception as e:
         logger.error(f"Error getting custom analysis: {e}")
-        raise HttpError(400, f"Error occurred while getting custom analysis: {str(e)}")
+        return {"error": f"Error fetching custom analysis: {str(e)}"}, 500
 
 @api.delete("/map_analyses")
 def delete_map_analysis_objects(request, payload: DeleteAnalysesIn):
     try:
         response = delete_map_analyses(payload.ids)
-
         return {"status": str(response['status']), "count": str(response['count'])}
     except Exception as e:
         logger.error(f"Error deleting map analyses: {e}")
-        return {"message": f"Error occurred while deleting map analyses: {str(e)}"}
+        return {"error": f"Error deleting map analyses: {str(e)}"}, 500
 
 @api.delete("/series_analyses")
 def delete_series_analysis_objects(request, payload: DeleteAnalysesIn):
     try:
         response = delete_series_analyses(payload.ids)
-
         return {"status": str(response['status']), "count": str(response['count'])}
     except Exception as e:
         logger.error(f"Error deleting series analyses: {e}")
-        return {"message": f"Error occurred while deleting series analyses: {str(e)}"}
+        return {"error": f"Error deleting series analyses: {str(e)}"}, 500
 
 @api.delete("/custom_analyses")
 def delete_custom_analysis_objects(request, payload: DeleteAnalysesIn):
     try:
         response = delete_custom_analyses(payload.ids)
-
         return {"status": str(response['status']), "count": str(response['count'])}
     except Exception as e:
         logger.error(f"Error deleting custom analyses: {e}")
-        return {"message": f"Error occurred while deleting custom analyses: {str(e)}"}
+        return {"error": f"Error deleting custom analyses: {str(e)}"}, 500
 
 @api.delete("/map_analysis")
 def delete_map_analysis_object(request, payload: DeleteAnalysisIn):
@@ -292,7 +292,7 @@ def delete_map_analysis_object(request, payload: DeleteAnalysisIn):
         return {"status": str(response)}
     except Exception as e:
         logger.error(f"Error deleting map analysis: {e}")
-        raise HttpError(400, f"Error occurred while deleting map analysis: {str(e)}")
+        return {"error": f"Error deleting map analysis: {str(e)}"}, 500
 
 @api.delete("/series_analysis")
 def delete_series_analysis_object(request, payload: DeleteAnalysisIn):
@@ -301,7 +301,7 @@ def delete_series_analysis_object(request, payload: DeleteAnalysisIn):
         return {"status": str(response)}
     except Exception as e:
         logger.error(f"Error deleting series analysis: {e}")
-        raise HttpError(400, f"Error occurred while deleting series analysis: {str(e)}")
+        return {"error": f"Error deleting series analysis: {str(e)}"}, 500
 
 @api.delete("/custom_analysis")
 def delete_custom_analysis_object(request, payload: DeleteAnalysisIn):
@@ -310,4 +310,4 @@ def delete_custom_analysis_object(request, payload: DeleteAnalysisIn):
         return {"status": str(response)}
     except Exception as e:
         logger.error(f"Error deleting custom analysis: {e}")
-        raise HttpError(400, f"Error occurred while deleting custom analysis: {str(e)}")
+        return {"error": f"Error deleting custom analysis: {str(e)}"}, 500
