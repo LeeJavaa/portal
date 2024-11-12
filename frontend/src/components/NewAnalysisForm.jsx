@@ -35,6 +35,9 @@ export default function NewAnalysisForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  // Error messages
+  const [scoreboardUploadError, setScoreboardUploadError] = useState("");
+
   const form = useForm({
     resolver: zodResolver(analysisSchema),
     defaultValues: {
@@ -55,21 +58,52 @@ export default function NewAnalysisForm() {
     setScoreboard(null);
     setScoreboardProcessed(false);
     setFormStep(0);
-  }, [form, scoreboardProcessed, scoreboard]);
+    setScoreboardUploadError("");
+  }, [form, scoreboardProcessed, scoreboard, scoreboardUploadError]);
 
-  const handleScoreboardChange = (e) => {
+  const handleScoreboardChange = async (e) => {
     e.preventDefault();
     const scoreboardFile = e.target.files[0];
-    const allowedScoreboardFileTypes = ["image/jpeg", "image/png", "image/gif"];
 
-    if (
-      scoreboardFile &&
-      allowedScoreboardFileTypes.includes(scoreboardFile.type)
-    ) {
+    if (!scoreboardFile) return;
+
+    try {
+      await validateImage(scoreboardFile);
       setScoreboard(scoreboardFile);
-    } else {
+      setScoreboardUploadError("");
+    } catch (err) {
+      setScoreboardUploadError(err);
       setScoreboard(null);
+      e.target.value = "";
     }
+  };
+
+  const validateImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const allowedScoreboardFileTypes = ["image/jpeg", "image/png"];
+
+      if (!allowedScoreboardFileTypes.includes(file.type)) {
+        reject("Please upload a valid image file (JPEG or PNG)");
+        return;
+      }
+
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(img.src);
+        if (img.width === 1920 && img.height === 1080) {
+          resolve(file);
+        } else {
+          reject("Image must be exactly 1920x1080 pixels");
+        }
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src);
+        reject("Failed to load image");
+      };
+    });
   };
 
   const handleScoreboardProcessing = async () => {
@@ -116,6 +150,7 @@ export default function NewAnalysisForm() {
       ) {
         setConfirmCloseOpen(true);
       } else {
+        setScoreboardUploadError("");
         setModalOpen(open);
       }
     },
@@ -210,6 +245,7 @@ export default function NewAnalysisForm() {
             onChange={handleScoreboardChange}
             onProcess={handleScoreboardProcessing}
             isUploading={isScoreboardUploading}
+            error={scoreboardUploadError}
           />
         )}
         {formStep == 1 && !confirmCloseOpen && (

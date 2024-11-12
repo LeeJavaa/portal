@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
@@ -9,9 +10,16 @@ export default function UploadDisplay({
   onChange,
   onProcess,
   isUploading,
+  error,
 }) {
   return (
     <div className="flex flex-col items-center space-y-4">
+      {error && (
+        <Alert variant="destructive" className="w-full border-2 mb-2">
+          <AlertDescription className="font-medium">{error}</AlertDescription>
+        </Alert>
+      )}
+
       {!scoreboard ? (
         <ImageIcon className="h-24 w-24 text-muted-foreground" />
       ) : (
