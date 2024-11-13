@@ -83,3 +83,25 @@ export const initiateScoreboardProcessing = async (fileName) => {
     throw new Error("Failed to begin scoreboard processing. Please try again.");
   }
 };
+
+export const checkScoreboardProcessingStatus = async (taskId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/new_map_analysis_step_two?task_id=${encodeURIComponent(
+        taskId
+      )}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Status check failed: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    throw new Error("Failed to check processing status");
+  }
+};

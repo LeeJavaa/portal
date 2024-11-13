@@ -1,10 +1,10 @@
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
-import { Progress } from "../ui/progress";
+import { Loader } from "lucide-react";
 
-export default function ProgressDisplay({ progress }) {
+export default function ProcessingDisplay() {
   return (
     <div className="flex flex-col items-center space-y-4">
-      <Progress value={progress} className="w-full" />
+      <Loader className=" h-20 w-20 animate-spin" />
       <Alert>
         <AlertTitle>Hold on!</AlertTitle>
         <AlertDescription>

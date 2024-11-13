@@ -12,7 +12,7 @@ import { analysisSchema } from "@/validators/newAnalysis.ts";
 import { Plus } from "lucide-react";
 import FormHeader from "./new-analysis-form/FormHeader";
 import UploadDisplay from "./new-analysis-form/UploadDisplay";
-import ProgressDisplay from "./new-analysis-form/ProgressDisplay";
+import ProcessingDisplay from "./new-analysis-form/ProcessingDisplay";
 import GameDataDisplay from "./new-analysis-form/GameDataDisplay";
 import ScoreboardDisplay from "./new-analysis-form/ScoreboardDisplay";
 import AnalysisData from "./new-analysis-form/AnalysisData";
@@ -22,6 +22,7 @@ import {
   getPresignedUploadUrl,
   initiateScoreboardProcessing,
   uploadScoreboardToS3,
+  checkScoreboardProcessingStatus,
 } from "@/api/newAnalysisForm";
 
 export default function NewAnalysisForm() {
@@ -29,8 +30,8 @@ export default function NewAnalysisForm() {
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
   const [scoreboard, setScoreboard] = useState(null);
+  const [scoreboardData, setScoreboardData] = useState(null);
   const [isScoreboardUploading, setIsScoreboardUploading] = useState(false);
-  const [processingProgress, setProcessingProgress] = useState(0);
   const [scoreboardProcessed, setScoreboardProcessed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -57,9 +58,16 @@ export default function NewAnalysisForm() {
     form.reset();
     setScoreboard(null);
     setScoreboardProcessed(false);
+    setScoreboardData(null);
     setFormStep(0);
     setScoreboardUploadError("");
-  }, [form, scoreboardProcessed, scoreboard, scoreboardUploadError]);
+  }, [
+    form,
+    scoreboardProcessed,
+    scoreboard,
+    scoreboardData,
+    scoreboardUploadError,
+  ]);
 
   const handleScoreboardChange = async (e) => {
     e.preventDefault();
@@ -111,7 +119,7 @@ export default function NewAnalysisForm() {
     setIsScoreboardUploading(true);
     setScoreboardUploadError("");
 
-    let url, fields;
+    let url, fields, taskId;
 
     try {
       const uniqueFileName = generateUniqueFileName(scoreboard.name);
@@ -145,15 +153,38 @@ export default function NewAnalysisForm() {
       }
 
       try {
-        const processingResult = await initiateScoreboardProcessing(
-          uniqueFileName
-        );
+        const response = await initiateScoreboardProcessing(uniqueFileName);
+        taskId = response.task_id;
       } catch (error) {
         setScoreboardUploadError(
           "Failed to begin scoreboard processing. Please try again."
         );
         return;
       }
+
+      setFormStep(1);
+      const pollInterval = setInterval(async () => {
+        try {
+          const response = await checkScoreboardProcessingStatus(taskId);
+
+          if (response.status === "completed") {
+            clearInterval(pollInterval);
+            setScoreboardProcessed(true);
+            setScoreboardData(response.data);
+            setFormStep(2);
+          } else if (response.status === "failed") {
+            clearInterval(pollInterval);
+            setFormStep(0);
+            setScoreboardUploadError("Processing failed. Please try again.");
+          }
+        } catch (error) {
+          clearInterval(pollInterval);
+          setFormStep(0);
+          setScoreboardUploadError("Processing failed. Please try again.");
+        }
+      }, 2000);
+
+      return () => clearInterval(pollInterval);
     } catch (error) {
       setScoreboardUploadError(
         "An unexpected error occurred. Please try again."
@@ -161,20 +192,6 @@ export default function NewAnalysisForm() {
     } finally {
       setIsScoreboardUploading(false);
     }
-
-    setFormStep(1);
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 1;
-      setProcessingProgress(progress);
-
-      if (progress >= 100) {
-        clearInterval(interval);
-        setScoreboardProcessed(true);
-        setFormStep(2);
-        setProcessingProgress(0);
-      }
-    }, 30);
   };
 
   const handleDialogChange = useCallback(
@@ -284,9 +301,7 @@ export default function NewAnalysisForm() {
             error={scoreboardUploadError}
           />
         )}
-        {formStep == 1 && !confirmCloseOpen && (
-          <ProgressDisplay progress={processingProgress} />
-        )}
+        {formStep == 1 && !confirmCloseOpen && <ProcessingDisplay />}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             {formStep == 2 && !confirmCloseOpen && (
