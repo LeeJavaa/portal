@@ -109,19 +109,55 @@ export default function NewAnalysisForm() {
   const handleScoreboardProcessing = async () => {
     if (!scoreboard) return;
     setIsScoreboardUploading(true);
+    setScoreboardUploadError("");
+
+    let url, fields;
+
     try {
       const uniqueFileName = generateUniqueFileName(scoreboard.name);
-      const { url, fields } = await getPresignedUploadUrl(
-        uniqueFileName,
-        scoreboard.type
-      );
-      await uploadScoreboardToS3(url, fields, scoreboard);
-      const processingResult = await initiateScoreboardProcessing(
-        uniqueFileName
-      );
-      console.log(processingResult);
+
+      try {
+        const response = await getPresignedUploadUrl(uniqueFileName);
+        url = response.url;
+        fields = response.fields;
+      } catch (error) {
+        setScoreboardUploadError(
+          "Can't authorise this upload. Please try again."
+        );
+        return;
+      }
+
+      try {
+        await uploadScoreboardToS3(url, fields, scoreboard);
+      } catch (error) {
+        if (error.message.includes("413")) {
+          setScoreboardUploadError(
+            "File is too large. Please upload a smaller image."
+          );
+        } else if (error.message.includes("403")) {
+          setScoreboardUploadError(
+            "Upload authorization expired. Please try again."
+          );
+        } else {
+          setScoreboardUploadError("Failed to upload image. Please try again.");
+        }
+        return;
+      }
+
+      try {
+        const processingResult = await initiateScoreboardProcessing(
+          uniqueFileName
+        );
+      } catch (error) {
+        setScoreboardUploadError(
+          "Failed to begin scoreboard processing. Please try again."
+        );
+        return;
+      }
     } catch (error) {
-      console.error("Error processing scoreboard:", error);
+      setScoreboardUploadError(
+        "An unexpected error occurred. Please try again."
+      );
     } finally {
       setIsScoreboardUploading(false);
     }

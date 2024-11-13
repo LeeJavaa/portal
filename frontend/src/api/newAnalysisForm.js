@@ -1,12 +1,12 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
 
-export const getPresignedUploadUrl = async (fileName, fileType) => {
+export const getPresignedUploadUrl = async (fileName) => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/generate_upload_scoreboard_url?file_name=${encodeURIComponent(
+      `${API_BASE_URL}/upload_scoreboard_url?file_name=${encodeURIComponent(
         fileName
-      )}&file_type=${encodeURIComponent(fileType)}`,
+      )}`,
       {
         method: "GET",
         headers: {
@@ -16,13 +16,12 @@ export const getPresignedUploadUrl = async (fileName, fileType) => {
     );
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Failed to get upload URL: ${response.status}`);
     }
 
     return await response.json();
   } catch (error) {
-    console.error("Error getting the presigned upload URL:", error);
-    throw error;
+    throw new Error("Can't authorise this upload. Please try again.");
   }
 };
 
@@ -40,40 +39,47 @@ export const uploadScoreboardToS3 = async (presignedUrl, fields, file) => {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      switch (response.status) {
+        case 413:
+          throw new Error("413: File size exceeds limit");
+        case 403:
+          throw new Error("403: Upload authorization expired");
+        default:
+          throw new Error(`HTTP error! status: ${response.status}`);
+      }
     }
 
-    // S3 returns 204 No Content on successful upload
     if (response.status === 204) {
       return true;
     } else {
       const responseData = await response.text();
-      console.log("Unexpected response:", responseData);
       return responseData;
     }
   } catch (error) {
-    console.error("Error uploading file to S3:", error);
     throw error;
   }
 };
 
 export const initiateScoreboardProcessing = async (fileName) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/process_scoreboard`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ file_name: fileName }),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/new_map_analysis_step_one?file_name=${encodeURIComponent(
+        fileName
+      )}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Processing failed: ${response.status}`);
     }
 
     return await response.json();
   } catch (error) {
-    console.error("Error initiating scoreboard processing:", error);
-    throw error;
+    throw new Error("Failed to begin scoreboard processing. Please try again.");
   }
 };
