@@ -1,7 +1,6 @@
 from celery import shared_task
 from celery.utils.log import get_task_logger
 
-from utils.task_management import ProgressTracker
 from .controllers.scoreboard_processing import extract_data, process_data
 
 logger = get_task_logger(__name__)
@@ -10,8 +9,7 @@ logger = get_task_logger(__name__)
 def process_scoreboard(self, scoreboard: str):
     """
     This function handles the task of performing OCR on a scoreboard screenshot and extracting the relevant data from
-    it. This will also update a progress variable that will be used during SSE to display the progress update on the
-    frontend.
+    it.
 
     The data returned may look something as follows:
     {
@@ -36,39 +34,15 @@ def process_scoreboard(self, scoreboard: str):
     args:
         - scoreboard [Str]: The scoreboard screenshot as a string (base64 encoded image)
     returns:
-        - progress [Int (0 -> 100)]: The progress of the scoreboard processing. This is a value between 0 and 100.
         - data [Dict]: A dictionary response of the extracted data. Empty until processing is complete. Example above.
     raises:
-        -
+        - Exception: If there's an error during processing
     """
     try:
-        self.update_state(
-            state='PROGRESS',
-            meta={
-                'progress': 0,
-                'data': {}
-            }
-        )
-
-        extract_tracker = ProgressTracker(self, start_progress=0, end_progress=70)
         game_data, player_data = extract_data(scoreboard)
-
-        process_tracker = ProgressTracker(self, start_progress=70, end_progress=100)
         processed_data = process_data(game_data, player_data)
 
-        result = {
-            'progress': 100,
-            'data': processed_data
-        }
-        return result
+        return processed_data
     except Exception as e:
         logger.error(f"Error processing scoreboard: {str(e)}")
-        self.update_state(
-            state='FAILURE',
-            meta={
-                'progress': 0,
-                'data': {},
-                'error': str(e)
-            }
-        )
         raise

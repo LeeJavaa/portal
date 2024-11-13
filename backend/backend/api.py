@@ -4,7 +4,9 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+
 from botocore.exceptions import ClientError
+from celery.result import AsyncResult
 from ninja import NinjaAPI, Schema
 from ninja.errors import HttpError
 from ninja.responses import Response
@@ -33,7 +35,6 @@ from analysis.tasks import process_scoreboard
 from django.http import StreamingHttpResponse
 
 from utils.s3_handling import generate_upload_scoreboard_url, generate_view_scoreboard_url, get_object_from_bucket
-from utils.task_management import check_progress
 
 api = NinjaAPI()
 logger = logging.getLogger('gunicorn.error')
@@ -129,40 +130,21 @@ def process_scoreboard_data(request, file_name: str):
 
 @api.get("/new_map_analysis_step_two")
 async def process_scoreboard_progress(request, task_id: str):
-    async def event_stream():
-        while True:
-            try:
-                progress_res = check_progress(task_id)
-
-                if progress_res.get('progress') == 100:
-                    yield f"data: {json.dumps(progress_res)}\n\n"
-                    break
-                else:
-                    yield f"data: {json.dumps({'progress': progress_res.get('progress', 0)})}\n\n"
-
-                await asyncio.sleep(1)
-            except asyncio.CancelledError as e:
-                error_message = f"Error checking progress for task {task_id}: {str(e)}"
-                logger.error(f"SSE connection for task {task_id} was cancelled")
-                yield f"data: {json.dumps({'error': error_message})}\n\n"
-                break
-            except Exception as e:
-                error_message = f"Error checking progress for task {task_id}: {str(e)}"
-                logger.error(error_message)
-                yield f"data: {json.dumps({'error': error_message})}\n\n"
-                break
     try:
-        response = StreamingHttpResponse(
-            event_stream(),
-            content_type='text/event-stream'
-        )
-        response['Cache-Control'] = 'no-cache'
-        response['X-Accel-Buffering'] = 'no'
-        return response
+        task = AsyncResult(task_id)
+        #
+        # if task.state == 'SUCCESS':
+        #     return {"status": "completed", "data": task.result}
+        # elif task.state == 'FAILURE':
+        #     return {"status": "failed", "error": str(task.result)}
+        # else:
+        #     return {"status": "processing"}
+
+        return Response({"error": "some error"}, status=500)
+
     except Exception as e:
-        error_message = f"Failed to create StreamingHttpResponse for task {task_id}: {str(e)}"
-        logger.error(error_message)
-        return Response({"error": error_message}, status=500)
+        logger.error(f"Error checking task status: {str(e)}")
+        return Response({"error": str(e)}, status=500)
 
 @api.post("/new_map_analysis_confirmation")
 def create_map_analysis_object(request, payload: MapAnalysisIn):
