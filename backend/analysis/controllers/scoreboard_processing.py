@@ -66,21 +66,21 @@ class PlayerStats:
     """
     Data class for player statistics
     """
-    name: Tuple[str, float]  # (text, confidence)
-    kd: Tuple[str, float]
-    assists: Tuple[str, float]
-    non_traded_kills: Tuple[str, float]
-    highest_streak: Tuple[str, float]
-    damage: Tuple[str, float]
-    hill_time: Tuple[str, float]
-    avg_hill_time: Tuple[str, float]
-    obj_kills: Tuple[str, float]
-    contested_time: Tuple[str, float]
-    kills_per_hill: Tuple[str, float]
-    dmg_per_hill: Tuple[str, float]
+    name: Tuple[str, str]  # (text, confidence)
+    kd: Tuple[str, str]
+    assists: Tuple[str, str]
+    non_traded_kills: Tuple[str, str]
+    highest_streak: Tuple[str, str]
+    damage: Tuple[str, str]
+    hill_time: Tuple[str, str]
+    avg_hill_time: Tuple[str, str]
+    obj_kills: Tuple[str, str]
+    contested_time: Tuple[str, str]
+    kills_per_hill: Tuple[str, str]
+    dmg_per_hill: Tuple[str, str]
 
 
-def extract_data(scoreboard: str):
+def extract_data(scoreboard: bytes):
     try:
         ocr = PaddleOCR()
 
@@ -214,7 +214,7 @@ def is_point_in_bounds(point: Tuple[float, float], bounds: Tuple[Tuple[float, fl
     except (TypeError, ValueError) as e:
         raise ValueError(f"Invalid coordinate data: {str(e)}")
 
-def find_detection_for_field(detections: List[OCRDetection], field_bounds: Tuple[Tuple[float, float], Tuple[float, float]]) -> Optional[Tuple[str, float]]:
+def find_detection_for_field(detections: List[OCRDetection], field_bounds: Tuple[Tuple[float, float], Tuple[float, float]]) -> Optional[Tuple[str, str]]:
     """
     Find matching detection for a given field based on region bounds
     """
@@ -222,11 +222,34 @@ def find_detection_for_field(detections: List[OCRDetection], field_bounds: Tuple
         for detection in detections:
             center = get_region_center(detection.region)
             if is_point_in_bounds(center, field_bounds):
-                return detection.text, detection.confidence
+                return detection.text.lower(), convert_confidence(detection.confidence)
         return None
     except Exception as e:
         raise ValueError(f"Failed to process field detection: {str(e)}")
 
+def convert_confidence(confidence: float) -> str:
+    """
+    Convert the confidence from a float value to a string representation
+    (low confidence, medium confidence and high confidence)
+
+    Args:
+        confidence: Float between 0 and 1 representing OCR confidence
+
+    Returns:
+        str: 'low', 'medium', or 'high' based on configured thresholds
+    """
+    thresholds = getattr(settings, 'OCR_CONFIDENCE_THRESHOLDS', {
+        'LOW': 0.75,
+        'MEDIUM': 0.85,
+        'HIGH': 1.0
+    })
+
+    if confidence < thresholds['LOW']:
+        return 'low'
+    elif confidence < thresholds['MEDIUM']:
+        return 'medium'
+    else:
+        return 'high'
 
 def adjust_bounds_for_row(bounds: Tuple[Tuple[float, float], Tuple[float, float]], row: int) -> Tuple[
     Tuple[float, float], Tuple[float, float]]:
@@ -269,18 +292,18 @@ def process_player_row(detections: List[OCRDetection], row_number: int) -> Optio
             return None
 
         return PlayerStats(
-            name=fields[PlayerDataField.NAME] or ("", 0.0),
-            kd=fields[PlayerDataField.KD] or ("0", 0.0),
-            assists=fields[PlayerDataField.ASSISTS] or ("0", 0.0),
-            non_traded_kills=fields[PlayerDataField.NON_TRADED_KILLS] or ("0", 0.0),
-            highest_streak=fields[PlayerDataField.HIGHEST_STREAK] or ("0", 0.0),
-            damage=fields[PlayerDataField.DAMAGE] or ("0", 0.0),
-            hill_time=fields[PlayerDataField.HILL_TIME] or ("0:00", 0.0),
-            avg_hill_time=fields[PlayerDataField.AVG_HILL_TIME] or ("0:00", 0.0),
-            obj_kills=fields[PlayerDataField.OBJ_KILLS] or ("0", 0.0),
-            contested_time=fields[PlayerDataField.CONTESTED_TIME] or ("0:00", 0.0),
-            kills_per_hill=fields[PlayerDataField.KILLS_PER_HILL] or ("0", 0.0),
-            dmg_per_hill=fields[PlayerDataField.DMG_PER_HILL] or ("0", 0.0)
+            name=fields[PlayerDataField.NAME] or ("", "low"),
+            kd=fields[PlayerDataField.KD] or ("0", "low"),
+            assists=fields[PlayerDataField.ASSISTS] or ("0", "low"),
+            non_traded_kills=fields[PlayerDataField.NON_TRADED_KILLS] or ("0", "low"),
+            highest_streak=fields[PlayerDataField.HIGHEST_STREAK] or ("0", "low"),
+            damage=fields[PlayerDataField.DAMAGE] or ("0", "low"),
+            hill_time=fields[PlayerDataField.HILL_TIME] or ("0:00", "low"),
+            avg_hill_time=fields[PlayerDataField.AVG_HILL_TIME] or ("0:00", "low"),
+            obj_kills=fields[PlayerDataField.OBJ_KILLS] or ("0", "low"),
+            contested_time=fields[PlayerDataField.CONTESTED_TIME] or ("0:00", "low"),
+            kills_per_hill=fields[PlayerDataField.KILLS_PER_HILL] or ("0", "low"),
+            dmg_per_hill=fields[PlayerDataField.DMG_PER_HILL] or ("0", "low")
         )
     except Exception as e:
         raise Exception(f"Failed to process player row: {str(e)}")

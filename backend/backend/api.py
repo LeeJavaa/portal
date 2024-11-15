@@ -132,16 +132,13 @@ def process_scoreboard_data(request, file_name: str):
 async def process_scoreboard_progress(request, task_id: str):
     try:
         task = AsyncResult(task_id)
-        #
-        # if task.state == 'SUCCESS':
-        #     return {"status": "completed", "data": task.result}
-        # elif task.state == 'FAILURE':
-        #     return {"status": "failed", "error": str(task.result)}
-        # else:
-        #     return {"status": "processing"}
 
-        return Response({"error": "some error"}, status=500)
-
+        if task.state == 'SUCCESS':
+            return {"status": "completed", "data": task.result}
+        elif task.state == 'FAILURE':
+            return {"status": "failed", "error": str(task.result)}
+        else:
+            return {"status": "processing"}
     except Exception as e:
         logger.error(f"Error checking task status: {str(e)}")
         return Response({"error": str(e)}, status=500)
