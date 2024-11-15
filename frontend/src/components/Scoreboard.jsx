@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -9,105 +9,157 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  hardpointHeaders,
+  sndHeaders,
+  controlHeaders,
+} from "@/data/scoreboard";
 
-const EmptyRow = () => (
+const getHeaders = (gameMode) => {
+  switch (gameMode) {
+    case "hp":
+      return hardpointHeaders;
+    case "snd":
+      return sndHeaders;
+    case "cntrl":
+      return controlHeaders;
+    default:
+      return hardpointHeaders;
+  }
+};
+
+const getBorderClass = (confidence, isModified) => {
+  if (isModified) return "";
+  switch (confidence) {
+    case "medium":
+      return "border-warning";
+    case "low":
+      return "border-destructive";
+    default:
+      return "";
+  }
+};
+
+const EmptyRow = ({ columnCount }) => (
   <TableRow>
-    {[...Array(12)].map((_, index) => (
+    {[...Array(columnCount)].map((_, index) => (
       <TableCell
         key={index}
         className={`py-5 ${
-          index === 0 ? "border-l" : index === 11 ? "border-r" : ""
+          index === 0 ? "border-l" : index === columnCount - 1 ? "border-r" : ""
         }`}
       ></TableCell>
     ))}
   </TableRow>
 );
 
-const ScoreboardRow = ({ player, isLastRow, input }) => (
-  <TableRow>
-    <TableCell
-      className={`font-medium border-r w-[250px] border-l ${
-        isLastRow ? "border-b" : ""
-      } ${input ? "py-1" : ""}`}
-    >
-      {input ? (
-        <Input
-          defaultValue={player.name}
-          className="border-0 pl-2 ring-offset-0 focus-visible:ring-offset-0"
-        />
-      ) : (
-        <span className="text-center">{player.name}</span>
-      )}
-    </TableCell>
-    {[
-      "kd",
-      "assists",
-      "ntk",
-      "highestStreak",
-      "dmg",
-      "ht",
-      "avgHt",
-      "objKills",
-      "contHt",
-      "kph",
-      "dph",
-    ].map((key) => (
-      <TableCell
-        key={key}
-        className={`border-r text-center ${isLastRow ? "border-b" : ""} ${
-          input ? "py-1" : ""
-        }`}
-      >
-        {input ? (
-          <Input
-            defaultValue={player[key]}
-            className="text-center border-0 px-0 focus-visible:ring-offset-0"
-          />
-        ) : (
-          <span className="">{player[key]}</span>
-        )}
-      </TableCell>
-    ))}
-  </TableRow>
-);
+const ScoreboardRow = ({
+  player,
+  isLastRow,
+  input,
+  headers,
+  onInputChange,
+}) => {
+  const [modifiedFields, setModifiedFields] = useState({});
+  const inputRefs = useRef({});
 
-export default function Scoreboard({ playerData, caption, input }) {
+  const handleInputChange = (key) => {
+    setModifiedFields((prev) => ({
+      ...prev,
+      [key]: true,
+    }));
+
+    if (onInputChange) {
+      const value = inputRefs.current[key]?.value;
+      onInputChange(player.name[0], key, value);
+    }
+  };
+
+  return (
+    <TableRow>
+      {headers.map(({ key }) => (
+        <TableCell
+          key={key}
+          className={`border-r text-center ${isLastRow ? "border-b" : ""} ${
+            key === "name" ? "border-l w-[250px]" : ""
+          } ${input ? "py-1" : ""}`}
+        >
+          {input ? (
+            <Input
+              ref={(el) => (inputRefs.current[key] = el)}
+              defaultValue={
+                Array.isArray(player[key]) ? player[key][0] : player[key]
+              }
+              className={`${
+                key === "name"
+                  ? "pl-2 uppercase font-medium"
+                  : "text-center px-0"
+              } border-0 ring-offset-0 focus-visible:ring-offset-0 ${getBorderClass(
+                Array.isArray(player[key]) ? player[key][1] : "low",
+                modifiedFields[key]
+              )}`}
+              onChange={() => handleInputChange(key)}
+            />
+          ) : (
+            <span>
+              {Array.isArray(player[key]) ? player[key][0] : player[key]}
+            </span>
+          )}
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+};
+
+export default function Scoreboard({
+  gameMode,
+  playerData,
+  caption,
+  input,
+  onPlayerDataChange,
+}) {
+  const headers = getHeaders(gameMode);
+
+  const handleInputChange = (playerName, key, value) => {
+    if (onPlayerDataChange) {
+      onPlayerDataChange(playerName, key, value);
+    }
+  };
+
+  // Create array of players with empty rows to ensure we have at least 8 rows
+  const filledPlayerData = [
+    ...playerData,
+    ...Array(Math.max(0, 8 - playerData.length)).fill({}),
+  ];
+
   return (
     <Table>
       <TableCaption>{caption}</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[250px] border-r border-t border-l"></TableHead>
-          <TableHead className="text-center border-r border-t">K/D</TableHead>
-          <TableHead className="text-center border-r border-t">
-            Assists
-          </TableHead>
-          <TableHead className="text-center border-r border-t">NTK</TableHead>
-          <TableHead className="text-center border-r border-t">HS</TableHead>
-          <TableHead className="text-center border-r border-t">DMG</TableHead>
-          <TableHead className="text-center border-r border-t">HT</TableHead>
-          <TableHead className="text-center border-r border-t">
-            Avg HT
-          </TableHead>
-          <TableHead className="text-center border-r border-t">
-            OBJ Kills
-          </TableHead>
-          <TableHead className="text-center border-r border-t">
-            Cont. HT
-          </TableHead>
-          <TableHead className="text-center border-r border-t">KPH</TableHead>
-          <TableHead className="text-center border-r border-t">DPH</TableHead>
+          {headers.map(({ key, label }) => (
+            <TableHead
+              key={key}
+              className={`text-center border-r border-t ${
+                key === "name" ? "border-l w-[250px]" : ""
+              }`}
+            >
+              {key === "name" ? "" : label}
+            </TableHead>
+          ))}
         </TableRow>
       </TableHeader>
       <TableBody>
-        {[...Array(8)].map((_, index) => (
+        {filledPlayerData.map((player, index) => (
           <React.Fragment key={index}>
             <ScoreboardRow
-              player={playerData[0]}
-              isLastRow={index === 7}
+              player={player}
+              isLastRow={index === filledPlayerData.length - 1}
               input={input}
+              headers={headers}
+              onInputChange={handleInputChange}
             />
-            {index === 3 && <EmptyRow />}
+            {index === 3 && <EmptyRow columnCount={headers.length} />}
           </React.Fragment>
         ))}
       </TableBody>

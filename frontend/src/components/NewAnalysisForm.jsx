@@ -312,7 +312,11 @@ export default function NewAnalysisForm() {
               />
             )}
             {formStep == 3 && !confirmCloseOpen && (
-              <ScoreboardDisplay setFormStep={setFormStep} />
+              <ScoreboardDisplay
+                form={form}
+                setFormStep={setFormStep}
+                data={scoreboardData}
+              />
             )}
             {formStep == 4 && !confirmCloseOpen && (
               <AnalysisData
