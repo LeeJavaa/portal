@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { Alert, AlertDescription } from "../ui/alert";
 import { Button } from "../ui/button";
 import {
   FormField,
@@ -14,9 +16,54 @@ import {
   SelectContent,
   SelectItem,
 } from "../ui/select";
+import {
+  GAME_MODES,
+  MAPS,
+  TEAMS,
+  getGameMode,
+  getMapName,
+  getTeamCode,
+} from "@/data/general";
 import { ArrowRight } from "lucide-react";
 
-export default function GameDataDisplay({ form, setFormStep }) {
+export default function GameDataDisplay({ form, setFormStep, data }) {
+  const handleNextStep = async () => {
+    const isValid = await form.trigger([
+      "game_mode",
+      "map",
+      "team_one",
+      "team_one_score",
+      "team_two",
+      "team_two_score",
+    ]);
+    if (isValid) {
+      setFormStep(3);
+    }
+  };
+
+  useEffect(() => {
+    if (data?.metadata) {
+      form.reset({
+        game_mode: getGameMode(data.metadata.game_mode[0]),
+        map: getMapName(data.metadata.map_name[0]),
+        team_one: getTeamCode(data.metadata.team1.name[0]),
+        team_one_score: parseInt(data.metadata.team1.score[0]),
+        team_two: getTeamCode(data.metadata.team2.name[0]),
+        team_two_score: parseInt(data.metadata.team2.score[0]),
+      });
+    }
+  }, [data]);
+
+  if (!data?.metadata) {
+    return (
+      <Alert variant="destructive" className="w-full border-2 mb-2">
+        <AlertDescription className="font-medium">
+          Something went wrong while processing. Please restart.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <>
       <div className="space-y-5 pb-5">
@@ -27,16 +74,18 @@ export default function GameDataDisplay({ form, setFormStep }) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Game Mode</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue="HP">
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a gamemode" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="HP">Hardpoint</SelectItem>
-                  <SelectItem value="SND">Search and Destroy</SelectItem>
-                  <SelectItem value="CNTRL">Control</SelectItem>
+                  {Object.values(GAME_MODES).map((mode) => (
+                    <SelectItem key={mode.code} value={mode.code}>
+                      {mode.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -50,20 +99,18 @@ export default function GameDataDisplay({ form, setFormStep }) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Map</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue="karachi">
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a map" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="highrise">Highrise</SelectItem>
-                  <SelectItem value="invasion">Invasion</SelectItem>
-                  <SelectItem value="karachi">Karachi</SelectItem>
-                  <SelectItem value="rio">Rio</SelectItem>
-                  <SelectItem value="sixstar">Six Star</SelectItem>
-                  <SelectItem value="subbase">Sub Base</SelectItem>
-                  <SelectItem value="vista">Vista</SelectItem>
+                  {Object.values(MAPS).map((map) => (
+                    <SelectItem key={map.code} value={map.code}>
+                      {map.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -77,17 +124,18 @@ export default function GameDataDisplay({ form, setFormStep }) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Team One</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue="OT">
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select team two" />
+                    <SelectValue placeholder="Select team one" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="AF">Atlanta FaZe</SelectItem>
-                  <SelectItem value="OT">OpTic Texas</SelectItem>
-                  <SelectItem value="NYSL">New York Subliners</SelectItem>
-                  <SelectItem value="TU">Toronto Ultra</SelectItem>
+                  {Object.values(TEAMS).map((team) => (
+                    <SelectItem key={team.code} value={team.code}>
+                      {team.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -103,8 +151,9 @@ export default function GameDataDisplay({ form, setFormStep }) {
               <FormLabel>Team One Score</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Enter the score for team one"
-                  defaultValue={250}
+                  type="number"
+                  value={field.value}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
                   {...field}
                 />
               </FormControl>
@@ -119,17 +168,18 @@ export default function GameDataDisplay({ form, setFormStep }) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Team Two</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue="NYSL">
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select team one" />
+                    <SelectValue placeholder="Select team two" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="AF">Atlanta FaZe</SelectItem>
-                  <SelectItem value="OT">OpTic Texas</SelectItem>
-                  <SelectItem value="NYSL">New York Subliners</SelectItem>
-                  <SelectItem value="TU">Toronto Ultra</SelectItem>
+                  {Object.values(TEAMS).map((team) => (
+                    <SelectItem key={team.code} value={team.code}>
+                      {team.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -145,8 +195,9 @@ export default function GameDataDisplay({ form, setFormStep }) {
               <FormLabel>Team Two Score</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Enter the score for team two"
-                  defaultValue={210}
+                  type="number"
+                  value={field.value}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
                   {...field}
                 />
               </FormControl>
@@ -156,7 +207,7 @@ export default function GameDataDisplay({ form, setFormStep }) {
         />
       </div>
       <div className="w-full flex gap-2">
-        <Button type="button" variant={"ghost"} onClick={() => setFormStep(3)}>
+        <Button type="button" variant={"ghost"} onClick={handleNextStep}>
           Next step
           <ArrowRight className="w-4 h-4 ml-2" />
         </Button>

@@ -305,7 +305,11 @@ export default function NewAnalysisForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             {formStep == 2 && !confirmCloseOpen && (
-              <GameDataDisplay form={form} setFormStep={setFormStep} />
+              <GameDataDisplay
+                form={form}
+                setFormStep={setFormStep}
+                data={scoreboardData}
+              />
             )}
             {formStep == 3 && !confirmCloseOpen && (
               <ScoreboardDisplay setFormStep={setFormStep} />
