@@ -46,10 +46,10 @@ export default function GameDataDisplay({ form, setFormStep, data }) {
       form.reset({
         game_mode: getGameMode(data.metadata.game_mode[0]),
         map: getMapName(data.metadata.map_name[0]),
-        team_one: getTeamCode(data.metadata.team1.name[0]),
-        team_one_score: parseInt(data.metadata.team1.score[0]),
-        team_two: getTeamCode(data.metadata.team2.name[0]),
-        team_two_score: parseInt(data.metadata.team2.score[0]),
+        team_one: getTeamCode(data.metadata.team_one_name[0]),
+        team_one_score: data.metadata.team_one_score[0],
+        team_two: getTeamCode(data.metadata.team_two_name[0]),
+        team_two_score: data.metadata.team_two_score[0],
       });
     }
   }, [data]);
@@ -151,9 +151,9 @@ export default function GameDataDisplay({ form, setFormStep, data }) {
               <FormLabel>Team One Score</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
+                  type="text"
                   value={field.value}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  placeholder="Enter score for team 1"
                   {...field}
                 />
               </FormControl>
@@ -195,9 +195,9 @@ export default function GameDataDisplay({ form, setFormStep, data }) {
               <FormLabel>Team Two Score</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
+                  type="text"
                   value={field.value}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  placeholder="Enter score for team 2"
                   {...field}
                 />
               </FormControl>

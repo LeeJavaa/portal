@@ -1,5 +1,6 @@
 "use client";
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Button } from "./ui/button";
@@ -23,6 +24,7 @@ import {
   initiateScoreboardProcessing,
   uploadScoreboardToS3,
   checkScoreboardProcessingStatus,
+  createMapAnalysis,
 } from "@/api/newAnalysisForm";
 
 export default function NewAnalysisForm() {
@@ -30,11 +32,12 @@ export default function NewAnalysisForm() {
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
   const [scoreboard, setScoreboard] = useState(null);
+  const [scoreboardFileName, setScoreboardFileName] = useState("");
   const [scoreboardData, setScoreboardData] = useState(null);
   const [isScoreboardUploading, setIsScoreboardUploading] = useState(false);
   const [scoreboardProcessed, setScoreboardProcessed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  const router = useRouter();
 
   // Error messages
   const [scoreboardUploadError, setScoreboardUploadError] = useState("");
@@ -51,12 +54,15 @@ export default function NewAnalysisForm() {
       title: "",
       played_date: "",
       tournament: "",
+      scoreboard_file_name: "",
+      playerStats: {},
     },
   });
 
   const resetForm = useCallback(() => {
     form.reset();
     setScoreboard(null);
+    setScoreboardFileName("");
     setScoreboardProcessed(false);
     setScoreboardData(null);
     setFormStep(0);
@@ -65,6 +71,7 @@ export default function NewAnalysisForm() {
     form,
     scoreboardProcessed,
     scoreboard,
+    scoreboardFileName,
     scoreboardData,
     scoreboardUploadError,
   ]);
@@ -123,6 +130,7 @@ export default function NewAnalysisForm() {
 
     try {
       const uniqueFileName = generateUniqueFileName(scoreboard.name);
+      setScoreboardFileName(uniqueFileName);
 
       try {
         const response = await getPresignedUploadUrl(uniqueFileName);
@@ -166,7 +174,6 @@ export default function NewAnalysisForm() {
       const pollInterval = setInterval(async () => {
         try {
           const response = await checkScoreboardProcessingStatus(taskId);
-
           if (response.status === "completed") {
             clearInterval(pollInterval);
             setScoreboardProcessed(true);
@@ -220,58 +227,51 @@ export default function NewAnalysisForm() {
     setConfirmCloseOpen(false);
   };
 
-  async function onSubmit(data) {
+  const onSubmit = async () => {
     setIsSubmitting(true);
+    setScoreboardUploadError("");
 
-    const formattedData = {
-      ...data,
-      played_date: new Date(data.played_date).toISOString(),
-    };
+    form.setValue("scoreboard_file_name", scoreboardFileName);
+
+    const result = await form.trigger([
+      "title",
+      "tournament",
+      "played_date",
+      "scoreboard_file_name",
+    ]);
+
+    if (!result) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    const formData = form.getValues();
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000); // 5 minutes
+      const response = await createMapAnalysis(formData);
 
-      const response = await fetch("http://localhost/api/create_analysis", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formattedData),
-        signal: controller.signal,
-      });
+      router.push(`/analysis/map/${response.id}`);
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create analysis");
-      }
-
-      window.location.reload();
-    } catch (error) {
-      if (error.name === "AbortError") {
-        toast({
-          title: "Error",
-          description:
-            "The request timed out after 5 minutes. Please try again.",
-          variant: "destructive",
-          duration: Infinity,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-          duration: Infinity,
-        });
-      }
-    } finally {
       setIsSubmitting(false);
       setModalOpen(false);
+      setScoreboardUploadError("");
       resetForm();
+    } catch (error) {
+      setIsSubmitting(false);
+
+      if (error.message.includes("timeout")) {
+        setScoreboardUploadError("Request timed out. Please try again.");
+      } else if (error.message.includes("validation")) {
+        setScoreboardUploadError(
+          "Please check all fields are filled correctly."
+        );
+      } else {
+        setScoreboardUploadError(
+          "Failed to create analysis. Please try again."
+        );
+      }
     }
-  }
+  };
 
   return (
     <Dialog open={modalOpen} onOpenChange={handleDialogChange}>
@@ -322,7 +322,9 @@ export default function NewAnalysisForm() {
               <AnalysisData
                 form={form}
                 isSubmitting={isSubmitting}
+                handleSubmit={onSubmit}
                 setFormStep={setFormStep}
+                error={scoreboardUploadError}
               />
             )}
           </form>

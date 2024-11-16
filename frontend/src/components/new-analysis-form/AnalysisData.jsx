@@ -1,3 +1,4 @@
+import { Alert, AlertDescription } from "../ui/alert";
 import { Button } from "../ui/button";
 import { DateTimePicker } from "../ui/datetime-picker";
 import {
@@ -15,11 +16,23 @@ import {
   SelectContent,
   SelectItem,
 } from "../ui/select";
+import { TOURNAMENTS } from "@/data/general";
 import { Loader } from "lucide-react";
 
-export default function AnalysisData({ form, setFormStep, isSubmitting }) {
+export default function AnalysisData({
+  form,
+  setFormStep,
+  isSubmitting,
+  handleSubmit,
+  error,
+}) {
   return (
     <>
+      {error && (
+        <Alert variant="destructive" className="border-2 mb-2">
+          <AlertDescription className="font-medium">{error}</AlertDescription>
+        </Alert>
+      )}
       <div className="space-y-5 pb-5">
         {/* Title */}
         <FormField
@@ -29,7 +42,11 @@ export default function AnalysisData({ form, setFormStep, isSubmitting }) {
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="OpTic vs NYSL Champs GF Map 1" {...field} />
+                <Input
+                  placeholder="Some title for your analysis here"
+                  value={field.value}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -41,19 +58,19 @@ export default function AnalysisData({ form, setFormStep, isSubmitting }) {
           name="tournament"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>File Name</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>Tournament</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="What tourny was this?" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="5">Call of Duty Champs 2024</SelectItem>
-                  <SelectItem value="4">Major IV Finals</SelectItem>
-                  <SelectItem value="3">Major III Finals</SelectItem>
-                  <SelectItem value="2">Major II Finals</SelectItem>
-                  <SelectItem value="1">Major I Finals</SelectItem>
+                  {Object.values(TOURNAMENTS).map((tournament) => (
+                    <SelectItem key={tournament.id} value={tournament.id}>
+                      {tournament.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -76,7 +93,7 @@ export default function AnalysisData({ form, setFormStep, isSubmitting }) {
         />
       </div>
       <div className="flex gap-2">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? (
             <>
               <Loader className="mr-2 h-4 w-4 animate-spin" /> Processing...

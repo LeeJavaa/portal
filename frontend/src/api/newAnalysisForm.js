@@ -105,3 +105,36 @@ export const checkScoreboardProcessingStatus = async (taskId) => {
     throw new Error("Failed to check processing status");
   }
 };
+
+export const createMapAnalysis = async (formData) => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1 * 60 * 1000); // 1 minute timeout
+
+    const response = await fetch(
+      `${API_BASE_URL}/new_map_analysis_confirmation`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+        signal: controller.signal,
+      }
+    );
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to create analysis");
+    }
+
+    return await response.json();
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("Request timed out after 1 minute");
+    }
+    throw error;
+  }
+};

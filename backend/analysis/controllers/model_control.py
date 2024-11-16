@@ -103,31 +103,31 @@ def create_map_analysis(payload: Dict[str, Any]) -> int:
                         highest_streak=int(stats['highest_streak']),
                         damage=int(stats['damage']),
                         hill_time=parse_time_to_seconds(stats['hill_time']),
-                        average_hill_time=parse_time_to_seconds(stats['avg_hill_time']),
-                        objective_kills=int(stats['obj_kills']),
-                        contested_hill_time=parse_time_to_seconds(stats['contested_time']),
+                        average_hill_time=parse_time_to_seconds(stats['average_hill_time']),
+                        objective_kills=int(stats['objective_kills']),
+                        contested_hill_time=parse_time_to_seconds(stats['contested_hill_time']),
                         kills_per_hill=float(stats['kills_per_hill']),
-                        damage_per_hill=float(stats['dmg_per_hill'])
+                        damage_per_hill=float(stats['damage_per_hill'])
                     )
                 elif game_mode == GameMode.objects.get(code='snd'):
                     PlayerMapPerformanceSND.objects.create(
                         player_performance=player_perf,
-                        bombs_planted=int(stats.get('planted', 0)),
-                        bombs_defused=int(stats.get('defused', 0)),
-                        first_bloods=int(stats.get('fb', 0)),
-                        first_deaths=int(stats.get('fd', 0)),
-                        kills_per_round=float(stats['kpr']),
-                        damage_per_round=float(stats['dpr'])
+                        bombs_planted=int(stats.get('boms_planted', 0)),
+                        bombs_defused=int(stats.get('bombs_defused', 0)),
+                        first_bloods=int(stats.get('first_bloods', 0)),
+                        first_deaths=int(stats.get('first_deaths', 0)),
+                        kills_per_round=float(stats['kills_per_round']),
+                        damage_per_round=float(stats['damage_per_round'])
                     )
                 elif game_mode == GameMode.objects.get(code='ctl'):
                     PlayerMapPerformanceControl.objects.create(
                         player_performance=player_perf,
-                        tiers_captured=int(stats.get('tiers', 0)),
-                        objective_kills=int(stats['obj_kills']),
-                        offense_kills=int(stats.get('off_kills', 0)),
-                        defense_kills=int(stats.get('def_kills', 0)),
-                        kills_per_round=float(stats['kpr']),
-                        damage_per_round=float(stats['dpr'])
+                        tiers_captured=int(stats.get('tiers_captured', 0)),
+                        objective_kills=int(stats['objective_kills']),
+                        offense_kills=int(stats.get('offensive_kills', 0)),
+                        defense_kills=int(stats.get('defensive_kills', 0)),
+                        kills_per_round=float(stats['kills_per_round']),
+                        damage_per_round=float(stats['damage_per_round'])
                     )
 
             try:

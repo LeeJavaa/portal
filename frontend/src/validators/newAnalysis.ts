@@ -10,11 +10,11 @@ const hardpointPlayerStats = basePlayerStats.extend({
   highest_streak: z.string(),
   damage: z.string(),
   hill_time: z.string(),
-  avg_hill_time: z.string(),
-  obj_kills: z.string(),
-  contested_time: z.string(),
+  average_hill_time: z.string(),
+  objective_kills: z.string(),
+  contested_hill_time: z.string(),
   kills_per_hill: z.string(),
-  dmg_per_hill: z.string(),
+  damage_per_hill: z.string(),
 });
 
 const sndPlayerStats = basePlayerStats.extend({
@@ -23,16 +23,16 @@ const sndPlayerStats = basePlayerStats.extend({
   first_bloods: z.string(),
   first_deaths: z.string(),
   kills_per_round: z.string(),
-  dmg_per_round: z.string(),
+  damage_per_round: z.string(),
 });
 
 const controlPlayerStats = basePlayerStats.extend({
   tiers_captured: z.string(),
-  obj_kills: z.string(),
+  objective_kills: z.string(),
   offense_kills: z.string(),
   defense_kills: z.string(),
   kills_per_round: z.string(),
-  dmg_per_round: z.string(),
+  damage_per_round: z.string(),
 });
 
 const playerStatsSchema = z.record(
@@ -45,12 +45,32 @@ export const analysisSchema = z.object({
   map: z.string().min(1, "Don't forget to mention the map!"),
   team_one: z.string().min(1, "Team one name is required."),
   team_one_score: z
-    .number()
-    .min(0, "Team one score must be a non-negative number."),
+    .string()
+    .min(1, "Team one score is required")
+    .regex(/^\d+$/, "Score must contain only numbers")
+    .transform((val) => {
+      const num = parseInt(val, 10);
+      if (isNaN(num)) throw new Error("Invalid number");
+      if (num < 0) throw new Error("Score cannot be negative");
+      return val;
+    })
+    .refine((val) => parseInt(val, 10) <= 999, {
+      message: "Score cannot exceed 999",
+    }),
   team_two: z.string().min(1, "Team two name is required."),
   team_two_score: z
-    .number()
-    .min(0, "Team two score must be a non-negative number."),
+    .string()
+    .min(1, "Team one score is required")
+    .regex(/^\d+$/, "Score must contain only numbers")
+    .transform((val) => {
+      const num = parseInt(val, 10);
+      if (isNaN(num)) throw new Error("Invalid number");
+      if (num < 0) throw new Error("Score cannot be negative");
+      return val;
+    })
+    .refine((val) => parseInt(val, 10) <= 999, {
+      message: "Score cannot exceed 999",
+    }),
   played_date: z.date({
     required_error: "When did this happen? We need a date! 📅",
     invalid_type_error:

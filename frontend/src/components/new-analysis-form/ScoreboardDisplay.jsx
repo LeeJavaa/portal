@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Scoreboard from "@/components/Scoreboard";
 
-const initializePlayerStats = (players, gameMode) => {
+const initializePlayerStats = (players) => {
   const stats = {};
   players.forEach((player) => {
     if (!player.name?.[0]) return;
@@ -25,8 +25,8 @@ export default function ScoreboardDisplay({ form, setFormStep, data }) {
   const [playerStats, setPlayerStats] = useState({});
 
   useEffect(() => {
-    if (data?.players) {
-      const initialStats = initializePlayerStats(data.players);
+    if (data?.player_stats) {
+      const initialStats = initializePlayerStats(data.player_stats);
       setPlayerStats(initialStats);
       form.setValue("player_stats", initialStats);
     }
@@ -44,15 +44,13 @@ export default function ScoreboardDisplay({ form, setFormStep, data }) {
 
   const handleConfirm = async () => {
     form.setValue("player_stats", playerStats);
-
     const valid = await form.trigger("player_stats");
-
     if (valid) {
       setFormStep(4);
     }
   };
 
-  if (!data?.players || data.players.length === 0) {
+  if (!data?.player_stats || data.player_stats.length === 0) {
     return (
       <Alert variant="destructive" className="border-2 mb-2">
         <AlertTitle className="font-bold">No player data found</AlertTitle>
@@ -86,7 +84,7 @@ export default function ScoreboardDisplay({ form, setFormStep, data }) {
       </Alert>
       <Scoreboard
         gameMode={gameMode}
-        playerData={data.players}
+        playerData={data.player_stats}
         caption="Scoreboard awaiting confirmation"
         input={true}
         onPlayerDataChange={handlePlayerDataChange}

@@ -75,6 +75,29 @@ export const TEAMS = {
   },
 };
 
+export const TOURNAMENTS = {
+  CHAMPS: {
+    id: "1",
+    name: "Call of Duty Championships 2024",
+  },
+  MAJOR4FIN: {
+    id: "2",
+    name: "Major IV Finalse",
+  },
+  MAJOR3FIN: {
+    id: "3",
+    name: "Major III Finals",
+  },
+  MAJOR2FIN: {
+    id: "4",
+    name: "Major II Finals",
+  },
+  MAJOR1FIN: {
+    id: "5",
+    name: "Major I Finals",
+  },
+};
+
 export const getGameMode = (mode) => {
   const gameMode = Object.values(GAME_MODES).find((gm) =>
     gm.identifiers.some((id) => mode.includes(id))
