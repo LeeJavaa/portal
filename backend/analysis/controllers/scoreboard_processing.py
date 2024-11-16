@@ -30,10 +30,10 @@ class GameDataField(Enum):
     GAME_MODE = ((215, 47), (430, 79))
     MAP_NAME = ((215, 88), (549, 127))
     GAME_TIME = ((215, 133), (549, 167))
-    TEAM1_NAME = ((190, 256), (670, 308))
-    TEAM1_SCORE = ((812, 72), (892, 129))
-    TEAM2_NAME = ((190, 617), (668, 665))
-    TEAM2_SCORE = ((1026, 70), (1108, 127))
+    TEAM_ONE_NAME = ((190, 256), (670, 308))
+    TEAM_ONE_SCORE = ((812, 72), (892, 129))
+    TEAM_TWO_NAME = ((190, 617), (668, 665))
+    TEAM_TWO_SCORE = ((1026, 70), (1108, 127))
 
 class PlayerDataField(Enum):
     """
@@ -46,11 +46,11 @@ class PlayerDataField(Enum):
     HIGHEST_STREAK = ((998, 324), (1074, 368))
     DAMAGE = ((1100, 324), (1198, 368))
     HILL_TIME = ((1224, 324), (1312, 368))
-    AVG_HILL_TIME = ((1335, 324), (1411, 368))
-    OBJ_KILLS = ((1437, 324), (1513, 368))
-    CONTESTED_TIME = ((1539, 324), (1615, 368))
+    AVERAGE_HILL_TIME = ((1335, 324), (1411, 368))
+    OBJECTIVE_KILLS = ((1437, 324), (1513, 368))
+    CONTESTED_HILL_TIME = ((1539, 324), (1615, 368))
     KILLS_PER_HILL = ((1641, 324), (1717, 368))
-    DMG_PER_HILL = ((1727, 324), (1825, 368))
+    DAMAGE_PER_HILL = ((1727, 324), (1825, 368))
 
 @dataclass
 class OCRDetection:
@@ -73,11 +73,11 @@ class PlayerStats:
     highest_streak: Tuple[str, str]
     damage: Tuple[str, str]
     hill_time: Tuple[str, str]
-    avg_hill_time: Tuple[str, str]
-    obj_kills: Tuple[str, str]
-    contested_time: Tuple[str, str]
+    average_hill_time: Tuple[str, str]
+    objective_kills: Tuple[str, str]
+    contested_hill_time: Tuple[str, str]
     kills_per_hill: Tuple[str, str]
-    dmg_per_hill: Tuple[str, str]
+    damage_per_hill: Tuple[str, str]
 
 
 def extract_data(scoreboard: bytes):
@@ -146,11 +146,11 @@ def process_data(game_data, player_data):
                     "highest_streak": player.highest_streak,
                     "damage": player.damage,
                     "hill_time": player.hill_time,
-                    "avg_hill_time": player.avg_hill_time,
-                    "obj_kills": player.obj_kills,
-                    "contested_time": player.contested_time,
+                    "average_hill_time": player.average_hill_time,
+                    "objective_kills": player.objective_kills,
+                    "contested_hill_time": player.contested_hill_time,
                     "kills_per_hill": player.kills_per_hill,
-                    "dmg_per_hill": player.dmg_per_hill
+                    "damage_per_hill": player.damage_per_hill
                 }
                 players.append(stats_dict)
 
@@ -162,16 +162,12 @@ def process_data(game_data, player_data):
                 "game_mode": game_data['game_mode'],
                 "map_name": game_data['map_name'],
                 "game_time": game_data['game_time'],
-                "team1": {
-                    "name": game_data['team1_name'],
-                    "score": game_data['team1_score']
-                },
-                "team2": {
-                    "name": game_data['team2_name'],
-                    "score": game_data['team2_score']
-                }
+                "team_one_name": game_data['team_one_name'],
+                "team_one_score": game_data['team_one_score'],
+                "team_two_name": game_data['team_two_name'],
+                "team_two_score": game_data['team_two_score'],
             },
-            "players": players
+            "player_stats": players
         }
     except Exception as e:
         logger.error(f"Error processing scoreboard data: {str(e)}")
@@ -299,11 +295,11 @@ def process_player_row(detections: List[OCRDetection], row_number: int) -> Optio
             highest_streak=fields[PlayerDataField.HIGHEST_STREAK] or ("0", "low"),
             damage=fields[PlayerDataField.DAMAGE] or ("0", "low"),
             hill_time=fields[PlayerDataField.HILL_TIME] or ("0:00", "low"),
-            avg_hill_time=fields[PlayerDataField.AVG_HILL_TIME] or ("0:00", "low"),
-            obj_kills=fields[PlayerDataField.OBJ_KILLS] or ("0", "low"),
-            contested_time=fields[PlayerDataField.CONTESTED_TIME] or ("0:00", "low"),
+            average_hill_time=fields[PlayerDataField.AVERAGE_HILL_TIME] or ("0:00", "low"),
+            objective_kills=fields[PlayerDataField.OBJECTIVE_KILLS] or ("0", "low"),
+            contested_hill_time=fields[PlayerDataField.CONTESTED_HILL_TIME] or ("0:00", "low"),
             kills_per_hill=fields[PlayerDataField.KILLS_PER_HILL] or ("0", "low"),
-            dmg_per_hill=fields[PlayerDataField.DMG_PER_HILL] or ("0", "low")
+            damage_per_hill=fields[PlayerDataField.DAMAGE_PER_HILL] or ("0", "low")
         )
     except Exception as e:
         raise Exception(f"Failed to process player row: {str(e)}")

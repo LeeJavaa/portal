@@ -84,7 +84,7 @@ def create_map_analysis(payload: Dict[str, Any]) -> int:
             )
 
             for player_name, stats in payload.player_stats.items():
-                kills, deaths = parse_kd(stats['k/d'])
+                kills, deaths = parse_kd(stats['kd'])
                 kd_ratio = kills / deaths if deaths > 0 else kills
 
                 player_perf = PlayerMapPerformance.objects.create(
@@ -94,20 +94,20 @@ def create_map_analysis(payload: Dict[str, Any]) -> int:
                     deaths=deaths,
                     kd_ratio=kd_ratio,
                     assists=int(stats['assists']),
-                    ntk=int(stats['ntk'])
+                    ntk=int(stats['non_traded_kills'])
                 )
 
                 if game_mode == GameMode.objects.get(code='hp'):
                     PlayerMapPerformanceHP.objects.create(
                         player_performance=player_perf,
-                        highest_streak=int(stats['hs']),
-                        damage=int(stats['dmg']),
-                        hill_time=parse_time_to_seconds(stats['ht']),
-                        average_hill_time=parse_time_to_seconds(stats['avg_ht']),
+                        highest_streak=int(stats['highest_streak']),
+                        damage=int(stats['damage']),
+                        hill_time=parse_time_to_seconds(stats['hill_time']),
+                        average_hill_time=parse_time_to_seconds(stats['avg_hill_time']),
                         objective_kills=int(stats['obj_kills']),
-                        contested_hill_time=parse_time_to_seconds(stats['cont_ht']),
-                        kills_per_hill=float(stats['kph']),
-                        damage_per_hill=float(stats['dph'])
+                        contested_hill_time=parse_time_to_seconds(stats['contested_time']),
+                        kills_per_hill=float(stats['kills_per_hill']),
+                        damage_per_hill=float(stats['dmg_per_hill'])
                     )
                 elif game_mode == GameMode.objects.get(code='snd'):
                     PlayerMapPerformanceSND.objects.create(

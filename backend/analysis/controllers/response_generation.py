@@ -75,7 +75,7 @@ def generate_map_analyses_response(filter_payload) -> List[Dict]:
 
             if tournament_id not in tournament_map_dict:
                 tournament_map_dict[tournament_id] = {
-                    "tournamentTitle": map_analysis.tournament.title,
+                    "tournament_title": map_analysis.tournament.title,
                     "maps": [],
                     "played_date": map_analysis.tournament.played_date
                 }
@@ -84,19 +84,19 @@ def generate_map_analyses_response(filter_payload) -> List[Dict]:
                 "id": map_analysis.id,
                 "title": map_analysis.title,
                 "thumbnail": map_analysis.thumbnail,
-                "teamOne": map_analysis.team_one.name,
-                "teamTwo": map_analysis.team_two.name,
+                "team_one": map_analysis.team_one.name,
+                "team_two": map_analysis.team_two.name,
                 "winner": map_analysis.winner.name,
-                "playedDate": map_analysis.played_date.isoformat(),
+                "played_date": map_analysis.played_date.isoformat(),
                 "map": map_analysis.map.name,
-                "gameMode": map_analysis.game_mode.name
+                "game_mode": map_analysis.game_mode.name
             }
 
             tournament_map_dict[tournament_id]["maps"].append(map_data)
 
         response = [
             {
-                "tournamentTitle": data["tournamentTitle"],
+                "tournament_title": data["tournamen_title"],
                 "maps": data["maps"]
             }
             for tournament_id, data in sorted(
@@ -163,7 +163,7 @@ def generate_series_analyses_response(filter_payload):
 
             if tournament_id not in tournament_map_dict:
                 tournament_map_dict[tournament_id] = {
-                    "tournamentTitle": series_analysis.tournament.title,
+                    "tournament_title": series_analysis.tournament.title,
                     "series": [],
                     "played_date": series_analysis.tournament.played_date
                 }
@@ -172,17 +172,17 @@ def generate_series_analyses_response(filter_payload):
                 "id": series_analysis.id,
                 "title": series_analysis.title,
                 "thumbnail": series_analysis.thumbnail,
-                "teamOne": series_analysis.team_one.name,
-                "teamTwo": series_analysis.team_two.name,
+                "team_one": series_analysis.team_one.name,
+                "team_two": series_analysis.team_two.name,
                 "winner": series_analysis.winner.name,
-                "playedDate": series_analysis.played_date.isoformat(),
+                "played_date": series_analysis.played_date.isoformat(),
             }
 
             tournament_map_dict[tournament_id]["series"].append(series_data)
 
         response = [
             {
-                "tournamentTitle": data["tournamentTitle"],
+                "tournament_title": data["tournament_title"],
                 "series": data["series"]
             }
             for tournament_id, data in sorted(
@@ -279,21 +279,21 @@ def generate_map_analysis_response(filter_payload):
         response = {
             "id": map_analysis.id,
             "created": map_analysis.created,
-            "lastModified": map_analysis.last_modified,
+            "last_modified": map_analysis.last_modified,
             "tournament": map_analysis.tournament.id,
-            "seriesAnalysis": map_analysis.series_analysis.id if map_analysis.series_analysis else None,
+            "series_analysis": map_analysis.series_analysis.id if map_analysis.series_analysis else None,
             "title": map_analysis.title,
             "thumbnail": map_analysis.thumbnail,
             "screenshot": map_analysis.screenshot,
-            "teamOne": map_analysis.team_one.name,
-            "teamTwo": map_analysis.team_two.name,
-            "teamOneScore": map_analysis.team_one_score,
-            "teamTwoScore": map_analysis.team_two_score,
+            "team_one": map_analysis.team_one.name,
+            "team_two": map_analysis.team_two.name,
+            "team_one_score": map_analysis.team_one_score,
+            "team_two_score": map_analysis.team_two_score,
             "winner": map_analysis.winner.name,
-            "playedDate": map_analysis.played_date,
+            "played_date": map_analysis.played_date,
             "map": map_analysis.map.name,
-            "gameMode": map_analysis.game_mode.name,
-            "playerPerformanceData": player_performance_data
+            "game_mode": map_analysis.game_mode.name,
+            "player_performance_data": player_performance_data
         }
 
         if filter_payload.team or filter_payload.players:
@@ -302,7 +302,7 @@ def generate_map_analysis_response(filter_payload):
             for performance in filtered_sorted_performances:
                 filtered_player_performance_data[performance.player.gamertag_clean] = create_map_performance_dict(
                     map_analysis, performance)
-            response["filteredPlayerPerformanceData"] = filtered_player_performance_data
+            response["filtered_player_performance_data"] = filtered_player_performance_data
 
         return response
     except ValidationError as ve:
@@ -351,17 +351,17 @@ def generate_series_analysis_response(filter_payload):
         response = {
             "id": series_analysis.id,
             "created": series_analysis.created,
-            "lastModified": series_analysis.last_modified,
+            "last_modified": series_analysis.last_modified,
             "tournament": series_analysis.tournament.id,
             "title": series_analysis.title,
             "thumbnail": series_analysis.thumbnail,
             "winner": series_analysis.winner.name,
-            "playedDate": series_analysis.played_date,
-            "teamOne": series_analysis.team_one.name,
-            "teamTwo": series_analysis.team_two.name,
-            "teamOneMapCount": series_analysis.team_one_map_count,
-            "teamTwoMapCount": series_analysis.team_two_map_count,
-            "playerPerformanceData": player_performance_data
+            "played_date": series_analysis.played_date,
+            "team_one": series_analysis.team_one.name,
+            "team_two": series_analysis.team_two.name,
+            "team_one_map_count": series_analysis.team_one_map_count,
+            "team_two_map_count": series_analysis.team_two_map_count,
+            "player_performance_data": player_performance_data
         }
 
         if filter_payload.team or filter_payload.players:
@@ -371,7 +371,7 @@ def generate_series_analysis_response(filter_payload):
                 filtered_player_performance_data[performance.player.gamertag_clean] = create_general_performance_dict(
                     series_analysis, performance
                 )
-            response["filteredPlayerPerformanceData"] = filtered_player_performance_data
+            response["filtered_player_performance_data"] = filtered_player_performance_data
 
         return response
     except ValidationError as ve:
@@ -420,11 +420,11 @@ def generate_custom_analysis_response(filter_payload):
         response = {
             "id": custom_analysis.id,
             "created": custom_analysis.created,
-            "lastModified": custom_analysis.last_modified,
+            "last_modified": custom_analysis.last_modified,
             "title": custom_analysis.title,
             "thumbnail": custom_analysis.thumbnail,
             "mapset": build_mapset_structure(custom_analysis),
-            "playerPerformanceData": player_performance_data
+            "player_performance_data": player_performance_data
         }
 
         if filter_payload.team or filter_payload.players:
@@ -434,7 +434,7 @@ def generate_custom_analysis_response(filter_payload):
                 filtered_player_performance_data[performance.player.gamertag_clean] = create_general_performance_dict(
                     performance
                 )
-            response["filteredPlayerPerformanceData"] = filtered_player_performance_data
+            response["filtered_player_performance_data"] = filtered_player_performance_data
 
         return response
     except ValidationError as ve:
@@ -573,11 +573,11 @@ def create_general_performance_dict(performance):
             raise ValidationError("Missing KD ratio field")
 
         perf_dict = {
-            "totalKills": performance.total_kills,
-            "totalDeaths": performance.total_deaths,
-            "kdRatio": kd_ratio,
-            "totalAssists": performance.total_assists,
-            "totalNtk": performance.total_ntk
+            "total_kills": performance.total_kills,
+            "total_deaths": performance.total_deaths,
+            "kd": kd_ratio,
+            "total_assists": performance.total_assists,
+            "total_ntk": performance.total_ntk
         }
 
         return perf_dict
