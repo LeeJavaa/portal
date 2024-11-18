@@ -179,7 +179,7 @@ def create_custom_analysis_object_from_series(request, payload: CustomAnalysisIn
         logger.error(f"Error creating custom analysis: {e}")
         return Response({"error": f"Error occurred while creating custom analysis: {str(e)}"}, status=500)
 
-@api.get("/map_analyses")
+@api.post("/map_analyses")
 def get_map_analyses(request, payload: MapAnalysesFilterIn):
     try:
         result = generate_map_analyses_response(payload)
@@ -188,7 +188,7 @@ def get_map_analyses(request, payload: MapAnalysesFilterIn):
         logger.error(f"Error fetching map analyses: {e}")
         return Response({"error": f"Error fetching map analyses: {str(e)}"}, status=500)
 
-@api.get("/series_analyses")
+@api.post("/series_analyses")
 def get_series_analyses(request, payload: SeriesAnalysesFilterIn):
     try:
         result = generate_series_analyses_response(payload)
@@ -197,7 +197,7 @@ def get_series_analyses(request, payload: SeriesAnalysesFilterIn):
         logger.error(f"Error fetching series analyses: {e}")
         return Response({"error": f"Error fetching series analyses: {str(e)}"}, status=500)
 
-@api.get("/custom_analyses")
+@api.post("/custom_analyses")
 def get_custom_analyses(request):
     try:
         result = generate_custom_analyses_response()
@@ -206,7 +206,7 @@ def get_custom_analyses(request):
         logger.error(f"Error getting custom analyses: {e}")
         return Response({"error": f"Error fetching custom analyses: {str(e)}"}, status=500)
 
-@api.get("/map_analysis")
+@api.post("/map_analysis")
 def get_map_analysis(request, payload: AnalysisFilterIn):
     try:
         result = generate_map_analysis_response(payload)
@@ -215,7 +215,7 @@ def get_map_analysis(request, payload: AnalysisFilterIn):
         logger.error(f"Error getting map analysis: {e}")
         return Response({"error": f"Error fetching map analysis: {str(e)}"}, status=500)
 
-@api.get("/series_analysis")
+@api.post("/series_analysis")
 def get_series_analysis(request, payload: AnalysisFilterIn):
     try:
         result = generate_series_analysis_response(payload)
@@ -224,7 +224,7 @@ def get_series_analysis(request, payload: AnalysisFilterIn):
         logger.error(f"Error getting series analysis: {e}")
         return Response({"error": f"Error fetching series analysis: {str(e)}"}, status=500)
 
-@api.get("/custom_analysis")
+@api.post("/custom_analysis")
 def get_custom_analysis(request, payload: AnalysisFilterIn):
     try:
         result = generate_custom_analysis_response(payload)

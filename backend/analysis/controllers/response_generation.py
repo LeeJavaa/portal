@@ -96,7 +96,7 @@ def generate_map_analyses_response(filter_payload) -> List[Dict]:
 
         response = [
             {
-                "tournament_title": data["tournamen_title"],
+                "tournament_title": data["tournament_title"],
                 "maps": data["maps"]
             }
             for tournament_id, data in sorted(
