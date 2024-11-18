@@ -9,7 +9,7 @@ export default function SeriesAnalysisBlock({
   isSelected,
   onSelect,
 }) {
-  let formatted_played_date = formatDate(analysis.playedDate);
+  let formatted_played_date = formatDate(analysis.played_date);
 
   const handleClick = (e) => {
     if (selectionMode) {
@@ -56,7 +56,7 @@ export default function SeriesAnalysisBlock({
         </h3>
         <div className="text-sm text-muted-foreground">
           <p>
-            {analysis.teamOne} vs {analysis.teamTwo}
+            {analysis.team_one} vs {analysis.team_two}
           </p>
           <p>{formatted_played_date}</p>
         </div>

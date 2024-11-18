@@ -10,8 +10,8 @@ export default function MapAnalysisBlock({
   onSelect,
   seriesGallery,
 }) {
-  let formatted_played_date = formatDate(analysis.playedDate);
-  let thumbnail = analysis.map ? analysis.map : analysis.thumbnail;
+  let formatted_played_date = formatDate(analysis.played_date);
+  let thumbnail = analysis.thumbnail ? analysis.thumbnail : analysis.map;
 
   const handleClick = (e) => {
     if (selectionMode) {
@@ -59,7 +59,7 @@ export default function MapAnalysisBlock({
         {!seriesGallery && (
           <div className="text-sm text-muted-foreground">
             <p>
-              {analysis.teamOne} vs {analysis.teamTwo}
+              {analysis.team_one} vs {analysis.team_two}
             </p>
             <p>{formatted_played_date}</p>
           </div>

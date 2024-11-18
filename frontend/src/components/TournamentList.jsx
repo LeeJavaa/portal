@@ -11,7 +11,7 @@ export default function TournamentList({
   selectedAnalyses,
   toggleAnalysisSelection,
 }) {
-  if (Object.keys(currentAnalyses).length === 0) {
+  if (!currentAnalyses || currentAnalyses.length === 0) {
     return (
       <Alert variant="destructive">
         <TriangleAlert className="h-4 w-4" />
@@ -21,19 +21,21 @@ export default function TournamentList({
     );
   }
 
-  return Object.entries(currentAnalyses).map(
-    ([tournamentId, tournamentData]) => (
-      <Tournament
-        key={tournamentId}
-        tournamentId={tournamentId}
-        tournamentData={tournamentData}
-        showSeries={showSeries}
-        expandedTournaments={expandedTournaments}
-        toggleExpanded={toggleExpanded}
-        selectionMode={selectionMode}
-        selectedAnalyses={selectedAnalyses}
-        toggleAnalysisSelection={toggleAnalysisSelection}
-      />
-    )
-  );
+  return currentAnalyses.map((tournamentData) => (
+    <Tournament
+      key={tournamentData.tournament_title}
+      tournamentId={tournamentData.tournament_title}
+      tournamentData={{
+        tournamentName: tournamentData.tournament_title,
+        maps: showSeries ? [] : tournamentData.maps,
+        series: showSeries ? tournamentData.series : [],
+      }}
+      showSeries={showSeries}
+      expandedTournaments={expandedTournaments}
+      toggleExpanded={toggleExpanded}
+      selectionMode={selectionMode}
+      selectedAnalyses={selectedAnalyses}
+      toggleAnalysisSelection={toggleAnalysisSelection}
+    />
+  ));
 }

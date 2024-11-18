@@ -4,6 +4,9 @@ export default function formatDate(dateString) {
     year: "numeric",
     month: "long",
     day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
     timeZone: "UTC",
+    hour12: true,
   }).format(date);
 }
