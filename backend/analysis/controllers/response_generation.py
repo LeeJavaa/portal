@@ -216,6 +216,7 @@ def generate_custom_analyses_response():
     """
     try:
         custom_analyses = CustomAnalysis.objects.order_by('-created').values(
+            'id',
             'created',
             'title',
             'thumbnail'
@@ -223,6 +224,7 @@ def generate_custom_analyses_response():
 
         result = [
             {
+                "id": custom_analysis["id"],
                 "created": custom_analysis["created"].isoformat(),
                 "title": custom_analysis["title"],
                 "thumbnail": custom_analysis["thumbnail"]
