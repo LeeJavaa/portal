@@ -1,21 +1,49 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import {
+  createSeriesAnalysis,
+  createCustomAnalysisFromMaps,
+  createCustomAnalysisFromSeries,
+} from "@/api/newSeriesCustomAnalysisForm";
 import SeriesCustomDialog from "./new-analysis-form/SeriesCustomDialog";
+import { Button } from "@/components/ui/button";
 
 export default function SelectionMenu({ showSeries, selectedAnalyses }) {
+  const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [analysisType, setAnalysisType] = useState(null);
+  const selectedIds = selectedAnalyses.map((analysis) => analysis.id);
 
-  const handleCreateAnalysis = (data) => {
-    setDialogOpen(false);
+  const handleCreateAnalysis = async (data) => {
+    try {
+      let response;
+      if (analysisType === "series") {
+        response = await createSeriesAnalysis(selectedIds, data.title);
+        await router.push(`/analysis/series/${response.id}`);
+      } else {
+        if (showSeries) {
+          response = await createCustomAnalysisFromSeries(
+            selectedIds,
+            data.title
+          );
+        } else {
+          response = await createCustomAnalysisFromMaps(
+            selectedIds,
+            data.title
+          );
+        }
+        await router.push(`/analysis/custom/${response.id}`);
+      }
+      setDialogOpen(false);
+    } catch (error) {
+      return { error: error.message };
+    }
   };
 
   const openDialog = (type) => {
     setAnalysisType(type);
     setDialogOpen(true);
   };
-
-  const selectedIds = selectedAnalyses.map((analysis) => analysis.id);
 
   return (
     <>

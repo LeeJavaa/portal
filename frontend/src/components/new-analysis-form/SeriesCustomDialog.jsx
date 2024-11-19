@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { newSeriesCustomAnalysisSchema } from "@/validators/newSeriesCustomAnalysis";
-
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,8 @@ import {
 import { Input } from "@/components/ui/input";
 
 const AnalysisDialog = ({ isOpen, onClose, onSubmit, type, selectedIds }) => {
+  const [error, setError] = useState("");
+
   const form = useForm({
     resolver: zodResolver(newSeriesCustomAnalysisSchema),
     defaultValues: {
@@ -30,8 +32,14 @@ const AnalysisDialog = ({ isOpen, onClose, onSubmit, type, selectedIds }) => {
     },
   });
 
-  const handleSubmit = (values) => {
-    onSubmit(values);
+  const handleSubmit = async (values) => {
+    const isValid = await form.trigger();
+    if (isValid) {
+      const result = await onSubmit(values);
+      if (result?.error) {
+        setError(result.error);
+      }
+    }
   };
 
   return (
@@ -47,7 +55,11 @@ const AnalysisDialog = ({ isOpen, onClose, onSubmit, type, selectedIds }) => {
             rest for you.
           </DialogDescription>
         </DialogHeader>
-
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
