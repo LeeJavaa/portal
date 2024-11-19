@@ -50,6 +50,7 @@ export default function HomeContent({
   };
 
   const currentAnalyses = showSeries ? seriesData : mapData;
+  const noDataAvailable = !currentAnalyses || currentAnalyses.length === 0;
 
   return (
     <>
@@ -61,15 +62,27 @@ export default function HomeContent({
         activeFilters={activeFilters}
         handleApplyFilter={handleApplyFilter}
       />
-      <TournamentList
-        currentAnalyses={currentAnalyses}
-        showSeries={showSeries}
-        expandedTournaments={expandedTournaments}
-        toggleExpanded={toggleExpanded}
-        selectionMode={selectionMode}
-        selectedAnalyses={selectedAnalyses}
-        toggleAnalysisSelection={toggleAnalysisSelection}
-      />
+      {noDataAvailable ? (
+        <Alert variant="destructive">
+          <TriangleAlert className="h-4 w-4" />
+          <AlertTitle>No Data Available</AlertTitle>
+          <AlertDescription>
+            {showSeries
+              ? "No series analyses found. Try switching to map view or adjusting your filters."
+              : "No map analyses found. Try switching to series view or adjusting your filters."}
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <TournamentList
+          currentAnalyses={currentAnalyses}
+          showSeries={showSeries}
+          expandedTournaments={expandedTournaments}
+          toggleExpanded={toggleExpanded}
+          selectionMode={selectionMode}
+          selectedAnalyses={selectedAnalyses}
+          toggleAnalysisSelection={toggleAnalysisSelection}
+        />
+      )}
       {selectionMode && (
         <SelectionMenu
           selectedAnalyses={selectedAnalyses}

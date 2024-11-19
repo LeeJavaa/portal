@@ -15,6 +15,7 @@ async function getData() {
 
 export default async function CustomPage() {
   const { analyses, error } = await getData();
+  const noAnalyses = !analyses || analyses.length === 0;
 
   if (error) {
     return (
@@ -31,9 +32,20 @@ export default async function CustomPage() {
       <h1 className="text-2xl font-bold text-center mb-8">
         Your Custom Analyses
       </h1>
-      <Suspense fallback={<div>Loading...</div>}>
-        <AnalysisGrid analyses={analyses} showCustoms={true} />
-      </Suspense>
+      {noAnalyses ? (
+        <Alert>
+          <TriangleAlert className="h-4 w-4" />
+          <AlertTitle>No Custom Analyses</AlertTitle>
+          <AlertDescription>
+            You haven't created any custom analyses yet. Create a custom
+            analysis by selecting multiple maps or series from the home page.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <Suspense fallback={<div>Loading...</div>}>
+          <AnalysisGrid analyses={analyses} showCustoms={true} />
+        </Suspense>
+      )}
     </main>
   );
 }
