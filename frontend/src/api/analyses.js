@@ -9,6 +9,7 @@ export const getMapAnalyses = async (filters = {}) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(filters),
+      cache: "no-cache",
     });
 
     if (!response.ok) {
@@ -30,6 +31,7 @@ export const getSeriesAnalyses = async (filters = {}) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(filters),
+      cache: "no-cache",
     });
 
     if (!response.ok) {
@@ -40,5 +42,24 @@ export const getSeriesAnalyses = async (filters = {}) => {
     return data.series_analyses;
   } catch (error) {
     throw new Error("Failed to fetch series analyses");
+  }
+};
+
+export const getCustomAnalyses = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/custom_analyses`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-cache",
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch custom analyses: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.custom_analyses;
+  } catch (error) {
+    throw new Error("Failed to fetch custom analyses");
   }
 };
