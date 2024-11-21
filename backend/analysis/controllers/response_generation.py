@@ -154,6 +154,11 @@ def generate_series_analyses_response(filter_payload):
                 playerseriesperformance__player__gamertag_clean=filter_payload.player
             ).distinct()
 
+        if filter_payload.map:
+            series_analyses_query = series_analyses_query.filter(
+                maps__map__name=filter_payload.map
+            ).distinct()
+
         series_analyses_query = series_analyses_query.order_by('-played_date')
 
         tournament_map_dict = {}

@@ -71,6 +71,7 @@ class MapAnalysesFilterIn(Schema):
 
 class SeriesAnalysesFilterIn(Schema):
     tournament: Optional[int] = None
+    map: Optional[str] = None
     team_one: Optional[str] = None
     team_two: Optional[str] = None
     player: Optional[str] = None
