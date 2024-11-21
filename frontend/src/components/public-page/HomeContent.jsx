@@ -3,16 +3,19 @@ import { useState } from "react";
 import ControlMenu from "@/components/ControlMenu";
 import SelectionMenu from "@/components/SelectionMenu";
 import TournamentList from "@/components/TournamentList";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { TriangleAlert } from "lucide-react";
 
 export default function HomeContent({
   mapData,
   seriesData,
   initialShowSeries,
+  initialActiveFilters,
 }) {
   const [showSeries, setShowSeries] = useState(initialShowSeries);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedAnalyses, setSelectedAnalyses] = useState([]);
-  const [activeFilters, setActiveFilters] = useState(0);
+  const [activeFilters, setActiveFilters] = useState(initialActiveFilters);
   const [expandedTournaments, setExpandedTournaments] = useState({});
 
   const toggleExpanded = (tournamentId) => {
@@ -40,8 +43,8 @@ export default function HomeContent({
     });
   };
 
-  const handleApplyFilter = () => {
-    setActiveFilters((prev) => prev + 1);
+  const handleApplyFilter = (filterCount) => {
+    setActiveFilters(filterCount);
   };
 
   const handleShowSeriesChange = (value) => {

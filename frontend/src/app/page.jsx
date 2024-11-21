@@ -5,11 +5,24 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlert } from "lucide-react";
 import { cookies } from "next/headers";
 
-async function getData() {
+async function getData(searchParams) {
+  const filters = {
+    tournament: searchParams.tournament || undefined,
+    game_mode: searchParams.game_mode || undefined,
+    map: searchParams.map || undefined,
+    team_one: searchParams.team_one || undefined,
+    team_two: searchParams.team_two || undefined,
+    player: searchParams.player || undefined,
+  };
+
+  const cleanFilters = Object.fromEntries(
+    Object.entries(filters).filter(([_, v]) => v !== undefined)
+  );
+
   try {
     const [mapData, seriesData] = await Promise.all([
-      getMapAnalyses(),
-      getSeriesAnalyses(),
+      getMapAnalyses(cleanFilters),
+      getSeriesAnalyses(cleanFilters),
     ]);
 
     return {
@@ -26,8 +39,9 @@ async function getData() {
   }
 }
 
-export default async function Home() {
-  const { mapData, seriesData, error } = await getData();
+export default async function Home({ searchParams }) {
+  const { mapData, seriesData, error } = await getData(searchParams);
+  const activeFilters = Object.keys(searchParams).length;
 
   if (error) {
     return (
@@ -52,6 +66,7 @@ export default async function Home() {
           mapData={mapData}
           seriesData={seriesData}
           initialShowSeries={initialShowSeries}
+          initialActiveFilters={activeFilters}
         />
       </Suspense>
     </main>

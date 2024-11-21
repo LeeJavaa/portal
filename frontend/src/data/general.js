@@ -98,6 +98,41 @@ export const TOURNAMENTS = {
   },
 };
 
+export const PLAYERS = {
+  KENNY: {
+    dirty: "Kenny",
+    clean: "Kenny",
+  },
+  DASHY: {
+    dirty: "Dashy",
+    clean: "Dashy",
+  },
+  PRED: {
+    dirty: "Pred",
+    clean: "Pred",
+  },
+  SHOTZZY: {
+    dirty: "Shotzzy",
+    clean: "Shotzzy",
+  },
+  SIB: {
+    dirty: "Sib",
+    clean: "Sib",
+  },
+  KISMET: {
+    dirty: "Kismet",
+    clean: "Kismet",
+  },
+  SKYZ: {
+    dirty: "Skyz",
+    clean: "Skyz",
+  },
+  HYDRA: {
+    dirty: "Hydra",
+    clean: "Hydra",
+  },
+};
+
 export const getGameMode = (mode) => {
   const gameMode = Object.values(GAME_MODES).find((gm) =>
     gm.identifiers.some((id) => mode.includes(id))
