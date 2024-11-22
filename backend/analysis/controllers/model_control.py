@@ -68,10 +68,13 @@ def create_map_analysis(payload: Dict[str, Any]) -> int:
             except ObjectDoesNotExist:
                 raise ObjectDoesNotExist(f"Player {player_name} does not exist. Are you sure that's their gamer tag?")
 
+        thumbnail = f"{map_object.name.lower()}_{team_one.code.lower()}_{team_two.code.lower()}"
+
         with transaction.atomic():
             map_analysis = MapAnalysis.objects.create(
                 tournament=tournament,
                 title=payload.title,
+                thumbnail=thumbnail,
                 screenshot=payload.scoreboard_file_name,
                 team_one=team_one,
                 team_two=team_two,
@@ -232,10 +235,14 @@ def create_series_analysis(map_ids, title):
             stats['total_assists'] += performance.assists
             stats['total_ntk'] += performance.ntk
 
+        first_map_select = map_analyses.select_related('map', 'team_one', 'team_two')[0]
+        thumbnail = f"{first_map_select.map.name.lower()}_{first_map_select.team_one.code.lower()}_{first_map_select.team_two.code.lower()}"
+
         with transaction.atomic():
             series_analysis = SeriesAnalysis.objects.create(
                 tournament=first_map.tournament,
                 title=title,
+                thumbnail=thumbnail,
                 winner_id=winning_team_id,
                 played_date=earliest_played_date,
                 team_one=first_map.team_one,
