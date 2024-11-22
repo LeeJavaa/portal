@@ -29,7 +29,7 @@ export default function MapAnalysisBlock({
     >
       <div className="relative overflow-hidden rounded-lg">
         <Image
-          src={`http://localhost/static/analysis/img/${thumbnail}.jpg`}
+          src={`https://portal-web-public.s3.us-east-1.amazonaws.com/thumbnails/${thumbnail}.png`}
           width={300}
           height={150}
           alt="Analysis Thumbnail Image"
