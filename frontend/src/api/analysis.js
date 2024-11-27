@@ -52,3 +52,24 @@ export const getScoreboardUrl = async (fileName) => {
     throw new Error(`Failed to fetch scoreboard URL: ${error.message}`);
   }
 };
+
+export const deleteMapAnalysis = async (id) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/map_analysis`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: parseInt(id) }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete map analysis: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.status;
+  } catch (error) {
+    throw new Error(`Failed to delete map analysis: ${error.message}`);
+  }
+};

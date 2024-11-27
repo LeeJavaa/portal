@@ -1,9 +1,12 @@
 "use client";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { deleteMapAnalysis } from "@/api/analysis";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { analysisFiltersSchema } from "@/validators/analysisFilters";
 import { getPlayerCleanName, getTeamCode } from "@/data/general";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +21,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -47,6 +51,9 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 export default function FilterBar({ data, scoreboardUrl }) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -103,6 +110,20 @@ export default function FilterBar({ data, scoreboardUrl }) {
       players: [],
     });
     router.push(`/analysis/map/${data.id}`);
+  };
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      setDeleteError(null);
+      await deleteMapAnalysis(data.id);
+      setIsDeleteDialogOpen(false);
+      router.push("/");
+    } catch (error) {
+      setDeleteError(error.message);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -274,8 +295,15 @@ export default function FilterBar({ data, scoreboardUrl }) {
             </DialogContent>
           </Dialog>
         )}
-        <Dialog>
-          <DialogTrigger asChild className="hover:underline">
+        <Dialog
+          open={isDeleteDialogOpen}
+          onOpenChange={(open) => {
+            setIsDeleteDialogOpen(open);
+            // Clear error when dialog is closed
+            if (!open) setDeleteError(null);
+          }}
+        >
+          <DialogTrigger asChild>
             <Button variant="outline">
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -291,6 +319,28 @@ export default function FilterBar({ data, scoreboardUrl }) {
               </DialogDescription>
             </DialogHeader>
             <CircleAlert className="w-32 h-32 mx-auto" />
+            {deleteError && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  Failed to delete analysis: {deleteError}
+                </AlertDescription>
+              </Alert>
+            )}
+            <DialogFooter className="flex gap-x-2 justify-center">
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
