@@ -28,3 +28,27 @@ export const getMapAnalysis = async (id, filters = {}) => {
     throw new Error(`Failed to fetch map analysis: ${error.message}`);
   }
 };
+
+export const getScoreboardUrl = async (fileName) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/view_scoreboard_url?file_name=${encodeURIComponent(
+        fileName
+      )}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-cache",
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to fetch scoreboard URL: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.url;
+  } catch (error) {
+    throw new Error(`Failed to fetch scoreboard URL: ${error.message}`);
+  }
+};

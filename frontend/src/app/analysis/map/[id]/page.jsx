@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getMapAnalysis } from "@/api/analysis";
+import { getMapAnalysis, getScoreboardUrl } from "@/api/analysis";
 import MapLoading from "@/components/analysis-page/MapLoading";
 import FilterBar from "@/components/analysis-page/FilterBar";
 import MetaDescription from "@/components/analysis-page/MetaDescription";
@@ -10,6 +10,7 @@ import { TriangleAlert } from "lucide-react";
 
 export default async function Page({ params, searchParams }) {
   let mapAnalysis;
+  let scoreboardUrl;
   let error;
 
   const getFiltersFromSearchParams = (searchParams) => {
@@ -26,6 +27,11 @@ export default async function Page({ params, searchParams }) {
   try {
     const filters = getFiltersFromSearchParams(searchParams);
     mapAnalysis = await getMapAnalysis(params.id, filters);
+
+    if (mapAnalysis.screenshot) {
+      scoreboardUrl = await getScoreboardUrl(mapAnalysis.screenshot);
+      console.log(scoreboardUrl);
+    }
   } catch (e) {
     error = e.message;
   }
@@ -53,7 +59,7 @@ export default async function Page({ params, searchParams }) {
           gameMode={mapAnalysis.game_mode}
         />
         <Separator className="mt-8" />
-        <FilterBar data={mapAnalysis} />
+        <FilterBar data={mapAnalysis} scoreboardUrl={scoreboardUrl} />
       </main>
     </Suspense>
   );

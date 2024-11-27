@@ -44,8 +44,9 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
-export default function FilterBar({ data }) {
+export default function FilterBar({ data, scoreboardUrl }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -237,18 +238,42 @@ export default function FilterBar({ data }) {
         </form>
       </Form>
       <div className="flex gap-x-5">
-        <Dialog>
-          <DialogTrigger className="hover:underline">
-            View Original
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Original Scoreboard Screenshot</DialogTitle>
-              <DialogDescription>Behold your eyes on heaven,</DialogDescription>
-            </DialogHeader>
-            <ImageIcon className="w-32 h-32 mx-auto" />
-          </DialogContent>
-        </Dialog>
+        {data.screenshot && (
+          <Dialog>
+            <DialogTrigger className="hover:underline">
+              View Original
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[800px]">
+              <DialogHeader>
+                <DialogTitle>Original Scoreboard Screenshot</DialogTitle>
+                <DialogDescription>For your viewing pleasure</DialogDescription>
+              </DialogHeader>
+              <div className="relative w-full aspect-video">
+                {scoreboardUrl ? (
+                  <>
+                    <Image
+                      src={scoreboardUrl}
+                      alt="Original Scoreboard"
+                      className="rounded-lg object-contain"
+                      fill
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.nextSibling.style.display = "block";
+                      }}
+                      unoptimized
+                    />
+                    <ImageIcon
+                      className="w-32 h-32 mx-auto hidden"
+                      aria-label="Image failed to load"
+                    />
+                  </>
+                ) : (
+                  <ImageIcon className="w-32 h-32 mx-auto" />
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
         <Dialog>
           <DialogTrigger asChild className="hover:underline">
             <Button variant="outline">
