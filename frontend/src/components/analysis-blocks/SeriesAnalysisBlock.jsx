@@ -1,3 +1,5 @@
+"use client";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import formatDate from "../../utils/dateHandling";
@@ -9,6 +11,7 @@ export default function SeriesAnalysisBlock({
   isSelected,
   onSelect,
 }) {
+  const [imageError, setImageError] = useState(false);
   let formatted_played_date = formatDate(analysis.played_date);
 
   const handleClick = (e) => {
@@ -16,6 +19,10 @@ export default function SeriesAnalysisBlock({
       e.preventDefault();
       onSelect();
     }
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
   };
 
   const content = (
@@ -27,7 +34,11 @@ export default function SeriesAnalysisBlock({
     >
       <div className="relative overflow-hidden rounded-lg">
         <Image
-          src={`https://portal-web-public.s3.us-east-1.amazonaws.com/thumbnails/${analysis.thumbnail}.png`}
+          src={
+            imageError
+              ? "https://portal-web-public.s3.us-east-1.amazonaws.com/thumbnails/placeholder.png"
+              : `https://portal-web-public.s3.us-east-1.amazonaws.com/thumbnails/${analysis.thumbnail}.png`
+          }
           width={300}
           height={150}
           alt="Analysis Thumbnail Image"
@@ -35,6 +46,7 @@ export default function SeriesAnalysisBlock({
             selectionMode ? "" : "group-hover:scale-105"
           }`}
           style={{ aspectRatio: "300/150", objectFit: "cover" }}
+          onError={handleImageError}
         />
         <div
           className={`absolute inset-0 bg-gradient-to-b from-transparent to-black/70 ${
