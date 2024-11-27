@@ -4,6 +4,7 @@ import HomeContent from "@/components/public-page/HomeContent";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlert } from "lucide-react";
 import { cookies } from "next/headers";
+import HomeContentLoading from "@/components/loading/HomeContentLoading";
 
 async function getData(searchParams) {
   const filters = {
@@ -61,7 +62,7 @@ export default async function Home({ searchParams }) {
 
   return (
     <main className="container py-8">
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<HomeContentLoading />}>
         <HomeContent
           mapData={mapData}
           seriesData={seriesData}

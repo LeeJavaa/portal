@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import { getMapAnalysis, getScoreboardUrl } from "@/api/analysis";
-import MapLoading from "@/components/analysis-page/MapLoading";
-import FilterBar from "@/components/analysis-page/FilterBar";
+import DataVis from "@/components/analysis-page/DataVis";
+import MapAnalysisLoading from "@/components/loading/MapAnalysisLoading";
 import MetaDescription from "@/components/analysis-page/MetaDescription";
+import FilterBar from "@/components/analysis-page/FilterBar";
 import StaticScoreboard from "@/components/StaticScoreboard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
@@ -47,7 +48,7 @@ export default async function Page({ params, searchParams }) {
   }
 
   return (
-    <Suspense fallback={<MapLoading />}>
+    <Suspense fallback={<MapAnalysisLoading />}>
       <main className="w-full max-w-screen-xl mx-auto">
         <h1 className="text-center text-3xl font-bold mt-5 mb-8">
           {mapAnalysis.title}
@@ -60,14 +61,8 @@ export default async function Page({ params, searchParams }) {
         />
         <Separator className="mt-8" />
         <FilterBar data={mapAnalysis} scoreboardUrl={scoreboardUrl} />
+        <DataVis />
       </main>
     </Suspense>
   );
-}
-{
-  /* <MetaDescription />
-      <StaticScoreboard playerData={} caption="" gameMode="hp" />
-      <Separator className="mt-8" />
-      <FilterBar />
-      <DataVis /> */
 }

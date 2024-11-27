@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function MapLoading() {
+export default function MapAnalysisLoading() {
   return (
     <main className="w-full max-w-screen-xl mx-auto">
       {/* Title skeleton */}
