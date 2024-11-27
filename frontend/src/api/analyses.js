@@ -3,7 +3,7 @@ const API_BASE_URL =
 
 export const getMapAnalyses = async (filters = {}) => {
   try {
-    const response = await fetch(`http://localhost:8000/api/map_analyses`, {
+    const response = await fetch(`${API_BASE_URL}/map_analyses`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
