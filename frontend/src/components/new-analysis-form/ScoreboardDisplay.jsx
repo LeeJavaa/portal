@@ -3,54 +3,44 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Scoreboard from "@/components/Scoreboard";
-
-const initializePlayerStats = (players) => {
-  const stats = {};
-  players.forEach((player) => {
-    if (!player.name?.[0]) return;
-
-    const playerStats = {};
-    Object.entries(player).forEach(([key, value]) => {
-      if (key !== "name") {
-        playerStats[key] = Array.isArray(value) ? value[0] : value;
-      }
-    });
-
-    stats[player.name[0]] = playerStats;
-  });
-  return stats;
-};
+import { Loader } from "lucide-react";
 
 export default function ScoreboardDisplay({ form, setFormStep, data }) {
-  const [playerStats, setPlayerStats] = useState({});
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
-    if (data?.player_stats) {
-      const initialStats = initializePlayerStats(data.player_stats);
-      setPlayerStats(initialStats);
-      form.setValue("player_stats", initialStats);
+    const currentPlayerStats = form.getValues("player_stats");
+    const isPlayerStatsEmpty = !currentPlayerStats;
+    if (data?.player_stats && isPlayerStatsEmpty) {
+      form.setValue("player_stats", data.player_stats);
     }
+    setIsDataLoaded(true);
   }, [data, form]);
 
-  const handlePlayerDataChange = (playerName, key, value) => {
-    setPlayerStats((prev) => ({
-      ...prev,
-      [playerName]: {
-        ...prev[playerName],
-        [key]: value,
-      },
-    }));
-  };
-
-  const handleConfirm = async () => {
-    form.setValue("player_stats", playerStats);
-    const valid = await form.trigger("player_stats");
-    if (valid) {
+  const handleConfirm = () => {
+    const isValid = form.trigger("player_stats");
+    if (isValid) {
       setFormStep(4);
     }
   };
 
-  if (!data?.player_stats || data.player_stats.length === 0) {
+  if (!isDataLoaded) {
+    return (
+      <>
+        <Alert>
+          <AlertTitle>Hold on!</AlertTitle>
+          <AlertDescription>
+            We're just busy processing that scoreboard real quick
+          </AlertDescription>
+        </Alert>
+        <Loader className=" h-15 w-15 animate-spin" />
+      </>
+    );
+  }
+
+  const playerStatsValue = form.getValues("player_stats");
+
+  if (!playerStatsValue || Object.keys(playerStatsValue).length === 0) {
     return (
       <Alert variant="destructive" className="border-2 mb-2">
         <AlertTitle className="font-bold">No player data found</AlertTitle>
@@ -84,10 +74,9 @@ export default function ScoreboardDisplay({ form, setFormStep, data }) {
       </Alert>
       <Scoreboard
         gameMode={gameMode}
-        playerData={data.player_stats}
+        playerData={playerStatsValue}
         caption="Scoreboard awaiting confirmation"
-        input={true}
-        onPlayerDataChange={handlePlayerDataChange}
+        form={form}
       />
       <div className="w-full flex gap-2">
         <Button type="button" onClick={handleConfirm}>

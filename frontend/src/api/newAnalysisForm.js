@@ -130,6 +130,8 @@ export const createMapAnalysis = async (formData) => {
       throw new Error(errorData.error || "Failed to create analysis");
     }
 
+    console.log(response);
+
     return await response.json();
   } catch (error) {
     if (error.name === "AbortError") {

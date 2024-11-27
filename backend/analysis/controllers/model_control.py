@@ -62,7 +62,8 @@ def create_map_analysis(payload: Dict[str, Any]) -> int:
         winner = team_one if payload.team_one_score > payload.team_two_score else team_two
 
         player_objects = {}
-        for player_name in payload.player_stats.keys():
+        for player_stat in payload.player_stats:
+            player_name = player_stat.name
             try:
                 player_objects[player_name] = Player.objects.get(gamertag_dirty=player_name)
             except ObjectDoesNotExist:
@@ -86,8 +87,9 @@ def create_map_analysis(payload: Dict[str, Any]) -> int:
                 game_mode=game_mode
             )
 
-            for player_name, stats in payload.player_stats.items():
-                kills, deaths = parse_kd(stats['kd'])
+            for player_stat in payload.player_stats:
+                player_name = player_stat.name
+                kills, deaths = parse_kd(player_stat.kd)
                 kd_ratio = kills / deaths if deaths > 0 else kills
 
                 player_perf = PlayerMapPerformance.objects.create(
@@ -96,41 +98,41 @@ def create_map_analysis(payload: Dict[str, Any]) -> int:
                     kills=kills,
                     deaths=deaths,
                     kd_ratio=kd_ratio,
-                    assists=int(stats['assists']),
-                    ntk=int(stats['non_traded_kills'])
+                    assists=int(player_stat.assists),
+                    ntk=int(player_stat.non_traded_kills),
+                    highest_streak=int(player_stat.highest_streak),
+                    damage=int(player_stat.damage),
                 )
 
                 if game_mode == GameMode.objects.get(code='hp'):
                     PlayerMapPerformanceHP.objects.create(
                         player_performance=player_perf,
-                        highest_streak=int(stats['highest_streak']),
-                        damage=int(stats['damage']),
-                        hill_time=parse_time_to_seconds(stats['hill_time']),
-                        average_hill_time=parse_time_to_seconds(stats['average_hill_time']),
-                        objective_kills=int(stats['objective_kills']),
-                        contested_hill_time=parse_time_to_seconds(stats['contested_hill_time']),
-                        kills_per_hill=float(stats['kills_per_hill']),
-                        damage_per_hill=float(stats['damage_per_hill'])
+                        hill_time=parse_time_to_seconds(player_stat.mode_stat_one),
+                        average_hill_time=parse_time_to_seconds(player_stat.mode_stat_two),
+                        objective_kills=int(player_stat.mode_stat_three),
+                        contested_hill_time=parse_time_to_seconds(player_stat.mode_stat_four),
+                        kills_per_hill=float(player_stat.mode_stat_five),
+                        damage_per_hill=float(player_stat.mode_stat_six)
                     )
                 elif game_mode == GameMode.objects.get(code='snd'):
                     PlayerMapPerformanceSND.objects.create(
                         player_performance=player_perf,
-                        bombs_planted=int(stats.get('boms_planted', 0)),
-                        bombs_defused=int(stats.get('bombs_defused', 0)),
-                        first_bloods=int(stats.get('first_bloods', 0)),
-                        first_deaths=int(stats.get('first_deaths', 0)),
-                        kills_per_round=float(stats['kills_per_round']),
-                        damage_per_round=float(stats['damage_per_round'])
+                        bombs_planted=int(player_stat.mode_stat_one),
+                        bombs_defused=int(player_stat.mode_stat_two),
+                        first_bloods=int(player_stat.mode_stat_three),
+                        first_deaths=int(player_stat.mode_stat_four),
+                        kills_per_round=float(player_stat.mode_stat_five),
+                        damage_per_round=float(player_stat.mode_stat_six)
                     )
                 elif game_mode == GameMode.objects.get(code='ctl'):
                     PlayerMapPerformanceControl.objects.create(
                         player_performance=player_perf,
-                        tiers_captured=int(stats.get('tiers_captured', 0)),
-                        objective_kills=int(stats['objective_kills']),
-                        offense_kills=int(stats.get('offensive_kills', 0)),
-                        defense_kills=int(stats.get('defensive_kills', 0)),
-                        kills_per_round=float(stats['kills_per_round']),
-                        damage_per_round=float(stats['damage_per_round'])
+                        tiers_captured=int(player_stat.mode_stat_one),
+                        objective_kills=int(player_stat.mode_stat_two),
+                        offense_kills=int(player_stat.mode_stat_three),
+                        defense_kills=int(player_stat.mode_stat_four),
+                        kills_per_round=float(player_stat.mode_stat_five),
+                        damage_per_round=float(player_stat.mode_stat_six)
                     )
 
             try:

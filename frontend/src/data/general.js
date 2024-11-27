@@ -10,40 +10,32 @@ export const GAME_MODES = {
     identifiers: ["search"],
   },
   CONTROL: {
-    code: "cntrl",
+    code: "ctl",
     name: "Control",
     identifiers: ["control"],
   },
 };
 
 export const MAPS = {
-  HIGHRISE: {
-    code: "highrise",
-    name: "Highrise",
+  PROTOCOL: {
+    code: "protocol",
+    name: "Protocol",
   },
-  INVASION: {
-    code: "invasion",
-    name: "Invasion",
+  REDCARD: {
+    code: "redcard",
+    name: "Red Card",
   },
-  KARACHI: {
-    code: "karachi",
-    name: "Karachi",
+  REWIND: {
+    code: "rewind",
+    name: "Rewind",
   },
-  RIO: {
-    code: "rio",
-    name: "Rio",
+  SKYLINE: {
+    code: "skyline",
+    name: "Skyline",
   },
-  SIXSTAR: {
-    code: "sixstar",
-    name: "Six Star",
-  },
-  SUBBASE: {
-    code: "subbase",
-    name: "Sub Base",
-  },
-  VISTA: {
-    code: "vista",
-    name: "Vista",
+  VAULT: {
+    code: "vault",
+    name: "Vault",
   },
 };
 

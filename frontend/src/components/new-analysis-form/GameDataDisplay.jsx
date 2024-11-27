@@ -42,7 +42,9 @@ export default function GameDataDisplay({ form, setFormStep, data }) {
   };
 
   useEffect(() => {
-    if (data?.metadata) {
+    const currentFormValues = form.getValues();
+    const isFormEmpty = !currentFormValues.game_mode;
+    if (data?.metadata && isFormEmpty) {
       form.reset({
         game_mode: getGameMode(data.metadata.game_mode[0]),
         map: getMapName(data.metadata.map_name[0]),

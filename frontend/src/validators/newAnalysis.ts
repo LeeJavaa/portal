@@ -1,44 +1,19 @@
 import { z } from "zod";
 
-const basePlayerStats = z.object({
+const playerStatsSchema = z.object({
+  name: z.string(),
   kd: z.string(),
   assists: z.string(),
   non_traded_kills: z.string(),
-});
-
-const hardpointPlayerStats = basePlayerStats.extend({
   highest_streak: z.string(),
   damage: z.string(),
-  hill_time: z.string(),
-  average_hill_time: z.string(),
-  objective_kills: z.string(),
-  contested_hill_time: z.string(),
-  kills_per_hill: z.string(),
-  damage_per_hill: z.string(),
+  mode_stat_one: z.string(),
+  mode_stat_two: z.string(),
+  mode_stat_three: z.string(),
+  mode_stat_four: z.string(),
+  mode_stat_five: z.string(),
+  mode_stat_six: z.string(),
 });
-
-const sndPlayerStats = basePlayerStats.extend({
-  bombs_planted: z.string(),
-  bombs_defused: z.string(),
-  first_bloods: z.string(),
-  first_deaths: z.string(),
-  kills_per_round: z.string(),
-  damage_per_round: z.string(),
-});
-
-const controlPlayerStats = basePlayerStats.extend({
-  tiers_captured: z.string(),
-  objective_kills: z.string(),
-  offense_kills: z.string(),
-  defense_kills: z.string(),
-  kills_per_round: z.string(),
-  damage_per_round: z.string(),
-});
-
-const playerStatsSchema = z.record(
-  z.string(),
-  z.union([hardpointPlayerStats, sndPlayerStats, controlPlayerStats])
-);
 
 export const analysisSchema = z.object({
   game_mode: z.string().min(1, "Please specify the game mode."),

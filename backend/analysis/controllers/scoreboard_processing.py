@@ -31,9 +31,9 @@ class GameDataField(Enum):
     MAP_NAME = ((215, 88), (549, 127))
     GAME_TIME = ((215, 133), (549, 167))
     TEAM_ONE_NAME = ((190, 256), (670, 308))
-    TEAM_ONE_SCORE = ((812, 72), (892, 129))
+    TEAM_ONE_SCORE = ((813, 124), (890, 188))
     TEAM_TWO_NAME = ((190, 617), (668, 665))
-    TEAM_TWO_SCORE = ((1026, 70), (1108, 127))
+    TEAM_TWO_SCORE = ((1033, 124), (1110, 188))
 
 class PlayerDataField(Enum):
     """
@@ -45,12 +45,12 @@ class PlayerDataField(Enum):
     NON_TRADED_KILLS = ((896, 324), (972, 368))
     HIGHEST_STREAK = ((998, 324), (1074, 368))
     DAMAGE = ((1100, 324), (1198, 368))
-    HILL_TIME = ((1224, 324), (1312, 368))
-    AVERAGE_HILL_TIME = ((1335, 324), (1411, 368))
-    OBJECTIVE_KILLS = ((1437, 324), (1513, 368))
-    CONTESTED_HILL_TIME = ((1539, 324), (1615, 368))
-    KILLS_PER_HILL = ((1641, 324), (1717, 368))
-    DAMAGE_PER_HILL = ((1727, 324), (1825, 368))
+    MODE_STAT_ONE = ((1224, 324), (1312, 368))
+    MODE_STAT_TWO = ((1335, 324), (1411, 368))
+    MODE_STAT_THREE = ((1437, 324), (1513, 368))
+    MODE_STAT_FOUR = ((1539, 324), (1615, 368))
+    MODE_STAT_FIVE = ((1641, 324), (1717, 368))
+    MODE_STAT_SIX = ((1727, 324), (1825, 368))
 
 @dataclass
 class OCRDetection:
@@ -72,12 +72,12 @@ class PlayerStats:
     non_traded_kills: Tuple[str, str]
     highest_streak: Tuple[str, str]
     damage: Tuple[str, str]
-    hill_time: Tuple[str, str]
-    average_hill_time: Tuple[str, str]
-    objective_kills: Tuple[str, str]
-    contested_hill_time: Tuple[str, str]
-    kills_per_hill: Tuple[str, str]
-    damage_per_hill: Tuple[str, str]
+    mode_stat_one: Tuple[str, str]
+    mode_stat_two: Tuple[str, str]
+    mode_stat_three: Tuple[str, str]
+    mode_stat_four: Tuple[str, str]
+    mode_stat_five: Tuple[str, str]
+    mode_stat_six: Tuple[str, str]
 
 
 def extract_data(scoreboard: bytes):
@@ -145,12 +145,12 @@ def process_data(game_data, player_data):
                     "non_traded_kills": player.non_traded_kills,
                     "highest_streak": player.highest_streak,
                     "damage": player.damage,
-                    "hill_time": player.hill_time,
-                    "average_hill_time": player.average_hill_time,
-                    "objective_kills": player.objective_kills,
-                    "contested_hill_time": player.contested_hill_time,
-                    "kills_per_hill": player.kills_per_hill,
-                    "damage_per_hill": player.damage_per_hill
+                    "mode_stat_one": player.mode_stat_one,
+                    "mode_stat_two": player.mode_stat_two,
+                    "mode_stat_three": player.mode_stat_three,
+                    "mode_stat_four": player.mode_stat_four,
+                    "mode_stat_five": player.mode_stat_five,
+                    "mode_stat_six": player.mode_stat_six
                 }
                 players.append(stats_dict)
 
@@ -159,13 +159,13 @@ def process_data(game_data, player_data):
 
         return {
             "metadata": {
-                "game_mode": game_data['game_mode'],
-                "map_name": game_data['map_name'],
-                "game_time": game_data['game_time'],
-                "team_one_name": game_data['team_one_name'],
-                "team_one_score": game_data['team_one_score'],
-                "team_two_name": game_data['team_two_name'],
-                "team_two_score": game_data['team_two_score'],
+                "game_mode": game_data.get('game_mode') or ("", "low"),
+                "map_name": game_data.get('map_name') or ("", "low"),
+                "game_time": game_data.get('game_time') or ("0:00", "low"),
+                "team_one_name": game_data.get('team_one_name') or ("", "low"),
+                "team_one_score": game_data.get('team_one_score') or ("0", "low"),
+                "team_two_name": game_data.get('team_two_name') or ("", "low"),
+                "team_two_score": game_data.get('team_two_score') or ("0", "low"),
             },
             "player_stats": players
         }
@@ -294,12 +294,12 @@ def process_player_row(detections: List[OCRDetection], row_number: int) -> Optio
             non_traded_kills=fields[PlayerDataField.NON_TRADED_KILLS] or ("0", "low"),
             highest_streak=fields[PlayerDataField.HIGHEST_STREAK] or ("0", "low"),
             damage=fields[PlayerDataField.DAMAGE] or ("0", "low"),
-            hill_time=fields[PlayerDataField.HILL_TIME] or ("0:00", "low"),
-            average_hill_time=fields[PlayerDataField.AVERAGE_HILL_TIME] or ("0:00", "low"),
-            objective_kills=fields[PlayerDataField.OBJECTIVE_KILLS] or ("0", "low"),
-            contested_hill_time=fields[PlayerDataField.CONTESTED_HILL_TIME] or ("0:00", "low"),
-            kills_per_hill=fields[PlayerDataField.KILLS_PER_HILL] or ("0", "low"),
-            damage_per_hill=fields[PlayerDataField.DAMAGE_PER_HILL] or ("0", "low")
+            mode_stat_one=fields[PlayerDataField.MODE_STAT_ONE] or ("0:00", "low"),
+            mode_stat_two=fields[PlayerDataField.MODE_STAT_TWO] or ("0:00", "low"),
+            mode_stat_three=fields[PlayerDataField.MODE_STAT_THREE] or ("0", "low"),
+            mode_stat_four=fields[PlayerDataField.MODE_STAT_FOUR] or ("0:00", "low"),
+            mode_stat_five=fields[PlayerDataField.MODE_STAT_FIVE] or ("0", "low"),
+            mode_stat_six=fields[PlayerDataField.MODE_STAT_SIX] or ("0", "low")
         )
     except Exception as e:
         raise Exception(f"Failed to process player row: {str(e)}")

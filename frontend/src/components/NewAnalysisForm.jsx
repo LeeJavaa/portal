@@ -120,6 +120,20 @@ export default function NewAnalysisForm() {
     });
   };
 
+  const removeStatsConfidence = (playerStats) => {
+    return playerStats.map((player) => {
+      const transformedPlayer = {};
+      for (const [key, value] of Object.entries(player)) {
+        if (Array.isArray(value) && value.length === 2) {
+          transformedPlayer[key] = value[0];
+        } else {
+          transformedPlayer[key] = value;
+        }
+      }
+      return transformedPlayer;
+    });
+  };
+
   const handleScoreboardProcessing = async () => {
     if (!scoreboard) return;
     setIsScoreboardUploading(true);
@@ -245,6 +259,10 @@ export default function NewAnalysisForm() {
     }
 
     const formData = form.getValues();
+
+    if (formData.player_stats) {
+      formData.player_stats = removeStatsConfidence(formData.player_stats);
+    }
 
     try {
       const response = await createMapAnalysis(formData);

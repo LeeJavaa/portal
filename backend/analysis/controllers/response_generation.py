@@ -503,9 +503,11 @@ def create_map_performance_dict(map_analysis, performance):
         perf_dict = {
             "kills": performance.kills,
             "deaths": performance.deaths,
-            "kdRatio": performance.kd_ratio,
+            "kd_ratio": performance.kd_ratio,
             "assists": performance.assists,
-            "ntk": performance.ntk
+            "ntk": performance.ntk,
+            "highest_streak": performance.highest_streak,
+            "damage": performance.damage
         }
 
         game_mode = map_analysis.game_mode.code
@@ -515,13 +517,12 @@ def create_map_performance_dict(map_analysis, performance):
 
             hp_stats = performance.playermapperformancehp
             perf_dict.update({
-                "dmg": hp_stats.damage,
-                "ht": parse_seconds_to_time(hp_stats.hill_time),
-                "avgHt": parse_seconds_to_time(hp_stats.average_hill_time),
-                "objKills": hp_stats.objective_kills,
-                "contHt": parse_seconds_to_time(hp_stats.contested_hill_time),
-                "kph": round(hp_stats.kills_per_hill, 2),
-                "dph": round(hp_stats.damage_per_hill, 2)
+                "mode_stat_one": parse_seconds_to_time(hp_stats.hill_time),
+                "mode_stat_two": parse_seconds_to_time(hp_stats.average_hill_time),
+                "mode_stat_three": hp_stats.objective_kills,
+                "mode_stat_four": parse_seconds_to_time(hp_stats.contested_hill_time),
+                "mode_stat_five": round(hp_stats.kills_per_hill, 2),
+                "mode_stat_six": round(hp_stats.damage_per_hill, 2)
             })
         elif game_mode == 'snd':
             if not hasattr(performance, 'playermapperformancesnd'):
@@ -529,12 +530,12 @@ def create_map_performance_dict(map_analysis, performance):
 
             snd_stats = performance.playermapperformancesnd
             perf_dict.update({
-                "bombsPlanted": snd_stats.bombs_planted,
-                "bombsDefused": snd_stats.bombs_defused,
-                "firstBloods": snd_stats.first_bloods,
-                "firstDeaths": snd_stats.first_deaths,
-                "kpr": round(snd_stats.kills_per_round, 2),
-                "dpr": round(snd_stats.damage_per_round, 2)
+                "mode_stat_one": snd_stats.bombs_planted,
+                "mode_stat_two": snd_stats.bombs_defused,
+                "mode_stat_three": snd_stats.first_bloods,
+                "mode_stat_four": snd_stats.first_deaths,
+                "mode_stat_five": round(snd_stats.kills_per_round, 2),
+                "mode_stat_six": round(snd_stats.damage_per_round, 2)
             })
         elif game_mode == 'ctrl':
             if not hasattr(performance, 'playermapperformancecontrol'):
@@ -542,12 +543,12 @@ def create_map_performance_dict(map_analysis, performance):
 
             ctrl_stats = performance.playermapperformancecontrol
             perf_dict.update({
-                "tiersCaptured": ctrl_stats.tiers_captured,
-                "objKills": ctrl_stats.objective_kills,
-                "offenseKills": ctrl_stats.offense_kills,
-                "defenseKills": ctrl_stats.defense_kills,
-                "kpr": round(ctrl_stats.kills_per_round, 2),
-                "dpr": round(ctrl_stats.damage_per_round, 2)
+                "mode_stat_one": ctrl_stats.tiers_captured,
+                "mode_stat_two": ctrl_stats.objective_kills,
+                "mode_stat_three": ctrl_stats.offense_kills,
+                "mode_stat_four": ctrl_stats.defense_kills,
+                "mode_stat_five": round(ctrl_stats.kills_per_round, 2),
+                "mode_stat_six": round(ctrl_stats.damage_per_round, 2)
             })
 
         return perf_dict

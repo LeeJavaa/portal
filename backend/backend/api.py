@@ -39,6 +39,20 @@ from utils.s3_handling import generate_upload_scoreboard_url, generate_view_scor
 api = NinjaAPI()
 logger = logging.getLogger('gunicorn.error')
 
+class PlayerStatsSchema(Schema):
+    name: str
+    kd: str
+    assists: str
+    non_traded_kills: str
+    highest_streak: str
+    damage: str
+    mode_stat_one: str
+    mode_stat_two: str
+    mode_stat_three: str
+    mode_stat_four: str
+    mode_stat_five: str
+    mode_stat_six: str
+
 class MapAnalysisIn(Schema):
     title: str
     tournament: int
@@ -50,7 +64,7 @@ class MapAnalysisIn(Schema):
     team_one_score: int
     team_two: str
     team_two_score: int
-    player_stats: Dict[str, Dict[str, Any]]
+    player_stats: List[PlayerStatsSchema]
 
 class SeriesAnalysisIn(Schema):
     title: str

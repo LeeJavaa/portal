@@ -91,13 +91,13 @@ class PlayerMapPerformance(models.Model):
     kd_ratio = models.FloatField()
     assists = models.PositiveIntegerField()
     ntk = models.PositiveIntegerField()
+    highest_streak = models.PositiveIntegerField()
+    damage = models.PositiveIntegerField()
 
 class PlayerMapPerformanceHP(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
     player_performance = models.OneToOneField(PlayerMapPerformance, on_delete=models.CASCADE)
-    highest_streak = models.PositiveIntegerField()
-    damage = models.PositiveIntegerField()
     hill_time = models.PositiveIntegerField()
     average_hill_time = models.PositiveIntegerField()
     objective_kills = models.PositiveIntegerField()

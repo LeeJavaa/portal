@@ -53,26 +53,29 @@ const EmptyRow = ({ columnCount }) => (
   </TableRow>
 );
 
-const ScoreboardRow = ({
-  player,
-  isLastRow,
-  input,
-  headers,
-  onInputChange,
-}) => {
+const ScoreboardRow = ({ player, isLastRow, headers, playerIndex, form }) => {
   const [modifiedFields, setModifiedFields] = useState({});
-  const inputRefs = useRef({});
 
-  const handleInputChange = (key) => {
+  const handleInputChange = (key, value) => {
+    const currentStats = form.getValues("player_stats");
+
+    const updatedPlayer = { ...currentStats[playerIndex] };
+
+    if (Array.isArray(updatedPlayer[key])) {
+      updatedPlayer[key] = [value, updatedPlayer[key][1]];
+    } else {
+      updatedPlayer[key] = value;
+    }
+
+    const updatedStats = [...currentStats];
+    updatedStats[playerIndex] = updatedPlayer;
+
+    form.setValue("player_stats", updatedStats);
+
     setModifiedFields((prev) => ({
       ...prev,
       [key]: true,
     }));
-
-    if (onInputChange) {
-      const value = inputRefs.current[key]?.value;
-      onInputChange(player.name[0], key, value);
-    }
   };
 
   return (
@@ -80,51 +83,30 @@ const ScoreboardRow = ({
       {headers.map(({ key }) => (
         <TableCell
           key={key}
-          className={`border-r text-center ${isLastRow ? "border-b" : ""} ${
-            key === "name" ? "border-l w-[250px]" : ""
-          } ${input ? "py-1" : ""}`}
+          className={`border-r text-center py-1 ${
+            isLastRow ? "border-b" : ""
+          } ${key === "name" ? "border-l w-[250px]" : ""}`}
         >
-          {input ? (
-            <Input
-              ref={(el) => (inputRefs.current[key] = el)}
-              defaultValue={
-                Array.isArray(player[key]) ? player[key][0] : player[key]
-              }
-              className={`${
-                key === "name"
-                  ? "pl-2 uppercase font-medium"
-                  : "text-center px-0"
-              } border-0 ring-offset-0 focus-visible:ring-offset-0 ${getBorderClass(
-                Array.isArray(player[key]) ? player[key][1] : "low",
-                modifiedFields[key]
-              )}`}
-              onChange={() => handleInputChange(key)}
-            />
-          ) : (
-            <span>
-              {Array.isArray(player[key]) ? player[key][0] : player[key]}
-            </span>
-          )}
+          <Input
+            defaultValue={
+              Array.isArray(player[key]) ? player[key][0] : player[key]
+            }
+            className={`${
+              key === "name" ? "pl-2 uppercase font-medium" : "text-center px-0"
+            } border-0 ring-offset-0 focus-visible:ring-offset-0 ${getBorderClass(
+              Array.isArray(player[key]) ? player[key][1] : "low",
+              modifiedFields[key]
+            )}`}
+            onChange={(e) => handleInputChange(key, e.target.value)}
+          />
         </TableCell>
       ))}
     </TableRow>
   );
 };
 
-export default function Scoreboard({
-  gameMode,
-  playerData,
-  caption,
-  input,
-  onPlayerDataChange,
-}) {
+export default function Scoreboard({ gameMode, playerData, caption, form }) {
   const headers = getHeaders(gameMode);
-
-  const handleInputChange = (playerName, key, value) => {
-    if (onPlayerDataChange) {
-      onPlayerDataChange(playerName, key, value);
-    }
-  };
 
   // Create array of players with empty rows to ensure we have at least 8 rows
   const filledPlayerData = [
@@ -155,9 +137,9 @@ export default function Scoreboard({
             <ScoreboardRow
               player={player}
               isLastRow={index === filledPlayerData.length - 1}
-              input={input}
               headers={headers}
-              onInputChange={handleInputChange}
+              playerIndex={index}
+              form={form}
             />
             {index === 3 && <EmptyRow columnCount={headers.length} />}
           </React.Fragment>
