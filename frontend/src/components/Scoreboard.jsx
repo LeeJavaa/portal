@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -21,7 +21,7 @@ const getHeaders = (gameMode) => {
       return hardpointHeaders;
     case "snd":
       return sndHeaders;
-    case "cntrl":
+    case "ctl":
       return controlHeaders;
     default:
       return hardpointHeaders;
