@@ -294,10 +294,10 @@ def process_player_row(detections: List[OCRDetection], row_number: int) -> Optio
             non_traded_kills=fields[PlayerDataField.NON_TRADED_KILLS] or ("0", "low"),
             highest_streak=fields[PlayerDataField.HIGHEST_STREAK] or ("0", "low"),
             damage=fields[PlayerDataField.DAMAGE] or ("0", "low"),
-            mode_stat_one=fields[PlayerDataField.MODE_STAT_ONE] or ("0:00", "low"),
-            mode_stat_two=fields[PlayerDataField.MODE_STAT_TWO] or ("0:00", "low"),
+            mode_stat_one=fields[PlayerDataField.MODE_STAT_ONE] or ("0", "low"),
+            mode_stat_two=fields[PlayerDataField.MODE_STAT_TWO] or ("0", "low"),
             mode_stat_three=fields[PlayerDataField.MODE_STAT_THREE] or ("0", "low"),
-            mode_stat_four=fields[PlayerDataField.MODE_STAT_FOUR] or ("0:00", "low"),
+            mode_stat_four=fields[PlayerDataField.MODE_STAT_FOUR] or ("0", "low"),
             mode_stat_five=fields[PlayerDataField.MODE_STAT_FIVE] or ("0", "low"),
             mode_stat_six=fields[PlayerDataField.MODE_STAT_SIX] or ("0", "low")
         )

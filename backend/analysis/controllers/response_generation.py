@@ -289,6 +289,7 @@ def generate_map_analysis_response(filter_payload):
             "last_modified": map_analysis.last_modified,
             "tournament": map_analysis.tournament.id,
             "series_analysis": map_analysis.series_analysis.id if map_analysis.series_analysis else None,
+            "series_analysis_title": map_analysis.series_analysis.title if map_analysis.series_analysis else None,
             "title": map_analysis.title,
             "thumbnail": map_analysis.thumbnail,
             "screenshot": map_analysis.screenshot,
@@ -537,7 +538,7 @@ def create_map_performance_dict(map_analysis, performance):
                 "mode_stat_five": round(snd_stats.kills_per_round, 2),
                 "mode_stat_six": round(snd_stats.damage_per_round, 2)
             })
-        elif game_mode == 'ctrl':
+        elif game_mode == 'ctl':
             if not hasattr(performance, 'playermapperformancecontrol'):
                 raise ValidationError("Missing Control performance data")
 
