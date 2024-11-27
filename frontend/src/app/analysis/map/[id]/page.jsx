@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { getMapAnalysis } from "@/api/analysis";
+import MapLoading from "@/components/analysis-page/MapLoading";
 import FilterBar from "@/components/analysis-page/FilterBar";
 import MetaDescription from "@/components/analysis-page/MetaDescription";
 import StaticScoreboard from "@/components/StaticScoreboard";
@@ -24,7 +26,6 @@ export default async function Page({ params, searchParams }) {
   try {
     const filters = getFiltersFromSearchParams(searchParams);
     mapAnalysis = await getMapAnalysis(params.id, filters);
-    console.log(mapAnalysis);
   } catch (e) {
     error = e.message;
   }
@@ -40,19 +41,21 @@ export default async function Page({ params, searchParams }) {
   }
 
   return (
-    <main className="w-full max-w-screen-xl mx-auto">
-      <h1 className="text-center text-3xl font-bold mt-5 mb-8">
-        {mapAnalysis.title}
-      </h1>
-      <MetaDescription data={mapAnalysis} />
-      <StaticScoreboard
-        playerData={mapAnalysis.player_performance_data}
-        caption=""
-        gameMode={mapAnalysis.game_mode}
-      />
-      <Separator className="mt-8" />
-      <FilterBar data={mapAnalysis} />
-    </main>
+    <Suspense fallback={<MapLoading />}>
+      <main className="w-full max-w-screen-xl mx-auto">
+        <h1 className="text-center text-3xl font-bold mt-5 mb-8">
+          {mapAnalysis.title}
+        </h1>
+        <MetaDescription data={mapAnalysis} />
+        <StaticScoreboard
+          playerData={mapAnalysis.player_performance_data}
+          caption=""
+          gameMode={mapAnalysis.game_mode}
+        />
+        <Separator className="mt-8" />
+        <FilterBar data={mapAnalysis} />
+      </main>
+    </Suspense>
   );
 }
 {
