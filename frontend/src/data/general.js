@@ -143,3 +143,10 @@ export const getTeamCode = (teamName) => {
   );
   return team?.code || "";
 };
+
+export const getPlayerCleanName = (dirtyName) => {
+  const player = Object.values(PLAYERS).find(
+    (p) => p.dirty.toLowerCase() === dirtyName.toLowerCase()
+  );
+  return player?.clean || dirtyName;
+};
