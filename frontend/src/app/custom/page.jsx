@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getCustomAnalyses } from "@/api/analyses";
-import AnalysisGrid from "@/components/AnalysisGrid";
+import AnalysisGrid from "@/components/public-page/AnalysisGrid";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlert } from "lucide-react";
 

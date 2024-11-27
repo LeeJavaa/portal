@@ -1,11 +1,11 @@
 "use client";
 import playerMapPerformances from "@/mock/playerMapPerformance.json";
 import mapAnalyses from "@/mock/mapAnalysis.json";
-import FilterBar from "@/components/analysis-page/FilterBar";
-import DataVis from "@/components/analysis-page/DataVis";
+import FilterBar from "@/components/analysis-pages/FilterBar";
+import DataVis from "@/components/analysis-pages/DataVis";
 import { Separator } from "@/components/ui/separator";
-import MapGallery from "@/components/analysis-page/MapGallery";
-import MapsetTable from "@/components/analysis-page/MapsetTable";
+import MapGallery from "@/components/analysis-pages/MapGallery";
+import MapsetTable from "@/components/analysis-pages/MapsetTable";
 
 export default function Page() {
   const playerPerformanceData =

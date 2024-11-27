@@ -1,4 +1,4 @@
-import AnalysisGrid from "@/components/AnalysisGrid";
+import AnalysisGrid from "@/components/public-page/AnalysisGrid";
 import { Button } from "@/components/ui/button";
 
 export default function Tournament({

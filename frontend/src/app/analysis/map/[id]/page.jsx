@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import { getMapAnalysis, getScoreboardUrl } from "@/api/analysis";
-import DataVis from "@/components/analysis-page/DataVis";
 import MapAnalysisLoading from "@/components/loading/MapAnalysisLoading";
-import MetaDescription from "@/components/analysis-page/MetaDescription";
-import FilterBar from "@/components/analysis-page/FilterBar";
+import MetaDescription from "@/components/analysis-pages/MetaDescription";
+import FilterBar from "@/components/analysis-pages/FilterBar";
 import StaticScoreboard from "@/components/StaticScoreboard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { TriangleAlert } from "lucide-react";
+import DataVis from "@/components/analysis-pages/DataVis";
 
 export default async function Page({ params, searchParams }) {
   let mapAnalysis;
@@ -61,7 +61,7 @@ export default async function Page({ params, searchParams }) {
         />
         <Separator className="mt-8" />
         <FilterBar data={mapAnalysis} scoreboardUrl={scoreboardUrl} />
-        <DataVis />
+        <DataVis data={mapAnalysis} />
       </main>
     </Suspense>
   );
