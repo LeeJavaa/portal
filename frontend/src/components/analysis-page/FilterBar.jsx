@@ -1,4 +1,19 @@
+"use client";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { analysisFiltersSchema } from "@/validators/analysisFilters";
+import { getPlayerCleanName, getTeamCode } from "@/data/general";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -7,6 +22,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -17,61 +38,217 @@ import {
 import {
   CircleAlert,
   ChartNoAxesColumnIncreasing,
+  PlusCircle,
   Trash2,
   Image as ImageIcon,
+  X,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export default function FilterBar({ mapAnalysis }) {
+export default function FilterBar({ data }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const availableTeams = [
+    { code: getTeamCode(data.team_one.toLowerCase()), name: data.team_one },
+    { code: getTeamCode(data.team_two.toLowerCase()), name: data.team_two },
+  ];
+
+  const availablePlayers = Object.keys(data.player_performance_data).map(
+    (playerName) => ({
+      clean: getPlayerCleanName(playerName),
+      dirty: playerName,
+    })
+  );
+
+  const urlPlayers = searchParams.get("players")?.split(",") || [];
+
+  const form = useForm({
+    resolver: zodResolver(analysisFiltersSchema),
+    defaultValues: {
+      team: searchParams.get("team") || "",
+      players: urlPlayers,
+    },
+  });
+
+  const activeFilters = ["team", "players"].reduce(
+    (count, param) => (searchParams.get(param) ? count + 1 : count),
+    0
+  );
+
+  const onSubmit = (values) => {
+    const filteredValues = {
+      ...Object.fromEntries(
+        Object.entries(values).filter(([_, value]) => {
+          if (Array.isArray(value)) {
+            return value.length > 0;
+          }
+          return value !== "";
+        })
+      ),
+    };
+
+    if (filteredValues.players) {
+      filteredValues.players = filteredValues.players.join(",");
+    }
+
+    const params = new URLSearchParams(filteredValues);
+    router.push(`/analysis/map/${data.id}?${params.toString()}`);
+  };
+
+  const handleClearFilters = () => {
+    form.reset({
+      team: "",
+      players: [],
+    });
+    router.push(`/analysis/map/${data.id}`);
+  };
+
   return (
     <div className="flex justify-between mt-8">
       <div className="flex gap-x-2 items-center">
         <ChartNoAxesColumnIncreasing className="w-6 h-6" />
         <h1 className="text-2xl font-bold">Visualise the Data</h1>
       </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-x-5">
+          <FormField
+            control={form.control}
+            name="team"
+            render={({ field }) => (
+              <FormItem>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Team" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {availableTeams.map((team) => (
+                      <SelectItem key={team.code} value={team.code}>
+                        {team.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="players"
+            render={({ field }) => (
+              <FormItem>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                          "w-[280px] justify-between",
+                          !field.value?.length && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value?.length > 0 ? (
+                          <div className="flex gap-1 flex-wrap">
+                            {field.value.map((player) => (
+                              <Badge
+                                variant="secondary"
+                                key={player}
+                                className="mr-1"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newValue = field.value.filter(
+                                    (p) => p !== player
+                                  );
+                                  form.setValue("players", newValue);
+                                }}
+                              >
+                                {player}
+                                <X className="w-3 h-3 ml-1" />
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          "Select players..."
+                        )}
+                        <PlusCircle className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[280px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search players..." />
+                      <CommandEmpty>No player found.</CommandEmpty>
+                      <CommandList>
+                        <CommandGroup className="max-h-64 overflow-auto">
+                          {availablePlayers.map((player) => (
+                            <CommandItem
+                              key={player.clean}
+                              onSelect={() => {
+                                const newValue = field.value?.includes(
+                                  player.clean
+                                )
+                                  ? field.value.filter(
+                                      (p) => p !== player.clean
+                                    )
+                                  : [...(field.value || []), player.clean];
+                                form.setValue("players", newValue);
+                              }}
+                            >
+                              <div
+                                className={cn(
+                                  "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                  field.value?.includes(player.clean)
+                                    ? "bg-primary text-primary-foreground"
+                                    : "opacity-50 [&_svg]:invisible"
+                                )}
+                              >
+                                <X className="h-3 w-3" />
+                              </div>
+                              {player.dirty}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </FormItem>
+            )}
+          />
+
+          <div className="flex gap-x-2">
+            {activeFilters > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClearFilters}
+              >
+                Clear Filters
+              </Button>
+            )}
+            <Button type="submit">
+              {activeFilters > 0 ? `Filter (${activeFilters})` : "Apply Filter"}
+            </Button>
+          </div>
+        </form>
+      </Form>
       <div className="flex gap-x-5">
-        <Select>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Team" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ot">OpTic Texas</SelectItem>
-            <SelectItem value="nysl">New York Subliners</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Player" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Kenny">Kenny</SelectItem>
-            <SelectItem value="Dashy">Dashy</SelectItem>
-            <SelectItem value="Shotzzy">Shotzzy</SelectItem>
-            <SelectItem value="Pred">Pred</SelectItem>
-            <SelectItem value="Hydra">Hydra</SelectItem>
-            <SelectItem value="Sib">Sib</SelectItem>
-            <SelectItem value="Skyz">Skyz</SelectItem>
-            <SelectItem value="Kismet">Kismet</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button>Apply Filter</Button>
-      </div>
-      <div className="flex gap-x-5">
-        {mapAnalysis && (
-          <Dialog>
-            <DialogTrigger className="hover:underline">
-              View Original
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Original Scoreboard Screenshot</DialogTitle>
-                <DialogDescription>
-                  Behold your eyes on heaven,
-                </DialogDescription>
-              </DialogHeader>
-              <ImageIcon className="w-32 h-32 mx-auto" />
-            </DialogContent>
-          </Dialog>
-        )}
+        <Dialog>
+          <DialogTrigger className="hover:underline">
+            View Original
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Original Scoreboard Screenshot</DialogTitle>
+              <DialogDescription>Behold your eyes on heaven,</DialogDescription>
+            </DialogHeader>
+            <ImageIcon className="w-32 h-32 mx-auto" />
+          </DialogContent>
+        </Dialog>
         <Dialog>
           <DialogTrigger asChild className="hover:underline">
             <Button variant="outline">

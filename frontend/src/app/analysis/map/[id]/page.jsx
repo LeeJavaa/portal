@@ -1,121 +1,64 @@
-"use client";
-import Scoreboard from "@/components/Scoreboard";
+import { getMapAnalysis } from "@/api/analysis";
 import FilterBar from "@/components/analysis-page/FilterBar";
 import MetaDescription from "@/components/analysis-page/MetaDescription";
-import playerMapPerformances from "@/mock/playerMapPerformance.json";
-import mapAnalyses from "@/mock/mapAnalysis.json";
-import DataVis from "@/components/analysis-page/DataVis";
+import StaticScoreboard from "@/components/StaticScoreboard";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { TriangleAlert } from "lucide-react";
 
-export default function Page() {
-  const combinePlayerPerformanceData = (data) => {
-    return data.playerMapPerformances
-      .filter((performance) => performance.mapAnalysis === 3)
-      .map((performance) => {
-        // Find corresponding game mode performance data
-        const hpPerformance = performance.playerPerformanceHP
-          ? data.playerMapPerformanceHPs.find(
-              (hp) => hp.playerPerformance === performance.playerPerformanceHP
-            )
-          : null;
+export default async function Page({ params, searchParams }) {
+  let mapAnalysis;
+  let error;
 
-        const sndPerformance = performance.playerPerformanceSND
-          ? data.playerMapPerformanceSNDs.find(
-              (snd) =>
-                snd.playerPerformance - 8 === performance.playerPerformanceSND
-            )
-          : null;
-
-        const controlPerformance = performance.playerPerformanceControl
-          ? data.playerMapPerformanceControls.find(
-              (ctrl) =>
-                ctrl.playerPerformance - 16 ===
-                performance.playerPerformanceControl
-            )
-          : null;
-
-        return {
-          // Base performance data
-          player: performance.player,
-          kills: performance.kills,
-          deaths: performance.deaths,
-          kdRatio: performance.kdRatio,
-          assists: performance.assists,
-          ntk: performance.ntk,
-
-          // Hardpoint stats
-          ...(hpPerformance && {
-            hp_highestStreak: hpPerformance.highestStreak,
-            hp_damage: hpPerformance.damage,
-            hp_hillTime: hpPerformance.hillTime,
-            hp_averageHillTime: hpPerformance.averageHillTime,
-            hp_objectiveKills: hpPerformance.objectiveKills,
-            hp_contestedHillTime: hpPerformance.contestedHillTime,
-            hp_killsPerHill: hpPerformance.killsPerHill,
-            hp_damagePerHill: hpPerformance.damagePerHill,
-          }),
-
-          // Search and Destroy stats
-          ...(sndPerformance && {
-            snd_bombsPlanted: sndPerformance.bombsPlanted,
-            snd_bombsDefused: sndPerformance.bombsDefused,
-            snd_firstBloods: sndPerformance.firstBloods,
-            snd_firstDeaths: sndPerformance.firstDeaths,
-            snd_killsPerRound: sndPerformance.killsPerRound,
-            snd_damagePerRound: sndPerformance.damagePerRound,
-          }),
-
-          // Control stats
-          ...(controlPerformance && {
-            ctrl_tiersCaptured: controlPerformance.tiersCaptured,
-            ctrl_objectiveKills: controlPerformance.objectiveKills,
-            ctrl_offenseKills: controlPerformance.offenseKills,
-            ctrl_defenseKills: controlPerformance.defenseKills,
-            ctrl_killsPerRound: controlPerformance.killsPerRound,
-            ctrl_damagePerRound: controlPerformance.damagePerRound,
-          }),
-        };
-      });
+  const getFiltersFromSearchParams = (searchParams) => {
+    const filters = {};
+    if (searchParams.team) {
+      filters.team = searchParams.team;
+    }
+    if (searchParams.players) {
+      filters.players = searchParams.players.split(",");
+    }
+    return filters;
   };
 
-  const playerPerformanceData = combinePlayerPerformanceData(
-    playerMapPerformances
-  );
+  try {
+    const filters = getFiltersFromSearchParams(searchParams);
+    mapAnalysis = await getMapAnalysis(params.id, filters);
+    console.log(mapAnalysis);
+  } catch (e) {
+    error = e.message;
+  }
 
-  const mapMetadata = mapAnalyses.mapAnalyses.filter(
-    (mapAnalysis) => mapAnalysis.id === 2
-  )[0];
-
-  const playerData = [
-    {
-      name: "KENNY",
-      kd: "29/19",
-      assists: "6",
-      ntk: "23",
-      highestStreak: "2",
-      dmg: "5173",
-      ht: "0:53",
-      avgHt: "0:04",
-      objKills: "5",
-      contHt: "0:04",
-      kph: "2.45",
-      dph: "436.81",
-    },
-  ];
+  if (error) {
+    return (
+      <Alert variant="destructive" className="mt-4 mb-4 b-2">
+        <TriangleAlert className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription className="font-medium">{error}</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <main className="w-full max-w-screen-xl mx-auto">
       <h1 className="text-center text-3xl font-bold mt-5 mb-8">
-        OpTic vs NYSL Champs GF Game 1
+        {mapAnalysis.title}
       </h1>
-      <MetaDescription />
-      <Scoreboard playerData={playerData} caption="" input={false} />
-      <Separator className="mt-8" />
-      <FilterBar />
-      <DataVis
-        playerPerformanceData={playerPerformanceData}
-        mapMetadata={mapMetadata}
+      <MetaDescription data={mapAnalysis} />
+      <StaticScoreboard
+        playerData={mapAnalysis.player_performance_data}
+        caption=""
+        gameMode={mapAnalysis.game_mode}
       />
+      <Separator className="mt-8" />
+      <FilterBar data={mapAnalysis} />
     </main>
   );
+}
+{
+  /* <MetaDescription />
+      <StaticScoreboard playerData={} caption="" gameMode="hp" />
+      <Separator className="mt-8" />
+      <FilterBar />
+      <DataVis /> */
 }
