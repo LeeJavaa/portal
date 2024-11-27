@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
+import Scoreboard from "@/components/new-analysis-form/Scoreboard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import Scoreboard from "@/components/Scoreboard";
-import { Loader } from "lucide-react";
+import { ArrowRight, Loader } from "lucide-react";
 
 export default function ScoreboardDisplay({ form, setFormStep, data }) {
   const [isDataLoaded, setIsDataLoaded] = useState(false);

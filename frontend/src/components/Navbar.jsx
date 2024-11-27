@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import NewAnalysisForm from "@/components/NewAnalysisForm";
+import NewAnalysisForm from "@/components/new-analysis-form/NewAnalysisForm";
 
 export default function Navbar() {
   const pathname = usePathname();

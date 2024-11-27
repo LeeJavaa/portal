@@ -1,4 +1,4 @@
-import FilterSheet from "@/components/FilterSheet";
+import FilterSheet from "@/components/public-page/FilterSheet";
 import { Switch } from "@/components/ui/switch";
 import { Toggle } from "@/components/ui/toggle";
 

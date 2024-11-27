@@ -1,10 +1,10 @@
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 import { getMapAnalyses, getSeriesAnalyses } from "@/api/analyses";
+import HomeContentLoading from "@/components/loading/HomeContentLoading";
 import HomeContent from "@/components/public-page/HomeContent";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlert } from "lucide-react";
-import { cookies } from "next/headers";
-import HomeContentLoading from "@/components/loading/HomeContentLoading";
 
 async function getData(searchParams) {
   const filters = {

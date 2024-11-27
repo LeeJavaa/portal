@@ -1,10 +1,5 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { analysisFiltersSchema } from "@/validators/analysisFilters";
-import { GAME_MODES, MAPS, PLAYERS, TEAMS, TOURNAMENTS } from "@/data/general";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -43,7 +38,12 @@ import {
   SheetTrigger,
   SheetFooter,
 } from "@/components/ui/sheet";
+import { GAME_MODES, MAPS, PLAYERS, TEAMS, TOURNAMENTS } from "@/data/general";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { cn } from "@/lib/utils";
+import { analysisFiltersSchema } from "@/validators/analysisFilters";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useForm } from "react-hook-form";
 
 export default function FilterSheet({ activeFilters = 0, onApplyFilter }) {
   const router = useRouter();

@@ -1,21 +1,21 @@
-import { Alert, AlertDescription } from "../ui/alert";
-import { Button } from "../ui/button";
-import { DateTimePicker } from "../ui/datetime-picker";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 import {
   FormField,
   FormLabel,
   FormItem,
   FormControl,
   FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "../ui/select";
+} from "@/components/ui/select";
 import { TOURNAMENTS } from "@/data/general";
 import { Loader } from "lucide-react";
 

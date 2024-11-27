@@ -1,4 +1,4 @@
-import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Loader } from "lucide-react";
 
 export default function ProcessingDisplay() {

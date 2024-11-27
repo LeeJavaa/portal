@@ -1,6 +1,6 @@
 import Link from "next/link";
-import formatDate from "@/utils/dateHandling";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import formatDate from "@/utils/dateHandling";
 import { SquareArrowOutUpRight } from "lucide-react";
 
 export default function MetaDescription({ data }) {

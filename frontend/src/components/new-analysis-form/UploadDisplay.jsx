@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { Cpu, Image as ImageIcon, Loader, Upload } from "lucide-react";
 

@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Tournament from "@/components/public-page/Tournament";
 import { TriangleAlert } from "lucide-react";
-import Tournament from "@/components/Tournament";
 
 export default function TournamentList({
   currentAnalyses,

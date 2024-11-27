@@ -1,6 +1,6 @@
+import CustomAnalysisBlock from "@/components/analysis-blocks/CustomAnalysisBlock";
 import MapAnalysisBlock from "@/components/analysis-blocks/MapAnalysisBlock";
 import SeriesAnalysisBlock from "@/components/analysis-blocks/SeriesAnalysisBlock";
-import CustomAnalysisBlock from "@/components/analysis-blocks/CustomAnalysisBlock";
 
 export default function AnalysisGrid({
   analyses,

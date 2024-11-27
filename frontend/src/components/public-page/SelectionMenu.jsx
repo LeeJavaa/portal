@@ -5,7 +5,7 @@ import {
   createCustomAnalysisFromMaps,
   createCustomAnalysisFromSeries,
 } from "@/api/newSeriesCustomAnalysisForm";
-import SeriesCustomDialog from "./new-analysis-form/SeriesCustomDialog";
+import SeriesCustomDialog from "@/components/new-analysis-form/SeriesCustomDialog";
 import { Button } from "@/components/ui/button";
 
 export default function SelectionMenu({ showSeries, selectedAnalyses }) {

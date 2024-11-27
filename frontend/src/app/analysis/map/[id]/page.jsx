@@ -3,7 +3,7 @@ import { getMapAnalysis, getScoreboardUrl } from "@/api/analysis";
 import MapAnalysisLoading from "@/components/loading/MapAnalysisLoading";
 import MetaDescription from "@/components/analysis-pages/MetaDescription";
 import FilterBar from "@/components/analysis-pages/FilterBar";
-import StaticScoreboard from "@/components/StaticScoreboard";
+import StaticScoreboard from "@/components/analysis-pages/StaticScoreboard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { TriangleAlert } from "lucide-react";

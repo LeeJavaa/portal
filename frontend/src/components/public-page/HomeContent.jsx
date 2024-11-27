@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import ControlMenu from "@/components/ControlMenu";
-import SelectionMenu from "@/components/SelectionMenu";
-import TournamentList from "@/components/TournamentList";
+import ControlMenu from "@/components/public-page/ControlMenu";
+import TournamentList from "@/components/public-page/TournamentList";
+import SelectionMenu from "@/components/public-page/SelectionMenu";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlert } from "lucide-react";
 

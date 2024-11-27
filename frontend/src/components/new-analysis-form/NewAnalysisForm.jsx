@@ -1,23 +1,6 @@
 "use client";
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
-import { Button } from "./ui/button";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { analysisSchema } from "@/validators/newAnalysis.ts";
-
-import { Plus } from "lucide-react";
-import FormHeader from "./new-analysis-form/FormHeader";
-import UploadDisplay from "./new-analysis-form/UploadDisplay";
-import ProcessingDisplay from "./new-analysis-form/ProcessingDisplay";
-import GameDataDisplay from "./new-analysis-form/GameDataDisplay";
-import ScoreboardDisplay from "./new-analysis-form/ScoreboardDisplay";
-import AnalysisData from "./new-analysis-form/AnalysisData";
-import CloseDisplay from "./new-analysis-form/CloseDisplay";
-import { generateUniqueFileName } from "@/utils/fileHandling";
 import {
   getPresignedUploadUrl,
   initiateScoreboardProcessing,
@@ -25,6 +8,21 @@ import {
   checkScoreboardProcessingStatus,
   createMapAnalysis,
 } from "@/api/newAnalysisForm";
+import FormHeader from "@/components/new-analysis-form/FormHeader";
+import UploadDisplay from "@/components/new-analysis-form/UploadDisplay";
+import ProcessingDisplay from "@/components/new-analysis-form/ProcessingDisplay";
+import GameDataDisplay from "@/components/new-analysis-form/GameDataDisplay";
+import ScoreboardDisplay from "@/components/new-analysis-form/ScoreboardDisplay";
+import AnalysisData from "@/components/new-analysis-form/AnalysisData";
+import CloseDisplay from "@/components/new-analysis-form/CloseDisplay";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Form } from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { generateUniqueFileName } from "@/utils/fileHandling";
+import { analysisSchema } from "@/validators/newAnalysis.ts";
+import { Plus } from "lucide-react";
+import { useForm } from "react-hook-form";
 
 export default function NewAnalysisForm() {
   const [formStep, setFormStep] = useState(0);

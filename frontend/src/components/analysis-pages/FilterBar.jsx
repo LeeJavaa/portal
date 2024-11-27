@@ -1,11 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
+import Image from "next/image";
 import { deleteMapAnalysis } from "@/api/analysis";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { analysisFiltersSchema } from "@/validators/analysisFilters";
-import { getPlayerCleanName, getTeamCode } from "@/data/general";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +36,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getPlayerCleanName, getTeamCode } from "@/data/general";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { analysisFiltersSchema } from "@/validators/analysisFilters";
+import { useForm } from "react-hook-form";
 import {
   CircleAlert,
   ChartNoAxesColumnIncreasing,
@@ -47,8 +49,6 @@ import {
   Image as ImageIcon,
   X,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
 
 export default function FilterBar({ data, scoreboardUrl }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

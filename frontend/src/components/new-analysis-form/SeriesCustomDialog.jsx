@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { newSeriesCustomAnalysisSchema } from "@/validators/newSeriesCustomAnalysis";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -20,6 +17,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { newSeriesCustomAnalysisSchema } from "@/validators/newSeriesCustomAnalysis";
+import { useForm } from "react-hook-form";
 
 const AnalysisDialog = ({ isOpen, onClose, onSubmit, type, selectedIds }) => {
   const [error, setError] = useState("");
