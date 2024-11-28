@@ -11,7 +11,11 @@ import { analysisFiltersSchema } from "@/validators/analysisFilters";
 import { useForm } from "react-hook-form";
 import { ChartNoAxesColumnIncreasing } from "lucide-react";
 
-export default function FilterBar({ data, scoreboardUrl }) {
+export default function FilterBar({
+  data,
+  scoreboardUrl = null,
+  seriesAnalysis = false,
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -28,11 +32,20 @@ export default function FilterBar({ data, scoreboardUrl }) {
     }
 
     const params = new URLSearchParams(filteredValues);
+
+    if (seriesAnalysis) {
+      router.push(`/analysis/series/${data.id}?${params.toString()}`);
+      return;
+    }
     router.push(`/analysis/map/${data.id}?${params.toString()}`);
   };
 
   const handleClearFilters = () => {
     form.reset({ team: "", players: [] });
+    if (seriesAnalysis) {
+      router.push(`/analysis/series/${data.id}`);
+      return;
+    }
     router.push(`/analysis/map/${data.id}`);
   };
 

@@ -14,7 +14,7 @@ export default function MapAnalysisBlock({
 }) {
   const [imageError, setImageError] = useState(false);
   let formatted_played_date = formatDate(analysis.played_date);
-  let thumbnail = analysis.thumbnail ? analysis.thumbnail : analysis.map;
+  let thumbnail = analysis.thumbnail;
 
   const handleClick = (e) => {
     if (selectionMode) {

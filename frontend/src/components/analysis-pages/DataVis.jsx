@@ -50,7 +50,7 @@ const chartConfig = {
   },
 };
 
-export default function DataVis({ data }) {
+export default function DataVis({ data = null }) {
   return (
     <section className="mt-8 mb-8">
       <div className="grid grid-cols-3 gap-x-2 gap-y-3">

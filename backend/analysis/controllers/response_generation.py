@@ -351,6 +351,29 @@ def generate_series_analysis_response(filter_payload):
         if filter_payload.players:
             filtered_performances = filtered_performances.filter(player__gamertag_clean__in=filter_payload.players)
 
+        maps = MapAnalysis.objects.filter(
+            series_analysis=series_analysis
+        ).order_by('played_date').values(
+            'id',
+            'title',
+            'team_one__name',
+            'team_two__name',
+            'thumbnail',
+            'played_date'
+        )
+
+        maps_data = [
+            {
+                'id': map_obj['id'],
+                'title': map_obj['title'],
+                'team_one': map_obj['team_one__name'],
+                'team_two': map_obj['team_two__name'],
+                'thumbnail': map_obj['thumbnail'],
+                'played_date': map_obj['played_date']
+            }
+            for map_obj in maps
+        ]
+
         all_sorted_performances = process_performances(series_analysis, all_performances)
         player_performance_data = {}
         for performance in all_sorted_performances:
@@ -369,7 +392,8 @@ def generate_series_analysis_response(filter_payload):
             "team_two": series_analysis.team_two.name,
             "team_one_map_count": series_analysis.team_one_map_count,
             "team_two_map_count": series_analysis.team_two_map_count,
-            "player_performance_data": player_performance_data
+            "player_performance_data": player_performance_data,
+            "maps": maps_data
         }
 
         if filter_payload.team or filter_payload.players:
@@ -377,7 +401,7 @@ def generate_series_analysis_response(filter_payload):
             filtered_player_performance_data = {}
             for performance in filtered_sorted_performances:
                 filtered_player_performance_data[performance.player.gamertag_clean] = create_general_performance_dict(
-                    series_analysis, performance
+                    performance
                 )
             response["filtered_player_performance_data"] = filtered_player_performance_data
 

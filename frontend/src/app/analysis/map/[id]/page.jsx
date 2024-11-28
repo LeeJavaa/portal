@@ -31,7 +31,6 @@ export default async function Page({ params, searchParams }) {
 
     if (mapAnalysis.screenshot) {
       scoreboardUrl = await getScoreboardUrl(mapAnalysis.screenshot);
-      console.log(scoreboardUrl);
     }
   } catch (e) {
     error = e.message;

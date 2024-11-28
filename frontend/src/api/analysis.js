@@ -29,6 +29,34 @@ export const getMapAnalysis = async (id, filters = {}) => {
   }
 };
 
+export const getSeriesAnalysis = async (id, filters = {}) => {
+  try {
+    const payload = {
+      id: parseInt(id),
+      team: filters.team || null,
+      players: filters.players || null,
+    };
+
+    const response = await fetch(`${API_BASE_URL}/series_analysis`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-cache",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch series analysis: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.series_analysis;
+  } catch (error) {
+    throw new Error(`Failed to fetch series analysis: ${error.message}`);
+  }
+};
+
 export const getScoreboardUrl = async (fileName) => {
   try {
     const response = await fetch(

@@ -34,14 +34,13 @@ export default function DeleteDialog({ id }) {
     }
   };
 
+  const onOpenChange = (open) => {
+    setIsOpen(open);
+    if (!open) setError(null);
+  };
+
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) setError(null);
-      }}
-    >
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline">
           <Trash2 className="w-4 h-4" />
