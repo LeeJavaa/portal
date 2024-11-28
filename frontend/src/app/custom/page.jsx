@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getCustomAnalyses } from "@/api/analyses";
+import AnalysisGridLoading from "@/components/loading/AnalysisGridLoading";
 import AnalysisGrid from "@/components/public-page/AnalysisGrid";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlert } from "lucide-react";
@@ -42,7 +43,7 @@ export default async function CustomPage() {
           </AlertDescription>
         </Alert>
       ) : (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<AnalysisGridLoading />}>
           <AnalysisGrid analyses={analyses} showCustoms={true} />
         </Suspense>
       )}

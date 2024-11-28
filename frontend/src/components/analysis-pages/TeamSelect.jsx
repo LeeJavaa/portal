@@ -8,7 +8,11 @@ import {
 } from "@/components/ui/select";
 import { getTeamCode } from "@/data/general";
 
-export default function TeamSelect({ form, data }) {
+export default function TeamSelect({ form, data, customAnalysis }) {
+  if (customAnalysis) {
+    return null;
+  }
+
   const availableTeams = [
     { code: getTeamCode(data.team_one.toLowerCase()), name: data.team_one },
     { code: getTeamCode(data.team_two.toLowerCase()), name: data.team_two },

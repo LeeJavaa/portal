@@ -15,6 +15,7 @@ export default function FilterBar({
   data,
   scoreboardUrl = null,
   seriesAnalysis = false,
+  customAnalysis = false,
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,15 +38,28 @@ export default function FilterBar({
       router.push(`/analysis/series/${data.id}?${params.toString()}`);
       return;
     }
+
+    if (customAnalysis) {
+      router.push(`/analysis/custom/${data.id}?${params.toString()}`);
+      return;
+    }
+
     router.push(`/analysis/map/${data.id}?${params.toString()}`);
   };
 
   const handleClearFilters = () => {
     form.reset({ team: "", players: [] });
+
     if (seriesAnalysis) {
       router.push(`/analysis/series/${data.id}`);
       return;
     }
+
+    if (customAnalysis) {
+      router.push(`/analysis/custom/${data.id}`);
+      return;
+    }
+
     router.push(`/analysis/map/${data.id}`);
   };
 
@@ -71,7 +85,7 @@ export default function FilterBar({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-x-5">
-          <TeamSelect form={form} data={data} />
+          <TeamSelect form={form} data={data} customAnalysis={customAnalysis} />
           <PlayerSelect form={form} data={data} />
 
           <div className="flex gap-x-2">
@@ -96,7 +110,11 @@ export default function FilterBar({
           screenshot={data.screenshot}
           scoreboardUrl={scoreboardUrl}
         />
-        <DeleteDialog id={data.id} />
+        <DeleteDialog
+          id={data.id}
+          customAnalysis={customAnalysis}
+          seriesAnalysis={seriesAnalysis}
+        />
       </div>
     </div>
   );

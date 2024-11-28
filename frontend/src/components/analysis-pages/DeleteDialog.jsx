@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteMapAnalysis } from "@/api/analysis";
+import {
+  deleteCustomAnalysis,
+  deleteMapAnalysis,
+  deleteSeriesAnalysis,
+} from "@/api/analysis";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { CircleAlert, Trash2 } from "lucide-react";
 
-export default function DeleteDialog({ id }) {
+export default function DeleteDialog({ id, seriesAnalysis, customAnalysis }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState(null);
@@ -24,7 +28,13 @@ export default function DeleteDialog({ id }) {
     try {
       setIsDeleting(true);
       setError(null);
-      await deleteMapAnalysis(id);
+      if (seriesAnalysis) {
+        await deleteSeriesAnalysis;
+      } else if (customAnalysis) {
+        await deleteCustomAnalysis;
+      } else {
+        await deleteMapAnalysis(id);
+      }
       setIsOpen(false);
       router.push("/");
     } catch (error) {

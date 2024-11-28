@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -8,31 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const MapsetTable = () => {
-  const data = [
-    {
-      tournament: "Tournament 1",
-      series: [
-        {
-          name: "Series A",
-          maps: ["Map 1", "Map 2"],
-        },
-        {
-          name: "Series B",
-          maps: ["Map 3", "Map 4"],
-        },
-      ],
-    },
-    {
-      tournament: "Tournament 2",
-      series: [
-        {
-          name: "Series C",
-          maps: ["Map 5", "Map 6", "Map 7"],
-        },
-      ],
-    },
-  ];
+const MapsetTable = ({ data }) => {
+  const { tournaments } = data.mapset;
 
   return (
     <div className="w-full">
@@ -45,12 +23,12 @@ const MapsetTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((tournament, tIndex) => (
-            <React.Fragment key={tournament.tournament}>
+          {tournaments.map((tournament) => (
+            <React.Fragment key={tournament.id}>
               {tournament.series.map((series, sIndex) =>
                 series.maps.map((map, mIndex) => (
                   <TableRow
-                    key={`${tournament.tournament}-${series.name}-${map}`}
+                    key={`${tournament.id}-${series.id}-${map.id}`}
                     className={`
                       border-0
                       ${
@@ -62,12 +40,28 @@ const MapsetTable = () => {
                     `}
                   >
                     <TableCell className="font-medium">
-                      {sIndex === 0 && mIndex === 0
-                        ? tournament.tournament
-                        : ""}
+                      {sIndex === 0 && mIndex === 0 ? tournament.title : ""}
                     </TableCell>
-                    <TableCell>{mIndex === 0 ? series.name : ""}</TableCell>
-                    <TableCell>{map}</TableCell>
+                    <TableCell>
+                      {mIndex === 0 ? (
+                        <Link
+                          href={`/analysis/series/${series.id}`}
+                          className="hover:underline hover:cursor-pointer"
+                        >
+                          {series.title}
+                        </Link>
+                      ) : (
+                        ""
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/analysis/map/${map.id}`}
+                        className="hover:underline hover:cursor-pointer"
+                      >
+                        {map.title}
+                      </Link>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
