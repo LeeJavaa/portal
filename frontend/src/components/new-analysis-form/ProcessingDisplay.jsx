@@ -7,7 +7,7 @@ export default function ProcessingDisplay() {
       <Alert>
         <AlertTitle>Hold on!</AlertTitle>
         <AlertDescription>
-          We're just busy processing that scoreboard real quick
+          We&apos;re just busy processing that scoreboard real quick
         </AlertDescription>
       </Alert>
       <Loader className=" h-15 w-15 animate-spin" />

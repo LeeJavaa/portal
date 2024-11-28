@@ -4,7 +4,9 @@ import DataVis from "@/components/analysis-pages/DataVis";
 import FilterBar from "@/components/analysis-pages/FilterBar";
 import MapsetTable from "@/components/analysis-pages/MapsetTable";
 import CustomAnalysisLoading from "@/components/loading/CustomAnalysisLoading";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { TriangleAlert } from "lucide-react";
 
 export default async function Page({ params, searchParams }) {
   let custom_analysis;

@@ -4,7 +4,9 @@ import DataVis from "@/components/analysis-pages/DataVis";
 import FilterBar from "@/components/analysis-pages/FilterBar";
 import MapGallery from "@/components/analysis-pages/MapGallery";
 import SeriesAnalysisLoading from "@/components/loading/SeriesAnalysisLoading";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { TriangleAlert } from "lucide-react";
 
 export default async function Page({ params, searchParams }) {
   let series_analysis;

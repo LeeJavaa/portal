@@ -29,7 +29,7 @@ export default function ScoreboardDisplay({ form, setFormStep, data }) {
         <Alert>
           <AlertTitle>Hold on!</AlertTitle>
           <AlertDescription>
-            We're just busy processing that scoreboard real quick
+            We&apos;re just busy processing that scoreboard real quick
           </AlertDescription>
         </Alert>
         <Loader className=" h-15 w-15 animate-spin" />
@@ -67,8 +67,8 @@ export default function ScoreboardDisplay({ form, setFormStep, data }) {
       <Alert className="border-2 mb-2">
         <AlertTitle className="font-bold">Can you fix this for us?</AlertTitle>
         <AlertDescription className=" font-medium">
-          Unfortunately our algorithms aren't perfect. Do you mind updating any
-          incorrect values? We may have highlighted a few for you.
+          Unfortunately our algorithms aren&apos;t perfect. Do you mind updating
+          any incorrect values? We may have highlighted a few for you.
         </AlertDescription>
       </Alert>
       <Scoreboard

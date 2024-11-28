@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import { getMapAnalysis, getScoreboardUrl } from "@/api/analysis";
-import MapAnalysisLoading from "@/components/loading/MapAnalysisLoading";
+import DataVis from "@/components/analysis-pages/DataVis";
 import MetaDescription from "@/components/analysis-pages/MetaDescription";
 import FilterBar from "@/components/analysis-pages/FilterBar";
 import StaticScoreboard from "@/components/analysis-pages/StaticScoreboard";
+import MapAnalysisLoading from "@/components/loading/MapAnalysisLoading";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { TriangleAlert } from "lucide-react";
-import DataVis from "@/components/analysis-pages/DataVis";
 
 export default async function Page({ params, searchParams }) {
   let mapAnalysis;

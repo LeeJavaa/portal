@@ -38,7 +38,7 @@ export default async function CustomPage() {
           <TriangleAlert className="h-4 w-4" />
           <AlertTitle>No Custom Analyses</AlertTitle>
           <AlertDescription>
-            You haven't created any custom analyses yet. Create a custom
+            You haven&apos;t created any custom analyses yet. Create a custom
             analysis by selecting multiple maps or series from the home page.
           </AlertDescription>
         </Alert>

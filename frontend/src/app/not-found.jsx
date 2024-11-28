@@ -10,8 +10,8 @@ export default function NotFound() {
           Page Not Found
         </h2>
         <p className="text-muted-foreground max-w-md">
-          Sorry, we couldn't find the page you're looking for. Please check the
-          URL or return home.
+          Sorry, we couldn&apos;t find the page you&apos;re looking for. Please
+          check the URL or return home.
         </p>
         <Button variant="outline" asChild>
           <Link href="/">Return Home</Link>

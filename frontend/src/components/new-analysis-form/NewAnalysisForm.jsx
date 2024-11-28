@@ -64,14 +64,7 @@ export default function NewAnalysisForm() {
     setScoreboardData(null);
     setFormStep(0);
     setScoreboardUploadError("");
-  }, [
-    form,
-    scoreboardProcessed,
-    scoreboard,
-    scoreboardFileName,
-    scoreboardData,
-    scoreboardUploadError,
-  ]);
+  }, [form]);
 
   const handleScoreboardChange = async (e) => {
     e.preventDefault();

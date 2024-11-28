@@ -11,8 +11,8 @@ export default function FormHeader({ confirmCloseOpen, formStep }) {
         <>
           <DialogTitle>Are you sure you want to close?</DialogTitle>
           <DialogDescription>
-            If you close this form, you'll lose all entered data. Is that what
-            you want to do?
+            If you close this form, you&apos;ll lose all entered data. Is that
+            what you want to do?
           </DialogDescription>
         </>
       ) : formStep == 3 ? (

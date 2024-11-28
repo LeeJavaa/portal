@@ -54,7 +54,7 @@ export default function GameDataDisplay({ form, setFormStep, data }) {
         team_two_score: data.metadata.team_two_score[0],
       });
     }
-  }, [data]);
+  }, [data, form]);
 
   if (!data?.metadata) {
     return (

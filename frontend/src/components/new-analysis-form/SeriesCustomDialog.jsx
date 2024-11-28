@@ -51,8 +51,8 @@ const AnalysisDialog = ({ isOpen, onClose, onSubmit, type, selectedIds }) => {
           </DialogTitle>
           <DialogDescription className="pt-2">
             Give us a title for your new{" "}
-            {type === "series" ? "series" : "custom"} analysis and we'll do the
-            rest for you.
+            {type === "series" ? "series" : "custom"} analysis and we&apos;ll do
+            the rest for you.
           </DialogDescription>
         </DialogHeader>
         {error && (
