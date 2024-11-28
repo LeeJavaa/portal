@@ -15,7 +15,6 @@ export const getMapAnalysis = async (id, filters = {}) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
-      cache: "no-cache",
     });
 
     if (!response.ok) {
@@ -43,7 +42,6 @@ export const getSeriesAnalysis = async (id, filters = {}) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
-      cache: "no-cache",
     });
 
     if (!response.ok) {
@@ -71,7 +69,6 @@ export const getCustomAnalysis = async (id, filters = {}) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
-      cache: "no-cache",
     });
 
     if (!response.ok) {
@@ -96,7 +93,6 @@ export const getScoreboardUrl = async (fileName) => {
         headers: {
           "Content-Type": "application/json",
         },
-        cache: "no-cache",
       }
     );
     if (!response.ok) {
