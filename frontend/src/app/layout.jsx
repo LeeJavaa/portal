@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
         <main className=" max-w-screen-2xl mx-auto">
           <Navbar />
           {children}
+          <SpeedInsights />
         </main>
         <Toaster />
       </body>
