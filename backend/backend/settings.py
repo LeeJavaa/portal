@@ -141,39 +141,17 @@ MEDIA_ROOT = "/var/www/portal/media"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# VIDEO PROCESSING REGION SETTINGS
+# CORS SETTINGS
+CORS_ALLOW_ALL_ORIGINS = True
 
-REGION_POS = {
-    'minimap' : [32, 506, 707, 1052],
-    'killfeed' : [32, 506, 480, 691],
-    'scorecard' : [718, 1208, 11, 209]
-}
-
-DESIRED_POS = {
-    'minimap': [0, 0],
-    'killfeed': [1100, 484],
-    'scorecard': [1100, 0]
-}
-
-DESIRED_WIDTH = {
-    'minimap': 1100,
-    'killfeed': 710,
-    'scorecard': 710
-}
-
-PROCESSED_DIMENSIONS = (1811, 810)
-
-# OCR CONFIDENCE LEVELS
+# OCR SETTINGS
 OCR_CONFIDENCE_THRESHOLDS = {
     'LOW': 0.5,
     'MEDIUM': 0.8,
     'HIGH': 1.0
 }
 
-# CORS
-CORS_ALLOW_ALL_ORIGINS = True
-
-# Logging
+# LOGGING SETTINGS
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -202,13 +180,14 @@ LOGGING = {
     },
 }
 
-# AWS Stuff
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
-
-# Celery Configuration
+# CELERY SETTINGS
 CELERY_BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
+
+# AWS SETTINGS
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
+
