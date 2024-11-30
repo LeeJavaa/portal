@@ -3,6 +3,9 @@ Lib
 Include
 pyvenv.cfg
 static
+/static/admin/
+/static/ninja/
+!/static/utils/
 
 *.pyc
 
