@@ -2,10 +2,10 @@ Scripts
 Lib
 Include
 pyvenv.cfg
-static
-/static/admin/
-/static/ninja/
-!/static/utils/
+
+backend/static/*
+!backend/static/utils/
+!backend/static/utils/**
 
 *.pyc
 
