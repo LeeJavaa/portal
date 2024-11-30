@@ -103,6 +103,6 @@ CELERY_TIMEZONE = 'UTC'
 
 # Static and Media Files
 STATIC_URL = '/static/'
-STATIC_ROOT = '/var/www/html/portal/static'
+STATIC_ROOT = '/var/www/portal/static'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/html/portal/media'
+MEDIA_ROOT = '/var/www/portal/media'
