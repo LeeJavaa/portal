@@ -14,6 +14,8 @@ DEBUG = False
 # Update allowed hosts for production
 ALLOWED_HOSTS = [
     'api.codportal.app',  # API subdomain
+    '127.0.0.1',  # For local gunicorn
+    'localhost',
 ]
 
 # Database configuration
