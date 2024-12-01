@@ -24,7 +24,7 @@ capture_output = True
 
 pidfile = "/var/run/gunicorn/prod.pid"
 
-daemon = True
+daemon = False
 
 # SSL (if not terminating SSL at nginx)
 # keyfile = "/etc/ssl/private/your-ssl.key"
