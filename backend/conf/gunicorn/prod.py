@@ -3,6 +3,11 @@ import multiprocessing
 
 wsgi_app = "backend.wsgi:application"
 
+# Set environment variables
+raw_env = [
+    "DJANGO_SETTINGS_MODULE=backend.settings_prod"
+]
+
 workers = multiprocessing.cpu_count() * 2 + 1  # (2 x NUMBER_OF_CPU_CORES) + 1
 worker_class = "sync"
 
