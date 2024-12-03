@@ -102,8 +102,6 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
-CELERYD_MAX_TASKS_PER_CHILD = 1  # Worker will restart after each task
-CELERYD_PREFETCH_MULTIPLIER = 1  # Don't prefetch tasks
 
 # Static and Media Files
 STATIC_URL = '/static/'

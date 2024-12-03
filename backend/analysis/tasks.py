@@ -5,7 +5,7 @@ from .controllers.scoreboard_processing import extract_data, process_data
 
 logger = get_task_logger(__name__)
 
-@shared_task(bind=True)
+@shared_task(bind=True, soft_time_limit=120, time_limit=180)
 def process_scoreboard(self, scoreboard: str):
     """
     This function handles the task of performing OCR on a scoreboard screenshot and extracting the relevant data from
