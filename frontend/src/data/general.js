@@ -104,6 +104,26 @@ export const TEAMS = {
     name: "Vegas Falcons",
     identifiers: ["vegas falcons", "falcons", "vegasfalcons"],
   },
+  NIXUH: {
+    code: "nxh",
+    name: "Nixuh",
+    identifiers: ["nixuh"],
+  },
+  HIGH_BORN: {
+    code: "hb",
+    name: "High Born",
+    identifiers: ["high born", "highborn"],
+  },
+  ELEVATE_ESPORTS: {
+    code: "ee",
+    name: "Elevate Esports",
+    identifiers: ["elevate esports", "elevateesports", "elevate"],
+  },
+  AERIAL_GAMING: {
+    code: "ag",
+    name: "Aerial Gaming",
+    identifiers: ["aerial gaming", "aerialgaming"],
+  },
 };
 
 export const TOURNAMENTS = {
@@ -325,6 +345,70 @@ export const PLAYERS = {
   NASTIE: {
     dirty: "Nastie",
     clean: "Nastie",
+  },
+  MAGICZ: {
+    dirty: "Magicz",
+    clean: "Magicz",
+  },
+  RAZ: {
+    dirty: "Raz",
+    clean: "Raz",
+  },
+  ENIGMA: {
+    dirty: "Enigma",
+    clean: "Enigma",
+  },
+  ADNAAN: {
+    dirty: "Adnaan",
+    clean: "Adnaan",
+  },
+  PLUTO: {
+    dirty: "Pluto",
+    clean: "Pluto",
+  },
+  RXYNZ: {
+    dirty: "Rxynz",
+    clean: "Rxynz",
+  },
+  HYDRO: {
+    dirty: "Hydro",
+    clean: "Hydro",
+  },
+  FROSTY: {
+    dirty: "Frosty",
+    clean: "Frosty",
+  },
+  WRETCHY: {
+    dirty: "Wretchy",
+    clean: "Wretchy",
+  },
+  SLIXX: {
+    dirty: "Slixx",
+    clean: "Slixx",
+  },
+  MAGE: {
+    dirty: "Mage",
+    clean: "Mage",
+  },
+  BEVZ: {
+    dirty: "Bevz",
+    clean: "Bevz",
+  },
+  HEROZ: {
+    dirty: "Heroz",
+    clean: "Heroz",
+  },
+  NOSOLUTION: {
+    dirty: "NoSolution",
+    clean: "NoSolution",
+  },
+  NINE_NINE_NINE: {
+    dirty: "999",
+    clean: "999",
+  },
+  ZSASZSA: {
+    dirty: "ZsaZsa",
+    clean: "ZsaZsa",
   },
 };
 
