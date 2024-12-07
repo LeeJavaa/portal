@@ -1,7 +1,5 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import formatDate from "@/utils/dateHandling";
 import { CircleCheck } from "lucide-react";
 
@@ -12,19 +10,14 @@ export default function MapAnalysisBlock({
   onSelect,
   seriesGallery,
 }) {
-  const [imageError, setImageError] = useState(false);
   let formatted_played_date = formatDate(analysis.played_date);
-  let thumbnail = analysis.thumbnail;
+  console.log(analysis);
 
   const handleClick = (e) => {
     if (selectionMode) {
       e.preventDefault();
       onSelect();
     }
-  };
-
-  const handleImageError = () => {
-    setImageError(true);
   };
 
   const content = (
@@ -35,20 +28,13 @@ export default function MapAnalysisBlock({
       onClick={handleClick}
     >
       <div className="relative overflow-hidden rounded-lg">
-        <Image
-          src={
-            imageError
-              ? "https://portal-web-public.s3.us-east-1.amazonaws.com/thumbnails/placeholder.png"
-              : `https://portal-web-public.s3.us-east-1.amazonaws.com/thumbnails/${thumbnail}.png`
-          }
-          width={300}
-          height={150}
-          alt="Analysis Thumbnail Image"
-          className={`h-full w-full rounded-lg object-cover transition-all duration-300 ${
+        <div
+          className={`h-[180px] w-full rounded-lg transition-all duration-300 ${
             selectionMode ? "" : "group-hover:scale-105"
           }`}
-          style={{ aspectRatio: "300/150", objectFit: "cover" }}
-          onError={handleImageError}
+          style={{
+            background: `linear-gradient(135deg, #${analysis.thumbnail_color} 0%, #${analysis.thumbnail_color}77 100%)`,
+          }}
         />
         <div
           className={`absolute inset-0 bg-gradient-to-b from-transparent to-black/70 ${

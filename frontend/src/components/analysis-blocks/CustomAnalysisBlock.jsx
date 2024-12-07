@@ -1,11 +1,6 @@
 import Link from "next/link";
 
 export default function CustomAnalysisBlock({ analysis }) {
-  const generateRandomPastelColor = () => {
-    const hue = Math.floor(Math.random() * 360);
-    return `hsl(${hue}, 70%, 80%)`;
-  };
-
   return (
     <Link
       href={`/analysis/custom/${analysis.id}`}
@@ -13,11 +8,9 @@ export default function CustomAnalysisBlock({ analysis }) {
     >
       <div className="relative overflow-hidden rounded-lg">
         <div
-          className="w-full rounded-lg transition-all duration-300 group-hover:scale-105"
+          className="h-[180px] w-full rounded-lg "
           style={{
-            backgroundColor: generateRandomPastelColor(),
-            height: "150px",
-            aspectRatio: "300/150",
+            background: `linear-gradient(135deg, #${analysis.thumbnail_color} 0%, #${analysis.thumbnail_color}77 100%)`,
           }}
         />
       </div>

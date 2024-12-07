@@ -83,7 +83,7 @@ def generate_map_analyses_response(filter_payload) -> List[Dict]:
             map_data = {
                 "id": map_analysis.id,
                 "title": map_analysis.title,
-                "thumbnail": map_analysis.thumbnail,
+                "thumbnail_color": map_analysis.winner.color,
                 "team_one": map_analysis.team_one.name,
                 "team_two": map_analysis.team_two.name,
                 "winner": map_analysis.winner.name,
@@ -176,7 +176,7 @@ def generate_series_analyses_response(filter_payload):
             series_data = {
                 "id": series_analysis.id,
                 "title": series_analysis.title,
-                "thumbnail": series_analysis.thumbnail,
+                "thumbnail_color": series_analysis.winner.color,
                 "team_one": series_analysis.team_one.name,
                 "team_two": series_analysis.team_two.name,
                 "winner": series_analysis.winner.name,
@@ -220,22 +220,22 @@ def generate_custom_analyses_response():
         - Exception: For any other unexpected errors during processing
     """
     try:
-        custom_analyses = CustomAnalysis.objects.order_by('-created').values(
-            'id',
-            'created',
-            'title',
-            'thumbnail'
+        custom_analyses = CustomAnalysis.objects.order_by('-created').prefetch_related(
+            'map_analyses',
+            'map_analyses__winner'
         )
 
-        result = [
-            {
-                "id": custom_analysis["id"],
-                "created": custom_analysis["created"].isoformat(),
-                "title": custom_analysis["title"],
-                "thumbnail": custom_analysis["thumbnail"]
-            }
-            for custom_analysis in custom_analyses
-        ]
+        result = []
+        for custom_analysis in custom_analyses:
+            first_map = custom_analysis.map_analyses.first()
+            thumbnail_color = first_map.winner.color if first_map else None
+
+            result.append({
+                "id": custom_analysis.id,
+                "created": custom_analysis.created.isoformat(),
+                "title": custom_analysis.title,
+                "thumbnail_color": thumbnail_color
+            })
 
         return result
     except ValidationError as ve:
