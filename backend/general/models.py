@@ -5,6 +5,7 @@ class Team(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
     code = models.CharField(max_length=4, db_index=True)
     name = models.CharField(max_length=30)
+    color = models.CharField(max_length=6, null=True, blank=True)
 
     def __str__(self):
         return self.name
