@@ -16,6 +16,7 @@ export default function ControlMenu({
         <Toggle
           onClick={toggleSelectionMode}
           variant={selectionMode ? "secondary" : "outline"}
+          aria-label="Toggle between map and series analyses"
         >
           {selectionMode ? "Cancel Selection" : "Select Analyses"}
         </Toggle>
