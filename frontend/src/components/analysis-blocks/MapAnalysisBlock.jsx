@@ -11,7 +11,6 @@ export default function MapAnalysisBlock({
   seriesGallery,
 }) {
   let formatted_played_date = formatDate(analysis.played_date);
-  console.log(analysis);
 
   const handleClick = (e) => {
     if (selectionMode) {
