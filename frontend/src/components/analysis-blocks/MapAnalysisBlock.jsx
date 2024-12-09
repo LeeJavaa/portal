@@ -1,7 +1,8 @@
 "use client";
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import formatDate from "@/utils/dateHandling";
-import { CircleCheck } from "lucide-react";
+import { CircleCheck, Loader2 } from "lucide-react";
 
 export default function MapAnalysisBlock({
   analysis,
@@ -10,16 +11,25 @@ export default function MapAnalysisBlock({
   onSelect,
   seriesGallery,
 }) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   let formatted_played_date = formatDate(analysis.played_date);
 
   const handleClick = (e) => {
     if (selectionMode) {
       e.preventDefault();
       onSelect();
+      return;
+    }
+
+    if (!selectionMode) {
+      e.preventDefault();
+      setIsLoading(true);
+      router.push(`/analysis/map/${analysis.id}`);
     }
   };
 
-  const content = (
+  return (
     <div
       className={`group overflow-hidden ${
         isSelected ? "border-primary" : "border-muted"
@@ -47,6 +57,11 @@ export default function MapAnalysisBlock({
             <CircleCheck className="h-7 w-7" />
           </div>
         )}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
       </div>
 
       <div className="mt-2">
@@ -64,10 +79,4 @@ export default function MapAnalysisBlock({
       </div>
     </div>
   );
-
-  if (selectionMode) {
-    return content;
-  }
-
-  return <Link href={`/analysis/map/${analysis.id}`}>{content}</Link>;
 }

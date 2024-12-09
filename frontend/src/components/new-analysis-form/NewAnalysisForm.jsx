@@ -10,6 +10,7 @@ import {
 } from "@/api/newAnalysisForm";
 import FormHeader from "@/components/new-analysis-form/FormHeader";
 import UploadDisplay from "@/components/new-analysis-form/UploadDisplay";
+import LoadingRedirect from "./LoadingRedirect";
 import ProcessingDisplay from "@/components/new-analysis-form/ProcessingDisplay";
 import GameDataDisplay from "@/components/new-analysis-form/GameDataDisplay";
 import ScoreboardDisplay from "@/components/new-analysis-form/ScoreboardDisplay";
@@ -34,6 +35,7 @@ export default function NewAnalysisForm() {
   const [isScoreboardUploading, setIsScoreboardUploading] = useState(false);
   const [scoreboardProcessed, setScoreboardProcessed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
 
   // Error messages
@@ -262,6 +264,7 @@ export default function NewAnalysisForm() {
 
       setIsSubmitting(false);
       setModalOpen(false);
+      setIsRedirecting(true);
       setScoreboardUploadError("");
       resetForm();
     } catch (error) {
@@ -282,62 +285,67 @@ export default function NewAnalysisForm() {
   };
 
   return (
-    <Dialog open={modalOpen} onOpenChange={handleDialogChange}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          New Analysis
-        </Button>
-      </DialogTrigger>
-      <DialogContent
-        className={formStep == 3 && !confirmCloseOpen ? "max-w-screen-2xl" : ""}
-      >
-        <FormHeader confirmCloseOpen={confirmCloseOpen} formStep={formStep} />
-        {confirmCloseOpen && (
-          <CloseDisplay
-            closeModalOpen={confirmCloseOpen}
-            onClose={handleConfirmClose}
-            onCancel={handleCancelClose}
-          />
-        )}
-        {formStep == 0 && !confirmCloseOpen && (
-          <UploadDisplay
-            scoreboard={scoreboard}
-            onChange={handleScoreboardChange}
-            onProcess={handleScoreboardProcessing}
-            isUploading={isScoreboardUploading}
-            error={scoreboardUploadError}
-          />
-        )}
-        {formStep == 1 && !confirmCloseOpen && <ProcessingDisplay />}
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-            {formStep == 2 && !confirmCloseOpen && (
-              <GameDataDisplay
-                form={form}
-                setFormStep={setFormStep}
-                data={scoreboardData}
-              />
-            )}
-            {formStep == 3 && !confirmCloseOpen && (
-              <ScoreboardDisplay
-                form={form}
-                setFormStep={setFormStep}
-                data={scoreboardData}
-              />
-            )}
-            {formStep == 4 && !confirmCloseOpen && (
-              <AnalysisData
-                form={form}
-                isSubmitting={isSubmitting}
-                handleSubmit={onSubmit}
-                setFormStep={setFormStep}
-                error={scoreboardUploadError}
-              />
-            )}
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+    <>
+      <LoadingRedirect isLoading={isRedirecting} />
+      <Dialog open={modalOpen} onOpenChange={handleDialogChange}>
+        <DialogTrigger asChild>
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            New Analysis
+          </Button>
+        </DialogTrigger>
+        <DialogContent
+          className={
+            formStep == 3 && !confirmCloseOpen ? "max-w-screen-2xl" : ""
+          }
+        >
+          <FormHeader confirmCloseOpen={confirmCloseOpen} formStep={formStep} />
+          {confirmCloseOpen && (
+            <CloseDisplay
+              closeModalOpen={confirmCloseOpen}
+              onClose={handleConfirmClose}
+              onCancel={handleCancelClose}
+            />
+          )}
+          {formStep == 0 && !confirmCloseOpen && (
+            <UploadDisplay
+              scoreboard={scoreboard}
+              onChange={handleScoreboardChange}
+              onProcess={handleScoreboardProcessing}
+              isUploading={isScoreboardUploading}
+              error={scoreboardUploadError}
+            />
+          )}
+          {formStep == 1 && !confirmCloseOpen && <ProcessingDisplay />}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+              {formStep == 2 && !confirmCloseOpen && (
+                <GameDataDisplay
+                  form={form}
+                  setFormStep={setFormStep}
+                  data={scoreboardData}
+                />
+              )}
+              {formStep == 3 && !confirmCloseOpen && (
+                <ScoreboardDisplay
+                  form={form}
+                  setFormStep={setFormStep}
+                  data={scoreboardData}
+                />
+              )}
+              {formStep == 4 && !confirmCloseOpen && (
+                <AnalysisData
+                  form={form}
+                  isSubmitting={isSubmitting}
+                  handleSubmit={onSubmit}
+                  setFormStep={setFormStep}
+                  error={scoreboardUploadError}
+                />
+              )}
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import formatDate from "@/utils/dateHandling";
-import { CircleCheck } from "lucide-react";
+import { CircleCheck, Loader2 } from "lucide-react";
 
 export default function SeriesAnalysisBlock({
   analysis,
@@ -10,16 +10,25 @@ export default function SeriesAnalysisBlock({
   isSelected,
   onSelect,
 }) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   let formatted_played_date = formatDate(analysis.played_date);
 
   const handleClick = (e) => {
     if (selectionMode) {
       e.preventDefault();
       onSelect();
+      return;
+    }
+
+    if (!selectionMode) {
+      e.preventDefault();
+      setIsLoading(true);
+      router.push(`/analysis/series/${analysis.id}`);
     }
   };
 
-  const content = (
+  return (
     <div
       className={`group overflow-hidden ${
         isSelected ? "border-primary" : "border-muted"
@@ -47,6 +56,11 @@ export default function SeriesAnalysisBlock({
             <CircleCheck className="h-7 w-7" />
           </div>
         )}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
       </div>
 
       <div className="mt-2">
@@ -62,10 +76,4 @@ export default function SeriesAnalysisBlock({
       </div>
     </div>
   );
-
-  if (selectionMode) {
-    return content;
-  }
-
-  return <Link href={`/analysis/series/${analysis.id}`}>{content}</Link>;
 }
