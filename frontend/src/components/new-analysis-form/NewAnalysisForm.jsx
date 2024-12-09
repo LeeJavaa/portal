@@ -285,7 +285,7 @@ export default function NewAnalysisForm() {
   };
 
   return (
-    <>
+    <div>
       <LoadingRedirect isLoading={isRedirecting} />
       <Dialog open={modalOpen} onOpenChange={handleDialogChange}>
         <DialogTrigger asChild>
@@ -346,6 +346,6 @@ export default function NewAnalysisForm() {
           </Form>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
