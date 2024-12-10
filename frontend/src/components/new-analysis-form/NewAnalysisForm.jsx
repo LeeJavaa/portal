@@ -295,9 +295,9 @@ export default function NewAnalysisForm() {
           </Button>
         </DialogTrigger>
         <DialogContent
-          className={
-            formStep == 3 && !confirmCloseOpen ? "max-w-screen-2xl" : ""
-          }
+          className={`w-[90%] sm:w-full rounded-2xl
+            ${formStep == 3 && !confirmCloseOpen ? "max-w-screen-2xl" : ""}
+          `}
         >
           <FormHeader confirmCloseOpen={confirmCloseOpen} formStep={formStep} />
           {confirmCloseOpen && (

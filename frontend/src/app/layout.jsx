@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={cn("antialiased", inter.className)}>
-        <main className=" max-w-screen-2xl mx-auto">
+        <main className=" px-8 lg:px-0 lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl mx-auto">
           <Navbar />
           {children}
           <SpeedInsights />

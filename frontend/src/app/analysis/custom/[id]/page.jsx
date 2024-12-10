@@ -49,7 +49,6 @@ export default async function Page({ params, searchParams }) {
         <MapsetTable data={custom_analysis} />
         <Separator />
         <FilterBar data={custom_analysis} customAnalysis={true} />
-        <DataVis />
       </main>
     </Suspense>
   );

@@ -48,13 +48,14 @@ export default function SelectionMenu({ showSeries, selectedAnalyses }) {
   return (
     <>
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t-2 border-border p-4 flex justify-between items-center">
-        <div className="flex justify-between items-center w-full max-w-screen-2xl mx-auto">
-          <div>({selectedAnalyses.length}) Selected</div>
-          <div>
+        <div className="flex flex-col lg:flex-row justify-between items-center w-full max-w-screen-2xl mx-auto space-y-4 lg:space-y-0">
+          <div className="text-center lg:text-left">
+            ({selectedAnalyses.length}) Selected
+          </div>
+          <div className="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2 w-full lg:w-auto">
             <Button
               onClick={() => openDialog("series")}
               disabled={showSeries || selectedAnalyses.length < 3}
-              className="mr-2"
             >
               Create Series Analysis
             </Button>

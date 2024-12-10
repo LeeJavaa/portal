@@ -77,18 +77,29 @@ export default function FilterBar({
   );
 
   return (
-    <div className="flex justify-between mt-8">
-      <div className="flex gap-x-2 items-center">
-        <ChartNoAxesColumnIncreasing className="w-6 h-6" />
-        <h1 className="text-2xl font-bold">Visualise the Data</h1>
+    <div className="flex flex-col lg:flex-row lg:justify-between gap-y-4 lg:gap-y-0 mt-8 mb-8">
+      <div className="flex gap-x-2 justify-center lg:justify-normal items-center w-full lg:w-auto">
+        <ChartNoAxesColumnIncreasing className="w-6 h-6 hidden lg:block" />
+        <h1 className="text-2xl font-bold text-center lg:text-left">
+          Visualise the Data
+        </h1>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-x-5">
-          <TeamSelect form={form} data={data} customAnalysis={customAnalysis} />
-          <PlayerSelect form={form} data={data} />
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col lg:flex-row gap-4 lg:gap-x-5"
+        >
+          <div className="flex flex-col items-center lg:flex-row gap-2 lg:gap-y-0 lg:gap-x-4">
+            <TeamSelect
+              form={form}
+              data={data}
+              customAnalysis={customAnalysis}
+            />
+            <PlayerSelect form={form} data={data} />
+          </div>
 
-          <div className="flex gap-x-2">
+          <div className="flex justify-center lg:justify-normal gap-x-2">
             {activeFilters > 0 && (
               <Button
                 type="button"
@@ -105,7 +116,7 @@ export default function FilterBar({
         </form>
       </Form>
 
-      <div className="flex gap-x-5">
+      <div className="flex justify-center lg:justify-normal gap-x-5">
         <ImagePreview
           screenshot={data.screenshot}
           scoreboardUrl={scoreboardUrl}

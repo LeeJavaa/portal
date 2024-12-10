@@ -7,7 +7,7 @@ export default function MapAnalysisLoading() {
       <Skeleton className="h-10 w-[60%] mx-auto mt-5 mb-8" />
 
       {/* Meta description skeletons */}
-      <div className="flex flex-col gap-4 mb-8">
+      <div className="flex flex-col items-center gap-4 mb-8">
         <Skeleton className="h-4 w-[80%]" />
         <Skeleton className="h-4 w-[70%]" />
         <Skeleton className="h-4 w-[75%]" />
@@ -25,18 +25,18 @@ export default function MapAnalysisLoading() {
 
       {/* Filter bar skeleton */}
       <Skeleton className="h-[1px] w-full mt-8" />
-      <div className="flex justify-between mt-8">
+      <div className="flex flex-col lg:flex-row lg:justify-between gap-y-6 lg:gap-y-0 mt-8">
         <div className="flex gap-x-2 items-center">
           <Skeleton className="h-6 w-6" />
-          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-8 w-36 lg:w-48" />
+        </div>
+        <div className="flex flex-col lg:flex-row gap-y-4 lg:gap-y-0 lg:gap-x-5">
+          <Skeleton className="h-10 w-full lg:w-[180px]" />
+          <Skeleton className="h-10 w-full lg:w-[180px]" />
+          <Skeleton className="h-10 w-full lg:w-24" />
         </div>
         <div className="flex gap-x-5">
-          <Skeleton className="h-10 w-[180px]" />
-          <Skeleton className="h-10 w-[180px]" />
-          <Skeleton className="h-10 w-24" />
-        </div>
-        <div className="flex gap-x-5">
-          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-full lg:w-24" />
           <Skeleton className="h-10 w-10" />
         </div>
       </div>

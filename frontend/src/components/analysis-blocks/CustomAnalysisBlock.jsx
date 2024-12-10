@@ -20,7 +20,7 @@ export default function CustomAnalysisBlock({ analysis }) {
     >
       <div className="relative overflow-hidden rounded-lg">
         <div
-          className="h-[180px] w-full rounded-lg"
+          className="h-[105px] lg:h-[180px] w-full rounded-lg"
           style={{
             background: `linear-gradient(135deg, #${analysis.thumbnail_color} 0%, #${analysis.thumbnail_color}77 100%)`,
           }}
@@ -32,7 +32,7 @@ export default function CustomAnalysisBlock({ analysis }) {
         )}
       </div>
       <div className="mt-2">
-        <h3 className="text-lg font-semibold text-primary mb-1">
+        <h3 className="text-lg font-semibold text-primary mb-1 truncate lg:whitespace-normal">
           {analysis.title}
         </h3>
       </div>

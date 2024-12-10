@@ -6,7 +6,7 @@ export default function AnalysisGridLoading() {
       {[...Array(8)].map((_, i) => (
         <div key={i} className="overflow-hidden">
           <div className="relative overflow-hidden rounded-lg">
-            <Skeleton className="w-full h-[150px] rounded-lg" />
+            <Skeleton className="w-full h-[105px] lg:h-[180px] rounded-lg" />
           </div>
           <div className="mt-2">
             <Skeleton className="h-6 w-3/4 mb-1" />

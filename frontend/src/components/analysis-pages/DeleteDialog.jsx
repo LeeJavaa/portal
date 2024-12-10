@@ -56,17 +56,17 @@ export default function DeleteDialog({ id, seriesAnalysis, customAnalysis }) {
           <Trash2 className="w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="w-[80%] lg:w-full rounded-2xl">
         <DialogHeader>
           <DialogTitle>
             Are you sure you want to delete this analysis?
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="hidden sm:block">
             Deleting this analysis means you will need to recreate it in order
             to see this data again.
           </DialogDescription>
         </DialogHeader>
-        <CircleAlert className="w-32 h-32 mx-auto" />
+        <CircleAlert className="w-24 h-24 sm:w-32 sm:h-32 mx-auto" />
         {error && (
           <Alert variant="destructive">
             <AlertDescription>
@@ -74,7 +74,7 @@ export default function DeleteDialog({ id, seriesAnalysis, customAnalysis }) {
             </AlertDescription>
           </Alert>
         )}
-        <DialogFooter className="flex gap-x-2 justify-center">
+        <DialogFooter className="flex flex-col sm:flex-row gap-4 sm:gap-2 items-stretch sm:justify-center">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>

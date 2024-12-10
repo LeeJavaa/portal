@@ -97,7 +97,7 @@ export default function FilterSheet({ activeFilters = 0, onApplyFilter }) {
           {activeFilters ? `Filter (${activeFilters})` : "Filter"}
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Filter Analyses</SheetTitle>
           <SheetDescription>
@@ -290,7 +290,7 @@ export default function FilterSheet({ activeFilters = 0, onApplyFilter }) {
               )}
             />
             <SheetFooter>
-              <div className="w-full flex justify-between gap-8 mt-2">
+              <div className="w-full flex flex-col lg:flex-row justify-between gap-4 lg:gap-8 mt-2">
                 <Button
                   type="button"
                   variant="outline"

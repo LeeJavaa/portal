@@ -38,7 +38,7 @@ export default function MapAnalysisBlock({
     >
       <div className="relative overflow-hidden rounded-lg">
         <div
-          className={`h-[180px] w-full rounded-lg transition-all duration-300 ${
+          className={`h-[105px] lg:h-[180px] w-full rounded-lg transition-all duration-300 ${
             selectionMode ? "" : "group-hover:scale-105"
           }`}
           style={{
@@ -65,7 +65,7 @@ export default function MapAnalysisBlock({
       </div>
 
       <div className="mt-2">
-        <h3 className="text-lg font-semibold text-primary mb-1">
+        <h3 className="text-lg font-semibold text-primary mb-1 truncate lg:whitespace-normal">
           {analysis.title}
         </h3>
         {!seriesGallery && (
@@ -73,7 +73,7 @@ export default function MapAnalysisBlock({
             <p>
               {analysis.team_one} vs {analysis.team_two}
             </p>
-            <p>{formatted_played_date}</p>
+            <p className="hidden lg:block">{formatted_played_date}</p>
           </div>
         )}
       </div>

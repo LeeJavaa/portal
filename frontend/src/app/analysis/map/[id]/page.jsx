@@ -60,7 +60,6 @@ export default async function Page({ params, searchParams }) {
         />
         <Separator className="mt-8" />
         <FilterBar data={mapAnalysis} scoreboardUrl={scoreboardUrl} />
-        <DataVis data={mapAnalysis} />
       </main>
     </Suspense>
   );

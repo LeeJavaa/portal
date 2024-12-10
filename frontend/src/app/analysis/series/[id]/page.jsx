@@ -49,7 +49,6 @@ export default async function Page({ params, searchParams }) {
         <MapGallery analyses={series_analysis.maps} />
         <Separator className="mt-8" />
         <FilterBar data={series_analysis} seriesAnalysis={true} />
-        <DataVis />
       </main>
     </Suspense>
   );
