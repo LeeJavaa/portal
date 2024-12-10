@@ -15,6 +15,7 @@ from analysis.models import (
 )
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import Prefetch, Q
+from general.models import Team
 from utils.analysis_handling import parse_seconds_to_time
 
 logger = logging.getLogger('gunicorn.error')
@@ -359,7 +360,8 @@ def generate_series_analysis_response(filter_payload):
             'team_one__name',
             'team_two__name',
             'thumbnail',
-            'played_date'
+            'played_date',
+            'winner'
         )
 
         maps_data = [
@@ -369,6 +371,7 @@ def generate_series_analysis_response(filter_payload):
                 'team_one': map_obj['team_one__name'],
                 'team_two': map_obj['team_two__name'],
                 'thumbnail': map_obj['thumbnail'],
+                'thumbnail_color': Team.objects.get(id=map_obj['winner']).color,
                 'played_date': map_obj['played_date']
             }
             for map_obj in maps
