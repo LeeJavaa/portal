@@ -32,7 +32,7 @@ from analysis.controllers.model_control import (
     delete_series_analysis
 )
 from analysis.tasks import process_scoreboard
-from django.http import StreamingHttpResponse
+from general.controllers.response_generation import generate_general_data_response
 
 from utils.s3_handling import generate_upload_scoreboard_url, generate_view_scoreboard_url, get_object_from_bucket
 
@@ -301,3 +301,12 @@ def delete_custom_analysis_object(request, payload: DeleteAnalysisIn):
     except Exception as e:
         logger.error(f"Error deleting custom analysis: {e}")
         return Response({"error": f"Error deleting custom analysis: {str(e)}"}, status=500)
+
+@api.get("/general_data")
+def general_data(request):
+    try:
+        response = generate_general_data_response()
+        return {"general_data": response}
+    except Exception as e:
+        logger.error(f"Error getting general data: {e}")
+        return Response({"error": f"Error getting general data: {str(e)}"}, status=500)
