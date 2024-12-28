@@ -108,3 +108,9 @@ STATIC_URL = '/static/'
 STATIC_ROOT = '/var/www/portal/static'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/var/www/portal/media'
+
+# AUTH STUFF
+JWT_SECRET = os.environ.get('PROD_JWT_SECRET', '')
+JWT_ALGORITHM = os.environ.get('PROD_JWT_ALGORITHM', 'HS256')
+ACCESS_TOKEN_EXPIRE_MINUTES = os.environ.get('PROD_ACCESS_TOKEN_EXPIRE_MINUTES', 15)
+REFRESH_TOKEN_EXPIRE_DAYS = os.environ.get('PROD_REFRESH_TOKEN_EXPIRE_DAYS', 7)
