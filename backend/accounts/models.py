@@ -1,4 +1,7 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -65,18 +68,31 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_modified = models.DateTimeField(auto_now=True)
     last_login = models.DateTimeField(null=True, blank=True)
 
+    refresh_token = models.CharField(max_length=512, null=True, blank=True)
+    refresh_token_expires = models.DateTimeField(null=True, blank=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    def __str__(self):
-        return self.email
+    def update_refresh_token(self, token: str):
+        self.refresh_token = token
+        self.refresh_token_expires = timezone.now() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        self.save()
+
+    def invalidate_refresh_token(self):
+        self.refresh_token = None
+        self.refresh_token_expires = None
+        self.save()
 
     def save(self, *args, **kwargs):
         if self.last_login is None:
             self.last_login = timezone.now()
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.email
 
 class RolePermission(models.Model):
     """Define permissions for each role."""
