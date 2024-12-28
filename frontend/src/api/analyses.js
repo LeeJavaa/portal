@@ -1,8 +1,8 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
 
-// Revalidate cache every 16 hours and 45 minutes
-const CACHE_REVALIDATE_SECONDS = 60000;
+// Revalidate cache every 10 minutes
+const CACHE_REVALIDATE_SECONDS = 600;
 // Revalidate cache for custom analyses 10 minutes
 const CUSTOM_ANALYSES_CACHE_REVALIDATE_SECONDS = 600;
 
