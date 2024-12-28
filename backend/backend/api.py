@@ -1,14 +1,10 @@
-import asyncio
-import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-
+from typing import  List, Optional
 
 from botocore.exceptions import ClientError
 from celery.result import AsyncResult
 from ninja import NinjaAPI, Schema
-from ninja.errors import HttpError
 from ninja.responses import Response
 
 from analysis.controllers.response_generation import (
@@ -32,6 +28,13 @@ from analysis.controllers.model_control import (
     delete_series_analysis
 )
 from analysis.tasks import process_scoreboard
+from accounts.auth import AuthBearer
+from accounts.controllers.auth import (
+    handle_login,
+    handle_logout,
+    handle_refresh,
+    handle_signup
+)
 from general.controllers.response_generation import generate_general_data_response
 
 from utils.s3_handling import generate_upload_scoreboard_url, generate_view_scoreboard_url, get_object_from_bucket
@@ -104,6 +107,24 @@ class DeleteAnalysisIn(Schema):
 class PreSignedUrlOut(Schema):
     url: str
     fields: dict
+
+# Authentication Schemas
+class SignupSchema(Schema):
+    email: str
+    password: str
+    password_confirm: str
+
+class LoginSchema(Schema):
+    email: str
+    password: str
+
+class TokenSchema(Schema):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+class RefreshSchema(Schema):
+    refresh_token: str
 
 @api.get("/upload_scoreboard_url", response=PreSignedUrlOut)
 def upload_scoreboard_url(request, file_name: str):
@@ -310,3 +331,40 @@ def general_data(request):
     except Exception as e:
         logger.error(f"Error getting general data: {e}")
         return Response({"error": f"Error getting general data: {str(e)}"}, status=500)
+
+# Authentication endpoints
+@api.post("/auth/signup", response={201: TokenSchema})
+def signup(request, payload: SignupSchema):
+    try:
+        response = handle_signup(payload)
+        return 201, response
+    except Exception as e:
+        logger.error(f"Error signing up: {e}")
+        return Response({"error": f"Error signing up: {str(e)}"}, status=401)
+
+@api.post("/auth/login", response={200: TokenSchema})
+def login(request, payload: LoginSchema):
+    try:
+        response = handle_login(payload)
+        return 200, response
+    except Exception as e:
+        logger.error(f"Error logging in: {e}")
+        return Response({"error": f"Error logging in: {str(e)}"}, status=401)
+
+@api.post("/auth/refresh", response={200: TokenSchema})
+def refresh_token(request, payload:RefreshSchema):
+    try:
+        response = handle_refresh(payload)
+        return 200, response
+    except Exception as e:
+        logger.error(f"Error refreshing token: {e}")
+        return Response({"error": f"Error refreshing token: {str(e)}"}, status=401)
+
+@api.post("/auth/logout", auth=AuthBearer())
+def logout(request):
+    try:
+        response = handle_logout(request)
+        return 200, response
+    except Exception as e:
+        logger.error(f"Error logging out: {e}")
+        return Response({"error": f"Error logging out: {str(e)}"}, status=401)
